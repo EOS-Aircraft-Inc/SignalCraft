@@ -1,0 +1,1 @@
+"""SignalCraft visualizer (Streamlit + Plotly)."""

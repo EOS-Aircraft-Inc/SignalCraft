@@ -1,0 +1,13 @@
+{
+  "upsert": {
+    "0_Systems": [
+      {
+        "System Id": "ZONE-NAC",
+        "Multiplicity": "6"
+      }
+    ]
+  },
+  "options": {
+    "with_buses": true
+  }
+}

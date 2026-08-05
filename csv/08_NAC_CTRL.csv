@@ -1,0 +1,57 @@
+﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,message_or_label,bit_or_field,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-018,Electric motor torque command,HICU,EMC,EM-{n},SIG-070,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-019,Electric motor current feedback,EMC,HICU,EM-{n},SIG-002,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-020,Electric motor voltage feedback,EMC,HICU,EM-{n},SIG-003,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-021,Electric motor speed feedback,EMC,HICU,EM-{n},SIG-004,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-022,Turbine torque target,HICU,EPECS,,SIG-093,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-023,Propeller speed target,HICU,EPECS,,SIG-097,TBD,,BNR,rpm,,,,,,TBD,"Fixed: previously referenced PHYS-031 (measured propeller speed), now correctly PHYS-118 (command target).",TBD,TBD,TBD
+DBUS-024,Turbine run command,HICU,EPECS,,SIG-098,TBD,,Discrete,,,,,,,TBD,Corrected: previously referenced CMD-030 (the local EPECS starter effector); now correctly the HICU->EPECS run enable relayed from FCC.,TBD,TBD,TBD
+DBUS-025,Active rating reference,HICU,EPECS,,SIG-119,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-026,Propulsion operating mode,HICU,EPECS,,SIG-120,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-027,Synchrophasing command,HICU,EPECS,,SIG-121,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-028,Gas generator speed,EPECS,HICU,,SIG-023,TBD,,BNR,rpm,,,,,,TBD,,TBD,TBD,TBD
+DBUS-029,Propeller speed,EPECS,HICU,,SIG-017,TBD,,BNR,rpm,,,,,,TBD,,TBD,TBD,TBD
+DBUS-030,Main engine oil pressure,EPECS,HICU,,SIG-024,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-031,Main engine oil temperature,EPECS,HICU,,SIG-028,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-032,Fuel temperature,EPECS,HICU,,SIG-018,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-033,Propeller Blade Angle Control Path,EPECS,HICU,,SIG-015,TBD,,BNR,deg,,,,,,TBD,,TBD,TBD,TBD
+DBUS-033-B,Propeller Blade Angle Protection Path,EPECS,HICU,,SIG-016,TBD,,BNR,deg,,,,,,TBD,,TBD,TBD,TBD
+DBUS-034,Fuel inlet pressure,EPECS,HICU,,SIG-019,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-035,Fuel flow,EPECS,HICU,,SIG-020,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-036,Fuel filter differential pressure,EPECS,HICU,,SIG-021,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-037,Compressor output pressure,EPECS,HICU,,SIG-025,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-038,Engine inlet temperature,EPECS,HICU,,SIG-026,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-039,Inter-turbine temperature,EPECS,HICU,,SIG-027,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-040,Combining gearbox oil pressure,EPECS,HICU,,SIG-031,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-041,Combining gearbox oil temperature,EPECS,HICU,,SIG-032,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-042,Combining gearbox chip detection,EPECS,HICU,,SIG-033,TBD,,Discrete,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-043,Combining gearbox oil filter differential pressure,EPECS,HICU,,SIG-034,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-044,Pack current,BMU,MBMS,PACK-{n},SIG-038,TBD,,BNR,A,,,,,,TBD,,TBD,TBD,TBD
+DBUS-045,Pack terminal voltage,BMU,MBMS,PACK-{n},SIG-039,TBD,,BNR,V,,,,,,TBD,,TBD,TBD,TBD
+DBUS-046,Pack temperature,BMU,MBMS,PACK-{n},SIG-040,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-047,Pack status and operating limits,BMU,MBMS,PACK-{n},SIG-122,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-048,ESS summary and operating limits,MBMS,HICU,,SIG-123,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-049,Pack contactor command request,HICU,BMU,PACK-{n},SIG-082,TBD,,TBD,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-050,Pack contactor status,BMU,MBMS;HICU,PACK-{n},SIG-068,TBD,,TBD,,,,,,,TBD,Pack contactor status feedback (SENS-118 / PHYS-125); distinct from command request DBUS-049 / CMD-060.,TBD,TBD,TBD
+DBUS-051,IPTMS coolant target temperature,HICU,IPTMS,,SIG-102,TBD,,BNR,degC,,,,,,TBD,HICU-commanded setpoint.,TBD,TBD,TBD
+DBUS-052,IPTMS pre-conditioning command,HICU,IPTMS,,SIG-103,TBD,,Discrete,,,,,,,TBD,Ground/pre-flight thermal pre-conditioning request.,TBD,TBD,TBD
+DBUS-053,IPTMS status and operating limits,IPTMS,HICU,,SIG-124,TBD,,TBD,,,,,,,TBD,"Aggregate status word; no discrete Physical Id defined yet, mirrors the Pack/ESS status pattern.",TBD,TBD,TBD
+DBUS-054,IPTMS loop 1 pump discharge pressure,IPTMS,HICU,,SIG-050,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-055,IPTMS loop 1 coolant supply temperature,IPTMS,HICU,,SIG-051,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-056,IPTMS loop 1 coolant return temperature,IPTMS,HICU,,SIG-052,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-057,IPTMS loop 1 TBV position feedback,IPTMS,HICU,,SIG-053,TBD,,BNR,%,,,,,,TBD,,TBD,TBD,TBD
+DBUS-058,IPTMS loop 2 pump discharge pressure,IPTMS,HICU,,SIG-054,TBD,,BNR,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-059,IPTMS loop 2 coolant supply temperature,IPTMS,HICU,,SIG-055,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-060,IPTMS loop 2 coolant return temperature,IPTMS,HICU,,SIG-056,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-061,IPTMS loop 2 TBV position feedback,IPTMS,HICU,,SIG-057,TBD,,BNR,%,,,,,,TBD,,TBD,TBD,TBD
+DBUS-062,IPTMS cross-loop TBV position feedback,IPTMS,HICU,,SIG-058,TBD,,BNR,%,,,,,,TBD,,TBD,TBD,TBD
+DBUS-063,EMC status / fault word,EMC,HICU,EM-{n},SIG-059,TBD,,Discrete,,,,,,,TBD,,TBD,TBD,TBD
+DBUS-064,EMC inverter temperature,EMC,HICU,EM-{n},SIG-060,TBD,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-070,Main engine oil chip detection,EPECS,HICU,,SIG-061,TBD,,Discrete,,,,,,TBD,,,,,
+DBUS-071,Turbine oil chip maintenance flag,EPECS,HICU,,SIG-062,TBD,,Discrete,,,,,,TBD,,,,,
+DBUS-072,FCU metering differential pressure,EPECS,HICU,,SIG-063,TBD,,BNR,,,,,,TBD,,,,,
+DBUS-073,Propeller heating command,HICU,PCU,,SIG-088,TBD,,Discrete,,,,,,TBD,,Relayed by HICU from the aircraft-level ice-protection system; bypasses EPECS.,,,
+DBUS-077,EPECS status / fault word,EPECS,HICU,,SIG-064,TBD,,Discrete,,,,,,TBD,,,,,
+DBUS-084,Turbine shutdown command,HICU,EPECS,,SIG-100,,,Discrete,,,,,,TBD,TBD,Relayed from FCC (see HICU_CTRL DBUS-083).,TBD,TBD,TBD
+DBUS-085,HVPDU contactor command,HICU,HVPDU,,SIG-079,TBD,,Discrete,,,,,,,TBD,Aircraft-level contactor command relayed by HICU; local protection stays in the HVPDU.,Yes,TBD,TBD
+DBUS-086,HVPDU load / SSPC command,HICU,HVPDU,,SIG-081,TBD,,Discrete,,,,,,,TBD,High-voltage load and solid-state power controller command from HICU.,Yes,TBD,TBD

@@ -1,0 +1,51 @@
+﻿System Id,System Name,Acronym,Installed In/Part of,Functional system,Type,Multiplicity,Instance Token,Description,Notes
+FUNC-AVIONICS,Avionics,AVIO,,,System,,,Aircraft avionics domain,
+FUNC-FCS,Flight Control System,FCS,,,System,,,Global flight control system,
+FUNC-PWRDIST,Power Distribution System,PDS,,,System,,,High-voltage distribution from the storage assemblies to the propulsion loads,Currently covers HVPDU and IMD only; low-voltage distribution is not modelled yet
+FUNC-PEMS,Power and Energy Management System,PEMS,,,System,,,"Power and energy management: mission energy strategy, power allocation to the propulsion effectors and nacelle command distribution",Covers MMS and HICU. The power-management computation itself is hosted by the FCC; that hosting choice does not move the FCC interfaces out of FCS.
+FUNC-PROP,Propulsion System,PROP,,,System,,,"Propulsion: hybrid propulsion packages, thermal engine, electric motors, combining gearbox and propeller",
+FUNC-FUEL,Fuel System,FUEL,,,System,,,Fuel storage and delivery to the propulsion packages,Storage is in the three tanks; delivery to each propulsion package is handled by the FCU (one per HPP)
+FUNC-THERM,Thermal system,THERM,,,System,,,Thermal management of the propulsion packages (IPTMS) and of the storage assemblies (BTMS),
+FUNC-ESS,Energy Storage System,ESS,,,System,,,"Electrical energy storage: four HVDC assemblies, each holding twelve battery packs with their BMU, a master BMS and a charge controller",Function only. The storage hardware is contained in the HVDC assemblies; see SYS-HVDC for the containment.
+AC,Aircraft,AC,,,Aircraft,1,,Complete aircraft,Root of the containment tree
+ZONE-BAY,Avionics bays,BAY,AC,,Zone,1,,Avionics bay,
+ZONE-COCKPIT,Cockpit,CKPT,AC,,Zone,1,,Pilot controls and displays,
+ZONE-WING,Wing,WING,AC,,Zone,2,WING-{n},Two wings,
+ZONE-NAC,Nacelle,NAC,AC,,Zone,4,NAC-{n},Four nacelle installations,
+ZONE-NOSE,Aircraft nose,NOSE,AC,,Zone,1,,,
+SYS-FCC,Flight Control Computer,FCC,BAY,FCS,Controller,3,FCC-{n},Primary flight control computer,Quantity subject to supplier confirmation. The FCC also hosts the power-management computation (working assumption); it stays in the FCS grouping because that hosting choice does not change its interfaces.
+SYS-ICM,Interface Control Module,ICM,BAY,FCS,Controller,3,ICM-{n},Pilot-control acquisition modules,Acquires the cockpit controls and publishes them on the aircraft backbone
+SYS-FMS,Flight Management System,FMS,BAY,AVIO,Component,2,FMS-{n},,
+SYS-IRU,Inertial Reference Unit,IRU,BAY,AVIO,Component,1,,Inertial reference units providing aircraft attitude and acceleration,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+SYS-ADC,Air Data Computer,ADC,BAY,AVIO,Component,1,,Air Data Computer,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+SYS-WXR,Weather Radar,WXR,BAY,AVIO,Component,1,,Weather radar (environmental sensing),Placeholder for AVIO_HS environmental inputs
+SYS-DCU,Data Concentrator Unit,DCU,BAY,AVIO,Component,1,,Placeholder for avionics data collector and distributor,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+SYS-IMA,Integrated Modular Avionics,IMA,BAY,AVIO,Component,1,,Integrated Modular Avionics - host of multiple applications in one server. Use data collected through DCU.,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+SYS-BPM,Backup Power Management,BPM,BAY,PEMS,Controller,1,,Independent backup propulsion command controller,Single aircraft-level controller
+SYS-MMS,Mission Management System,MMS,BAY,PEMS,Controller,1,,"Aircraft-level mission and energy management; retrieves the flight mission from FMS and provides energy/hybridization strategy to the FCC power-management function, which retains command authority over the propulsion effectors.",Single aircraft-level controller.
+SYS-FTANK,Fuel Tank,FTANK,AC,FUEL,Component,3,FTANK_CENTER;FTANK_LEFT;FTANK_RIGHT,One center tank and two wing tanks,Three aircraft-level tanks with an explicit token list. Parented to the aircraft rather than to the wing: a per-wing parent would give six tanks and would not accept the center tank.
+SYS-BTMS,Battery Thermal Management System,BTMS,WING,THERM,Component,1,,Battery thermal management; one per wing,Each BTMS conditions the two HVDC assemblies of its wing.
+SYS-HICU,Hybrid Integrated Control Unit,HICU,NAC,PEMS,Controller,1,,Nacelle command distributor between aircraft-level functions and local controllers in the nacelle. Act as a data concentrator.,One per nacelle; replaces part of the EPECS functions
+SYS-IPTMS,Integrated Propulsion Thermal Management System,IPTMS,NAC,THERM,Component,1,,Propulsion and gearbox thermal management,
+SYS-HPP,Hybrid Propulsion Package,HPP,NAC,PROP,Component,1,,"One thermal engine, two electric engines, gearbox and controls",
+SYS-EPECS,Engine and Propeller Electronic Control System,EPECS,HPP,PROP,Controller,1,,Local turbine and propeller controller,
+SYS-TURB,Thermal Engine,TURB,HPP,PROP,Component,1,,One thermal engine per HPP,
+SYS-FCU,Fuel Control Unit,FCU,HPP,FUEL,Component,1,,Link between the aircraft fuel system and the HPP; meters fuel to the thermal engine,One per HPP. Fuel measurements at the FCU and its metering and shutdown effectors belong here rather than to the aircraft-level FUEL system.
+SYS-GBX,Combining Gearbox,GBX,HPP,PROP,Component,1,,One combining gearbox per HPP,
+SYS-PROP,Propeller,PROPELLER,HPP,PROP,Component,1,,One propeller per HPP,
+SYS-PCU,Propeller Control Unit,PCU,PROPELLER,PROP,Component,1,,Dual-channel propeller pitch control unit,
+SYS-POSG,Propeller Overspeed Governor,OSG,PROPELLER,PROP,Component,1,,Overspeed governor,
+SYS-AUXFEATH,Auxiliary Feathering Pump,FEATH_PUMP,PROPELLER,PROP,Component,1,,,
+SYS-EM,Electric Motor,EM,HPP,PROP,Component,2,EM-{n},Two electric motors per HPP,Motor sectors deferred pending supplier definition
+SYS-EMC,Electric Motor Controller,EMC,EM,PROP,Controller,1,,One controller/inverter function per electric motor assembly,Installed in EM: the EM-{n} token comes from the motor and is no longer restated here
+SYS-HVDC,High Voltage DC Assembly,HVDC,NAC,ESS,Component,1,,"One HVDC assembly per nacelle, four in total; each holds twelve battery packs, one master BMS, one charge controller and the HVPDU","ESS is now a function, so the assembly is parented where it is installed. One per nacelle rather than four: the nacelle control bus addresses its packs as PACK-1..12 within NAC-{n}, which only closes if the twelve packs are nacelle-local. HVDC-2 informally means the assembly of NAC-2; no token is restated here."
+SYS-HVPDU,High-Voltage Power Distribution Unit,HVPDU,HVDC,PDS,Component,1,,"One HVPDU per HVDC assembly, feeding the two motor controllers of the nacelle","Part of the HVDC assembly, but its function is distribution rather than storage, hence PDS. Installed in the engine bay (J1) while the packs sit in the aft nacelle (J4)."
+SYS-IMD,Insulation Monitoring Device,IMD,HVPDU,PDS,Component,1,,One IMD per HVPDU,Working assumption
+SYS-PACK,Battery Pack,PACK,HVDC,ESS,Component,12,PACK-{n},Twelve battery packs per HVDC assembly,Count corrected: the previous description said fourteen while the token list held twelve. Token uses {n} (unpadded; 10+ stay multi-digit).
+SYS-BMU,Battery Management Unit,BMU,PACK,ESS,Controller,1,,Nominal pack monitoring and control,One per pack. Cell-level acquisition is internal to the pack and no longer modelled; SYS-SBMS removed.
+SYS-MBMS,Master Battery Management System,MBMS,HVDC,ESS,Controller,1,,HVDC-level coordination and aircraft interface,"Separate LRU, one per HVDC assembly"
+SYS-CHARGE,Charge Controller,CHGC,HVDC,ESS,Controller,1,,Charging protocol and command function,One charge controller per HVDC assembly
+SYS-FUELBOOST,Fuel boost pump,F_B_PUMP,HPP,FUEL,Component,1,,Aircraft side fuel boost pump,"Even if fuel pump are per tank, there is one dedicated to each nacelle"
+SYS-LVPDU,Low Voltage Power Distribution Unit,LVPDU,AC,PDS,Component,3,LVPDU_AFT;LVPDU_CENTER;LVPDU_FWD,,
+SYS-DCDC,Direct Current to Direct Current converter,DCDC,HVPDU,PDS,Component,1,,,
+SYS-LVBAT,Low voltage battery,LVBAT,LVPDU,PDS,Component,1,,,

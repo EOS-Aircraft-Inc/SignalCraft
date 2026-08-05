@@ -1,0 +1,10 @@
+﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,message_or_label,bit_or_field,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-001,Aircraft pitch angle,IRU,DCU;FCC;FMS,,SIG-041,TBD,,BNR,deg,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-002,Aircraft roll angle,IRU,DCU;FCC;FMS,,SIG-042,TBD,,BNR,deg,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-003,Aircraft heading angle,IRU,DCU;FCC;FMS,,SIG-043,TBD,,BNR,deg,,,,,,TBD,True vs magnetic TBD; label and rate TBD,TBD,TBD,TBD
+DBUS-004,Aircraft longitudinal acceleration,IRU,DCU;FCC;FMS,,SIG-044,TBD,,BNR,g,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-005,Aircraft lateral acceleration,IRU,DCU;FCC;FMS,,SIG-045,TBD,,BNR,g,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-006,Aircraft normal acceleration,IRU,DCU;FCC;FMS,,SIG-046,TBD,,BNR,g,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-007,Aircraft pitch rate,IRU,DCU;FCC;FMS,,SIG-047,TBD,,BNR,deg/s,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-008,Aircraft roll rate,IRU,DCU;FCC;FMS,,SIG-048,TBD,,BNR,deg/s,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD
+DBUS-009,Aircraft yaw rate,IRU,DCU;FCC;FMS,,SIG-049,TBD,,BNR,deg/s,,,,,,TBD,Label and rate TBD,TBD,TBD,TBD

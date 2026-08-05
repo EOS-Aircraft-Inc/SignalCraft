@@ -1,0 +1,2 @@
+﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,message_or_label,bit_or_field,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-001,True Airspeed,ADC,FCC;DCU,,,,,,,,,,,,,,,,
