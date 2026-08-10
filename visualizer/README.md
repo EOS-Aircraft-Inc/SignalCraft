@@ -21,4 +21,4 @@ Sidebar: **Reload database**, **Export to Excel**, **Import Excel → CSV & relo
 | Signal Trace | All hops for one `SIG-*` |
 | Edit data | Guided upsert/delete/rewrite (same engine as `icd_edit.py`) — Dry-run then Apply |
 
-Data rules for filling sheets: see the main [`README.md`](../README.md) (“How to fill the database”).
+Data rules for filling sheets: see the workbook `Column_Help` sheet (also in `csv/`) and the main [`README.md`](../README.md) (“How to fill the database”).

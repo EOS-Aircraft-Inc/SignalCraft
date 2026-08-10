@@ -1,0 +1,4 @@
+Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-ADC-001,True airspeed,ADC,FCC;DCU,,SIG-069,,TBD,,,BNR,kt,,,,,,TBD,"Allocation Id renumbered from DBUS-001, which collided with the IRU_TX row of the same name.",TBD,TBD,TBD
+DBUS-ADC-002,Calibrated airspeed,ADC,FCC;DCU,,SIG-115,,TBD,,,BNR,kt,,,,,,TBD,,TBD,TBD,TBD
+DBUS-ADC-003,Air data environmental conditions,ADC,FCC;DCU,,SIG-127,,TBD,,,TBD,,,,,,,TBD,Direct ADC to FCC path for the air data part of the environmental picture; the weather part reaches the FCC from the DCU on AVIO_HS as SIG-173.,TBD,TBD,TBD

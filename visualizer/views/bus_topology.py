@@ -106,7 +106,7 @@ def _filter_link_kinds(
     show_discrete: bool,
     show_power: bool,
 ) -> pd.DataFrame:
-    """Keep only edges whose link_kind is enabled (Full network layer toggles)."""
+    """Keep only edges whose link_kind is enabled by the layer toggles."""
     if edges.empty or "link_kind" not in edges.columns:
         return edges
     allowed: set[str] = set()
@@ -198,11 +198,6 @@ def render(bundle: IcdBundle) -> None:
     )
     generic = view == "Generic view"
     group_by_function = False
-    show_mono = True
-    show_shared = True
-    show_analog = True
-    show_discrete = True
-    show_power = True
 
     if generic:
         st.caption(
@@ -230,44 +225,45 @@ def render(bundle: IcdBundle) -> None:
             "direct LRU↔LRU links (databus boxes only). "
             "Buses stay pinned; drag one bus at a time — connected LRUs re-settle."
         )
-        c_m, c_s, c_a, c_d, c_p = st.columns(5)
-        with c_m:
-            show_mono = st.checkbox(
-                "Digital mono",
-                value=True,
-                key="topo_show_mono",
-                help="Show unidirectional digital databuses (blue).",
-            )
-        with c_s:
-            show_shared = st.checkbox(
-                "Digital shared",
-                value=True,
-                key="topo_show_shared",
-                help="Show shared / multi-drop digital databuses (purple).",
-            )
-        with c_a:
-            show_analog = st.checkbox(
-                "Analog",
-                value=False,
-                key="topo_show_analog",
-                help="Show direct Analog links from 1_Signals (Physical ≠ Owner).",
-            )
-        with c_d:
-            show_discrete = st.checkbox(
-                "Discrete",
-                value=False,
-                key="topo_show_discrete",
-                help="Show direct Discrete links from 1_Signals (Physical ≠ Owner).",
-            )
-        with c_p:
-            show_power = st.checkbox(
-                "Power",
-                value=False,
-                key="topo_show_power",
-                help="Show direct Power links from 1_Signals (Physical ≠ Owner).",
-            )
         nodes = bundle.graph_nodes
         edges = bundle.graph_edges
+
+    c_m, c_s, c_a, c_d, c_p = st.columns(5)
+    with c_m:
+        show_mono = st.checkbox(
+            "Digital mono",
+            value=True,
+            key="topo_show_mono",
+            help="Show unidirectional digital databuses (blue).",
+        )
+    with c_s:
+        show_shared = st.checkbox(
+            "Digital shared",
+            value=True,
+            key="topo_show_shared",
+            help="Show shared / multi-drop digital databuses (purple).",
+        )
+    with c_a:
+        show_analog = st.checkbox(
+            "Analog",
+            value=False,
+            key="topo_show_analog",
+            help="Show direct Analog links from 1_Signals (Physical ≠ Owner).",
+        )
+    with c_d:
+        show_discrete = st.checkbox(
+            "Discrete",
+            value=False,
+            key="topo_show_discrete",
+            help="Show direct Discrete links from 1_Signals (Physical ≠ Owner).",
+        )
+    with c_p:
+        show_power = st.checkbox(
+            "Power",
+            value=False,
+            key="topo_show_power",
+            help="Show direct Power links from 1_Signals (Physical ≠ Owner).",
+        )
 
     families = _bus_families(bundle.buses)
     family = st.selectbox("Bus family", options=["(all)"] + families, key="topo_family")
@@ -276,15 +272,14 @@ def render(bundle: IcdBundle) -> None:
     plot_edges = edges if show_all else _edges_for_family(
         edges, nodes, bundle.buses, family
     )
-    if not generic:
-        plot_edges = _filter_link_kinds(
-            plot_edges,
-            show_mono=show_mono,
-            show_shared=show_shared,
-            show_analog=show_analog,
-            show_discrete=show_discrete,
-            show_power=show_power,
-        )
+    plot_edges = _filter_link_kinds(
+        plot_edges,
+        show_mono=show_mono,
+        show_shared=show_shared,
+        show_analog=show_analog,
+        show_discrete=show_discrete,
+        show_power=show_power,
+    )
     # Nodes follow visible edges — toggling layers re-evaluates buses and LRUs.
     plot_nodes = _nodes_touched_by_edges(nodes, plot_edges)
 
@@ -304,12 +299,8 @@ def render(bundle: IcdBundle) -> None:
     # Include layer toggles in widget keys so Bus/LRU multiselects reset to the
     # newly visible set whenever Analog/Discrete/Power/Digital filters change.
     layer_key = (
-        "g"
-        if generic
-        else (
-            f"m{int(show_mono)}s{int(show_shared)}"
-            f"a{int(show_analog)}d{int(show_discrete)}p{int(show_power)}"
-        )
+        f"m{int(show_mono)}s{int(show_shared)}"
+        f"a{int(show_analog)}d{int(show_discrete)}p{int(show_power)}"
     )
 
     with st.expander("Filter nodes on diagram", expanded=False):

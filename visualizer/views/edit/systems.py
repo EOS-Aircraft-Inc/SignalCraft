@@ -12,7 +12,12 @@ from visualizer.components.selectors import (
     table_select_id,
 )
 from visualizer.data.loader import IcdBundle
-from visualizer.data.models import SYSTEMS_SHEET, SYSTEM_ID
+from visualizer.data.models import (
+    SYSTEM_ID,
+    SYSTEM_TEXTUAL_NAME,
+    SYSTEM_UNIQUE_ID,
+    SYSTEMS_SHEET,
+)
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import apply_now, render_apply_panel, sync_fields
 
@@ -50,17 +55,22 @@ def render(bundle: IcdBundle) -> None:
     systems = bundle.systems
     q = st.text_input("Search systems", key="edit_sys_q")
     view = apply_text_search(
-        systems, q, ["System Id", "System Name", "Acronym", "Description"]
+        systems,
+        q,
+        [SYSTEM_UNIQUE_ID, SYSTEM_TEXTUAL_NAME, "Description"],
     )
-    table_sid = table_select_id(view, "System Id", key="edit_sys_table")
+    table_sid = table_select_id(view, SYSTEM_UNIQUE_ID, key="edit_sys_table")
     if table_sid:
         st.session_state["edit_sys_selected_id"] = table_sid
         st.session_state["edit_sys_mode"] = "Edit existing"
 
     sid = str(st.session_state.get("edit_sys_selected_id") or "")
-    if sid and sid not in set(systems["System Id"].astype(str)):
+    if sid and SYSTEM_UNIQUE_ID in systems.columns:
+        if sid not in set(systems[SYSTEM_UNIQUE_ID].astype(str)):
+            sid = ""
+            st.session_state.pop("edit_sys_selected_id", None)
+    elif sid:
         sid = ""
-        st.session_state.pop("edit_sys_selected_id", None)
 
     action = st.radio(
         "Action",
@@ -95,71 +105,45 @@ def render(bundle: IcdBundle) -> None:
             st.info("Select a system row in the table above.")
             return
 
-        label_col, ren_acr_col, ren_id_col = st.columns([3, 1, 1])
+        label_col, ren_col = st.columns([3, 1])
         with label_col:
-            row0 = systems[systems["System Id"] == sid].iloc[0]
+            row0 = systems[systems[SYSTEM_UNIQUE_ID] == sid].iloc[0]
             st.markdown(
-                f"**Selected:** `{sid}` — {row0.get('System Name', '')} "
-                f"(`{row0.get('Acronym', '')}`)"
+                f"**Selected:** `{sid}` — {row0.get(SYSTEM_TEXTUAL_NAME, '')}"
             )
-        with ren_acr_col:
-            do_ren_acr = st.button("Rename acronym", key="edit_sys_btn_ren_acr")
-        with ren_id_col:
-            do_ren_id = st.button("Rename System Id", key="edit_sys_btn_ren_id")
+        with ren_col:
+            do_ren = st.button("Rename UniqueId", key="edit_sys_btn_ren_id")
 
-        row = systems[systems["System Id"] == sid].iloc[0]
+        row = systems[systems[SYSTEM_UNIQUE_ID] == sid].iloc[0]
         original = {c: str(row.get(c, "") or "") for c in systems.columns}
 
-        if do_ren_acr:
-            st.session_state["edit_sys_rename_mode"] = "acronym"
-            st.session_state["edit_sys_rename_sid"] = sid
-        if do_ren_id:
+        if do_ren:
             st.session_state["edit_sys_rename_mode"] = "id"
             st.session_state["edit_sys_rename_sid"] = sid
 
         rename_mode = st.session_state.get("edit_sys_rename_mode")
         rename_sid = st.session_state.get("edit_sys_rename_sid")
-        if rename_mode and rename_sid == sid:
-            if rename_mode == "acronym":
-                st.markdown(f"Rename acronym for **{sid}** (`{row.get('Acronym', '')}`)")
-                new_acr = st.text_input("New acronym", key="edit_sys_inline_new_acr")
-                if st.button("Apply acronym rename", type="primary", key="edit_sys_apply_acr"):
-                    old_acr = str(row.get("Acronym") or "").strip()
-                    if old_acr and new_acr.strip() and new_acr.strip() != old_acr:
-                        ok = apply_now(
-                            {
-                                "rewrite": {
-                                    "acronyms": [
-                                        {"from": old_acr, "to": new_acr.strip()}
-                                    ]
-                                }
-                            },
-                            success=f"Renamed acronym {old_acr} -> {new_acr.strip()}.",
-                        )
-                        if ok:
-                            st.session_state.pop("edit_sys_rename_mode", None)
-                            st.rerun()
-                    else:
-                        st.warning("Enter a different acronym.")
-            else:
-                st.markdown(f"Rename System Id **{sid}**")
-                new_id = st.text_input("New System Id", key="edit_sys_inline_new_id")
-                if st.button("Apply System Id rename", type="primary", key="edit_sys_apply_id"):
-                    if new_id.strip() and new_id.strip() != sid:
-                        ok = apply_now(
-                            {
-                                "rewrite": {
-                                    "ids": [{"from": sid, "to": new_id.strip()}]
-                                }
-                            },
-                            success=f"Renamed System Id {sid} -> {new_id.strip()}.",
-                        )
-                        if ok:
-                            st.session_state["edit_sys_selected_id"] = new_id.strip()
-                            st.session_state.pop("edit_sys_rename_mode", None)
-                            st.rerun()
-                    else:
-                        st.warning("Enter a different System Id.")
+        if rename_mode == "id" and rename_sid == sid:
+            st.markdown(f"Rename UniqueId **{sid}** (propagates to all references)")
+            new_id = st.text_input("New UniqueId", key="edit_sys_inline_new_id")
+            if st.button("Apply UniqueId rename", type="primary", key="edit_sys_apply_id"):
+                if new_id.strip() and new_id.strip() != sid:
+                    ok = apply_now(
+                        {
+                            "rewrite": {
+                                "acronyms": [
+                                    {"from": sid, "to": new_id.strip()}
+                                ]
+                            }
+                        },
+                        success=f"Renamed UniqueId {sid} -> {new_id.strip()}.",
+                    )
+                    if ok:
+                        st.session_state["edit_sys_selected_id"] = new_id.strip()
+                        st.session_state.pop("edit_sys_rename_mode", None)
+                        st.rerun()
+                else:
+                    st.warning("Enter a different UniqueId.")
             if st.button("Cancel rename", key="edit_sys_cancel_ren"):
                 st.session_state.pop("edit_sys_rename_mode", None)
                 st.rerun()
@@ -176,11 +160,10 @@ def render(bundle: IcdBundle) -> None:
             "edit_sys",
             sid,
             {
-                "edit_sys_name": original.get("System Name", ""),
+                "edit_sys_name": original.get(SYSTEM_TEXTUAL_NAME, ""),
                 "edit_sys_type": original.get("Type", "")
                 if original.get("Type") in STATUS_TYPES
                 else "",
-                "edit_sys_acr": original.get("Acronym", ""),
                 "edit_sys_func_label": func_label,
                 "edit_sys_inst_label": inst_label,
                 "edit_sys_mult": original.get("Multiplicity", ""),
@@ -191,14 +174,13 @@ def render(bundle: IcdBundle) -> None:
         )
     else:
         st.session_state.pop("edit_sys_rename_mode", None)
-        sid = st.text_input("System Id (blank = auto SYS-###)", key="edit_sys_new_id")
+        sid = st.text_input("UniqueId (required)", key="edit_sys_new_id")
         sync_fields(
             "edit_sys",
             "__new__",
             {
                 "edit_sys_name": "",
                 "edit_sys_type": "",
-                "edit_sys_acr": "",
                 "edit_sys_func_label": "",
                 "edit_sys_inst_label": "",
                 "edit_sys_mult": "",
@@ -208,11 +190,7 @@ def render(bundle: IcdBundle) -> None:
             },
         )
 
-    name_col, acr_col = st.columns(2)
-    with name_col:
-        name = st.text_input("System Name", key="edit_sys_name")
-    with acr_col:
-        acr = st.text_input("Acronym", key="edit_sys_acr")
+    name = st.text_input("Textual Name", key="edit_sys_name")
 
     type_options = [""] + STATUS_TYPES
     type_col, func_col = st.columns(2)
@@ -258,12 +236,13 @@ def render(bundle: IcdBundle) -> None:
         with tok_col:
             token = st.text_input("Instance Token", key="edit_sys_tok")
 
+    preview_id = sid.strip() if mode == "Add new" else sid
     render_containment_schema(
         systems,
-        acr,
+        preview_id,
         overrides={
-            "Acronym": acr,
-            "System Name": name,
+            SYSTEM_UNIQUE_ID: preview_id,
+            SYSTEM_TEXTUAL_NAME: name,
             "Type": typ or "",
             "Installed In/Part of": installed,
             "Multiplicity": mult,
@@ -287,8 +266,7 @@ def render(bundle: IcdBundle) -> None:
         )
 
     edited = {
-        "System Name": name,
-        "Acronym": acr,
+        SYSTEM_TEXTUAL_NAME: name,
         "Type": typ or "",
         "Description": desc,
         "Notes": notes,
@@ -304,10 +282,12 @@ def render(bundle: IcdBundle) -> None:
             payload.pop("Functional system", None)
             payload.pop("Multiplicity", None)
             payload.pop("Instance Token", None)
-        if sid:
-            payload["System Id"] = sid
-        if (acr or name) and not mult_err:
+        if sid.strip():
+            payload[SYSTEM_UNIQUE_ID] = sid.strip()
+        if sid.strip() and (name or typ) and not mult_err:
             document = {"upsert": {SYSTEMS_SHEET: [payload]}}
+        elif (name or typ) and not sid.strip():
+            st.warning("UniqueId is required for new systems.")
     elif sid and not mult_err:
         patch = sparse_upsert(SYSTEMS_SHEET, SYSTEM_ID, sid, original, edited)
         if patch:

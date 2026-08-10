@@ -100,7 +100,7 @@ source workbook manually when ready.
 | `scripts/icd_sheets.py` | Sheet names and controlled vocabulary |
 
 The integrity check separates two levels. **Errors** are broken data: unknown
-identifiers, acronyms missing from `0_Systems`, or allocations whose
+identifiers, UniqueIds missing from `0_Systems`, or allocations whose
 `signal_id` is not in `1_Signals`. **Warnings** are known gaps that must not
 block the workflow (for example a payload row missing `signal_id`). Use
 `--quiet-warnings` for the count only.
@@ -124,9 +124,9 @@ One document drives the full working set:
 ```
 
 - **Omitted field** → leave unchanged. **Explicit `""`** → clear.
-- Upsert matches on the sheet primary key; omit the key to auto-allocate (`SIG` / `DBUS` / …).
+- Upsert matches on the sheet primary key; omit the key to auto-allocate (`SIG` / `DBUS` / …). `0_Systems` requires an explicit `UniqueId` (no auto-id).
 - Payload sheets use `Allocation Id` + `signal_id` (`SIG-*`).
-- `rewrite` expands global acronym/id replacements before apply.
+- `rewrite.acronyms` renames a `0_Systems.UniqueId` and propagates it across references; `rewrite.ids` renames Signal/Bus/allocation ids.
 - If a multiplicity change impacts bus families and `options.with_buses` is omitted, the edit **aborts** until you set `true` (clone/remove buses) or `false` (systems only).
 
 Examples: `scripts/examples/edit_*.example.json`.
@@ -139,22 +139,25 @@ Examples: `scripts/examples/edit_*.example.json`.
           Bus-definition tabs (signal_id → SIG-*)
 ```
 
-Fill in that order: systems first (acronyms), then signals, then buses, then
+Fill in that order: systems first (UniqueIds), then signals, then buses, then
 allocations. Relays reuse the same `SIG-*` on several allocations — do not
 duplicate the signal row.
 
 ## How to fill the database
 
+Column-by-column guidance (including allowed values) also lives in the workbook
+sheet `Column_Help`. It exports and rebuilds with the rest of the CSV working set.
+
 ### 1. `0_Systems` — equipment list and containment
 
-Add a row **before** using a new acronym elsewhere. Use the exact `Acronym`
+Add a row **before** using a new UniqueId elsewhere. Use the exact `UniqueId`
 everywhere else.
 
 | Column | What to enter |
 |---|---|
-| `System Id` | Stable id (`SYS-*`) |
-| `System Name` / `Acronym` | Display name and unique acronym |
-| `Installed In/Part of` | Containment parent acronym (empty for root / functional rows) |
+| `UniqueId` | Stable unique key used as the reference everywhere (`FCC`, `NAC`, …) |
+| `Textual Name` | Human-readable equipment or grouping name |
+| `Installed In/Part of` | Containment parent UniqueId (empty for root / functional rows) |
 | `Functional system` | Optional grouping only — **not** used for instances |
 | `Type` | `Aircraft` / `System` = labels (not bus equipment); `Component` / `Controller` / … = real LRUs |
 | `Multiplicity` | Count **per parent instance** (not aircraft total) |
@@ -172,9 +175,9 @@ derive `GBX-1`…`GBX-4` from the parent.
 | `Signal Name` / `Abbreviation` | Human labels |
 | `Signal Role` | Measurement / Command / Computed / … |
 | `Interface Type` | `Digital` \| `Analog` \| `Discrete` \| `Power` |
-| `Physical System` | Equipment the quantity belongs to (`0_Systems` acronym) |
+| `Physical System` | Equipment the quantity belongs to (`0_Systems` UniqueId) |
 | `Signal Owner` | System that owns the signal path |
-| `Repeated Per` | Extra dimensions if needed (bare acronyms like `NAC` or `EM`, **not** `NAC-1`) |
+| `Repeated Per` | Extra dimensions if needed (bare UniqueIds like `NAC` or `EM`, **not** `NAC-1`) |
 | `Related to` | Optional `;`-separated related `SIG-*` |
 | `Physical Id` | Opaque grouping label only (not a foreign key) |
 
@@ -195,12 +198,16 @@ when roles or technologies differ (e.g. control vs protection).
 | `Bus Id` | Stable instance id (e.g. `NAC_CTRL_1`) |
 | `Bus Definition` | Name of the payload tab that defines this family’s data (`NAC_CTRL`, …) |
 | `protocol` / `topology` | Protocol; topology `Unidirectional` or `Shared` (digital). Topology drives Bus Topology link color |
-| `Writer` / `Receiver` | Connected LRUs — exact acronyms or instance tokens from `0_Systems` |
+| `Writer` / `Receiver` | Connected LRUs — exact UniqueIds or instance tokens from `0_Systems` |
 | platform flags | `On aircraft ?` / `On FND ?` / `On Sim ?` as needed |
 
 Several bus instances may share one `Bus Definition` so the payload is authored
 once. List all nodes on a shared bus in Writer/Receiver (and notes) as needed;
 per-message producers/receivers live on the definition tab.
+
+`Message ID`, bit range, encoding, `update_period_ms` and (for now) `offset=…`
+in notes are the inputs for bus load / bandwidth checks: each distinct
+`Message ID` on a physical bus instance is one frame type.
 
 ### 4. Bus-definition tabs — allocations on a family
 
@@ -214,13 +221,16 @@ one encoded item on that family.
 | `data_name` | Human-readable name |
 | `writer_lru` / `receiver_lrus` | Producer and intended receivers for this item |
 | `instance_dimension` | Extra token when the bus instance alone is not enough (e.g. pack on a nacelle bus) |
+| `Message ID` | Transport message identity: A825/CAN DOC or arbitration id, or A429 label |
+| `message_or_label` | Human message / frame name when useful |
+| `start bit` / `stop bit` | Field bit range (MSB…LSB as authored; inclusive) |
 | encoding fields | unit, range, period, validity, … as known |
 | platform flags | `On aircraft ?` / `On FND ?` / `On Sim ?` |
 
 ### Cross-cutting rules
 
 - Prefer stable ids (`SYS-*`, `SIG-*`, `DBUS-*`, bus ids); rename names freely.
-- Cross-references use ids/acronyms, never Excel row numbers or formulas.
+- Cross-references use ids/UniqueIds, never Excel row numbers or formulas.
 - Multiple values in one cell → semicolon-separated.
 - Hop identity everywhere is **`signal_id`**.
 - After edits: integrity check, then rebuild Excel for review; promote to

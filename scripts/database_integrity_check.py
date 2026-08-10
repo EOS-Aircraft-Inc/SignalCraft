@@ -11,12 +11,31 @@ from icd_csv import collect_ids, load_manifest, read_sheet, sheet_index, split_r
 from icd_instances import SystemTree, family_map
 from icd_paths import DEFAULT_CSV_DIR
 from icd_sheets import (
-    CONTROLLED_SHEETS,
-    DATABUSES_SHEET,
+    ALLOCATION_ID,
+    BUS_DEFINITION,
+    BUS_ID,
     BUS_TOPOLOGIES,
+    CONTROLLED_SHEETS,
+    DATA_ID,
+    DATABUSES_SHEET,
+    INSTALLED_IN,
+    INTERFACE_TYPE,
     INTERFACE_TYPES,
+    PHYSICAL_SYSTEM,
+    RECEIVER,
+    RECEIVER_LRUS,
+    RELATED_TO,
+    REPEATED_PER,
+    SIGNAL_ID,
+    SIGNAL_ID_REF,
+    SIGNAL_OWNER,
     SIGNALS_SHEET,
+    SYSTEM_TEXTUAL_NAME,
+    SYSTEM_UNIQUE_ID,
     SYSTEMS_SHEET,
+    TOPOLOGY,
+    WRITER,
+    WRITER_LRU,
     formal_topology_label,
     normalize_bus_topology,
 )
@@ -51,11 +70,11 @@ def duplicates(values: list[str]) -> list[str]:
 
 
 def allocation_key(fields: list[str]) -> str:
-    if "Allocation Id" in fields:
-        return "Allocation Id"
-    if "Data Id" in fields:
-        return "Data Id"
-    return "Allocation Id"
+    if ALLOCATION_ID in fields:
+        return ALLOCATION_ID
+    if DATA_ID in fields:
+        return DATA_ID
+    return ALLOCATION_ID
 
 
 def check_core_ids(csv_dir: Path) -> list[str]:
@@ -63,10 +82,9 @@ def check_core_ids(csv_dir: Path) -> list[str]:
     manifest = load_manifest(csv_dir)
     signals_sheet = resolve_signals_sheet(manifest)
     checks = [
-        (SYSTEMS_SHEET, "System Id", "system"),
-        (SYSTEMS_SHEET, "Acronym", "system acronym"),
-        (signals_sheet, "Signal Id", "signal"),
-        (DATABUSES_SHEET, "Bus Id", "bus"),
+        (SYSTEMS_SHEET, SYSTEM_UNIQUE_ID, "system"),
+        (signals_sheet, SIGNAL_ID, "signal"),
+        (DATABUSES_SHEET, BUS_ID, "bus"),
     ]
     for sheet_name, field, label in checks:
         _, rows = read_sheet(sheet_name, csv_dir, manifest)
@@ -81,62 +99,65 @@ def check_system_hierarchy(csv_dir: Path) -> list[str]:
     errors: list[str] = []
     _, rows = read_sheet(SYSTEMS_SHEET, csv_dir)
 
-    acronyms = {row.get("Acronym", "").strip() for row in rows}
-    acronyms.discard("")
+    unique_ids = {row.get(SYSTEM_UNIQUE_ID, "").strip() for row in rows}
+    unique_ids.discard("")
     parent_of: dict[str, str] = {}
     no_instance_types = {"aircraft", "system", "domain"}
 
     for row in rows:
-        acronym = row.get("Acronym", "").strip()
-        if not acronym:
-            errors.append(f"System {row.get('System Id', '?')} has no Acronym")
+        unique_id = row.get(SYSTEM_UNIQUE_ID, "").strip()
+        if not unique_id:
+            errors.append(
+                f"System row missing {SYSTEM_UNIQUE_ID} "
+                f"({SYSTEM_TEXTUAL_NAME}={row.get(SYSTEM_TEXTUAL_NAME, '')!r})"
+            )
             continue
 
         parent = (
-            row.get("Installed In/Part of") or row.get("Installed In") or ""
+            row.get(INSTALLED_IN) or row.get("Installed In") or ""
         ).strip()
         typ = (row.get("Type") or row.get("System Type") or "").strip()
         multiplicity = row.get("Multiplicity", "").strip()
         token = row.get("Instance Token", "").strip()
-        parent_of[acronym] = parent
+        parent_of[unique_id] = parent
 
-        if parent and parent not in acronyms:
-            errors.append(f"System {acronym}: unknown Installed In '{parent}'")
-        if parent == acronym:
-            errors.append(f"System {acronym}: Installed In refers to itself")
+        if parent and parent not in unique_ids:
+            errors.append(f"System {unique_id}: unknown Installed In '{parent}'")
+        if parent == unique_id:
+            errors.append(f"System {unique_id}: Installed In refers to itself")
 
         if typ.lower() in no_instance_types:
             # Empty or "1" Multiplicity is fine; Instance Token is never allowed.
             if token or (multiplicity and multiplicity != "1"):
                 errors.append(
-                    f"{typ or 'System'} {acronym} must have empty Multiplicity "
+                    f"{typ or 'System'} {unique_id} must have empty Multiplicity "
                     "(or '1') and no Instance Token"
                 )
             continue
 
         if not multiplicity.isdigit() or int(multiplicity) < 1:
             errors.append(
-                f"System {acronym}: Multiplicity '{multiplicity}' is not a "
+                f"System {unique_id}: Multiplicity '{multiplicity}' is not a "
                 "positive integer (count per parent instance)"
             )
             continue
         count = int(multiplicity)
         if count > 1 and not token:
             errors.append(
-                f"System {acronym}: Multiplicity {count} requires an Instance Token"
+                f"System {unique_id}: Multiplicity {count} requires an Instance Token"
             )
         if count == 1 and token and parent:
             errors.append(
-                f"System {acronym}: singleton must not carry an Instance Token "
+                f"System {unique_id}: singleton must not carry an Instance Token "
                 f"'{token}' (it adds nothing to the instance path)"
             )
 
-    for acronym in parent_of:
+    for unique_id in parent_of:
         seen: set[str] = set()
-        node = parent_of.get(acronym, "")
+        node = parent_of.get(unique_id, "")
         while node:
             if node in seen:
-                errors.append(f"System {acronym}: containment cycle via {node}")
+                errors.append(f"System {unique_id}: containment cycle via {node}")
                 break
             seen.add(node)
             node = parent_of.get(node, "")
@@ -152,17 +173,21 @@ def check_system_references(csv_dir: Path) -> list[str]:
     targets = [
         (
             signals_sheet,
-            "Signal Id",
-            ["Physical System", "Signal Owner", "Repeated Per"],
+            SIGNAL_ID,
+            [PHYSICAL_SYSTEM, SIGNAL_OWNER, REPEATED_PER],
         ),
         (
             DATABUSES_SHEET,
-            "Bus Id",
-            ["Writer", "Receiver", "master_lru", "equipment_connected"],
+            BUS_ID,
+            [WRITER, RECEIVER, "master_lru", "equipment_connected"],
         ),
     ]
     targets += [
-        (sheet, allocation_key(read_sheet(sheet, csv_dir, manifest)[0]), ["writer_lru", "receiver_lrus"])
+        (
+            sheet,
+            allocation_key(read_sheet(sheet, csv_dir, manifest)[0]),
+            [WRITER_LRU, RECEIVER_LRUS],
+        )
         for sheet in payload_sheets(csv_dir, manifest)
     ]
 
@@ -180,7 +205,7 @@ def check_system_references(csv_dir: Path) -> list[str]:
                     base = acronym.split("-")[0] if "-" in acronym else acronym
                     if acronym in tree.acronyms or base in tree.acronyms:
                         continue
-                    if field in {"Writer", "Receiver", "writer_lru", "receiver_lrus"}:
+                    if field in {WRITER, RECEIVER, WRITER_LRU, RECEIVER_LRUS}:
                         # Instance tokens are validated loosely against acronym prefixes.
                         if any(
                             acronym.startswith(f"{a}-") or acronym == a
@@ -199,39 +224,40 @@ def check_signal_and_payload_refs(csv_dir: Path) -> list[str]:
     manifest = load_manifest(csv_dir)
     signals_sheet = resolve_signals_sheet(manifest)
     _, signals = read_sheet(signals_sheet, csv_dir, manifest)
-    signal_ids = set(collect_ids(signals, "Signal Id"))
+    signal_ids = set(collect_ids(signals, SIGNAL_ID))
 
     for row in signals:
-        sid = row.get("Signal Id", "").strip() or "?"
-        iface = (row.get("Interface Type") or "").strip()
+        sid = row.get(SIGNAL_ID, "").strip() or "?"
+        iface = (row.get(INTERFACE_TYPE) or "").strip()
         if iface and iface not in INTERFACE_TYPES:
             warnings_holder.append(
-                f"{signals_sheet} {sid}: Interface Type '{iface}' is not one of "
+                f"{signals_sheet} {sid}: {INTERFACE_TYPE} '{iface}' is not one of "
                 f"{', '.join(INTERFACE_TYPES)}"
             )
-        for ref in split_refs(row.get("Related to", "")):
+        for ref in split_refs(row.get(RELATED_TO, "")):
             if ref not in signal_ids:
                 errors.append(
-                    f"{signals_sheet} {sid}: Related to '{ref}' is not a known Signal Id"
+                    f"{signals_sheet} {sid}: {RELATED_TO} '{ref}' is not a known "
+                    f"{SIGNAL_ID}"
                 )
             elif ref == sid:
                 errors.append(
-                    f"{signals_sheet} {sid}: Related to must not reference itself"
+                    f"{signals_sheet} {sid}: {RELATED_TO} must not reference itself"
                 )
 
     _, buses = read_sheet(DATABUSES_SHEET, csv_dir, manifest)
     for row in buses:
-        bus_id = row.get("Bus Id", "").strip() or "?"
-        topo = (row.get("topology") or "").strip()
+        bus_id = row.get(BUS_ID, "").strip() or "?"
+        topo = (row.get(TOPOLOGY) or "").strip()
         if topo and topo not in BUS_TOPOLOGIES and not normalize_bus_topology(topo):
             warnings_holder.append(
-                f"{DATABUSES_SHEET} {bus_id}: topology '{topo}' is not one of "
+                f"{DATABUSES_SHEET} {bus_id}: {TOPOLOGY} '{topo}' is not one of "
                 f"{', '.join(BUS_TOPOLOGIES)}"
             )
         elif topo and topo not in BUS_TOPOLOGIES and normalize_bus_topology(topo):
             warnings_holder.append(
-                f"{DATABUSES_SHEET} {bus_id}: topology '{topo}' should be formalized as "
-                f"'{formal_topology_label(topo)}'"
+                f"{DATABUSES_SHEET} {bus_id}: {TOPOLOGY} '{topo}' should be "
+                f"formalized as '{formal_topology_label(topo)}'"
             )
 
     for sheet in payload_sheets(csv_dir, manifest):
@@ -239,20 +265,22 @@ def check_signal_and_payload_refs(csv_dir: Path) -> list[str]:
         key = allocation_key(fields)
         for row in rows:
             row_id = row.get(key, "").strip() or "?"
-            sid = row.get("signal_id", "").strip()
+            sid = row.get(SIGNAL_ID_REF, "").strip()
             if not sid:
                 warnings_holder.append(
-                    f"{sheet} {row_id}: missing signal_id, so this allocation "
+                    f"{sheet} {row_id}: missing {SIGNAL_ID_REF}, so this allocation "
                     "cannot be traced"
                 )
                 continue
             if sid not in signal_ids:
                 errors.append(
-                    f"{sheet} {row_id}: signal_id '{sid}' is not a known Signal Id"
+                    f"{sheet} {row_id}: {SIGNAL_ID_REF} '{sid}' is not a known "
+                    f"{SIGNAL_ID}"
                 )
             if ";" in sid:
                 errors.append(
-                    f"{sheet} {row_id}: signal_id must reference exactly one Signal Id"
+                    f"{sheet} {row_id}: {SIGNAL_ID_REF} must reference exactly one "
+                    f"{SIGNAL_ID}"
                 )
     # Warnings are returned via a module-level pattern in run_checks.
     check_signal_and_payload_refs.last_warnings = warnings_holder  # type: ignore[attr-defined]
@@ -263,17 +291,26 @@ check_signal_and_payload_refs.last_warnings = []  # type: ignore[attr-defined]
 
 
 def check_allocation_ids(csv_dir: Path) -> list[str]:
-    """Allocation Id must be unique within each bus-definition tab."""
+    """Allocation Id must be unique within each tab and workbook-wide."""
     errors: list[str] = []
     manifest = load_manifest(csv_dir)
+    workbook_ids: list[str] = []
     for sheet_name in payload_sheets(csv_dir, manifest):
         fields, rows = read_sheet(sheet_name, csv_dir, manifest)
         key = allocation_key(fields)
         if key not in fields:
-            errors.append(f"{sheet_name}: missing Allocation Id / Data Id column")
+            errors.append(
+                f"{sheet_name}: missing {ALLOCATION_ID} / {DATA_ID} column"
+            )
             continue
-        for value in duplicates(collect_ids(rows, key)):
+        sheet_ids = collect_ids(rows, key)
+        for value in duplicates(sheet_ids):
             errors.append(f"Duplicate allocation ID in {sheet_name}: {value}")
+        workbook_ids.extend(sheet_ids)
+    for value in duplicates(workbook_ids):
+        errors.append(
+            f"Duplicate {ALLOCATION_ID} across bus-definition tabs: {value}"
+        )
     return errors
 
 
@@ -281,7 +318,7 @@ def check_bus_families(csv_dir: Path) -> list[str]:
     errors: list[str] = []
     manifest = load_manifest(csv_dir)
     fields, buses = read_sheet(DATABUSES_SHEET, csv_dir, manifest)
-    if "instance" not in fields and "Bus Definition" not in fields:
+    if "instance" not in fields and BUS_DEFINITION not in fields:
         # Current export uses Bus Definition without a separate instance column.
         pass
     families = family_map(buses)

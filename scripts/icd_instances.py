@@ -24,7 +24,13 @@ from pathlib import Path
 
 from icd_csv import read_sheet
 from icd_paths import DEFAULT_CSV_DIR
-from icd_sheets import SYSTEMS_SHEET
+from icd_sheets import (
+    BUS_DEFINITION,
+    BUS_ID,
+    INSTALLED_IN,
+    SYSTEM_UNIQUE_ID,
+    SYSTEMS_SHEET,
+)
 
 ROOT_TOKEN = "AC"
 _COUNTER = re.compile(r"\{(n+)\}")
@@ -36,9 +42,9 @@ class SystemTree:
     def __init__(self, rows: list[dict[str, str]]) -> None:
         self.rows: dict[str, dict[str, str]] = {}
         for row in rows:
-            acronym = (row.get("Acronym") or "").strip()
-            if acronym:
-                self.rows[acronym] = row
+            unique_id = (row.get(SYSTEM_UNIQUE_ID) or "").strip()
+            if unique_id:
+                self.rows[unique_id] = row
 
     @classmethod
     def load(cls, csv_dir: Path = DEFAULT_CSV_DIR, manifest=None) -> SystemTree:
@@ -63,7 +69,7 @@ class SystemTree:
         if not row:
             return ""
         return (
-            row.get("Installed In/Part of") or row.get("Installed In") or ""
+            row.get(INSTALLED_IN) or row.get("Installed In") or ""
         ).strip()
 
     def multiplicity(self, acronym: str) -> int:
@@ -132,9 +138,9 @@ class SystemTree:
         - own Multiplicity > 1 with an Instance Token → expand that pattern, and
           when ancestors also multiply, prefix ancestor indices
           (``EMC-1-1`` = nacelle 1, motor 1);
-        - own Multiplicity == 1 under multiplied ancestors → ``Acronym-1..N``
+        - own Multiplicity == 1 under multiplied ancestors → ``UniqueId-1..N``
           (``HICU-1``, ``GBX-1``, …);
-        - no multiplied ancestors → bare ``Acronym``.
+        - no multiplied ancestors → bare ``UniqueId``.
         """
         acronym = (acronym or "").strip()
         if not acronym or acronym not in self.rows:
@@ -177,7 +183,7 @@ class SystemTree:
 
     @property
     def dimension_acronyms(self) -> set[str]:
-        """Acronyms usable as a dimension in an Instance Scope."""
+        """UniqueIds usable as a dimension in an Instance Scope."""
         return {
             acronym for acronym in self.rows if self.multiplicity(acronym) > 1
         }
@@ -202,7 +208,7 @@ class SystemTree:
 def bus_family_name(row: Mapping[str, str]) -> str:
     """Family handle for a ``10_Databuses`` row (``Bus Definition`` preferred)."""
     return (
-        str(row.get("Bus Definition") or "").strip()
+        str(row.get(BUS_DEFINITION) or "").strip()
         or str(row.get("definition_tab") or "").strip()
     )
 
@@ -216,7 +222,7 @@ def family_map(rows: Iterable[Mapping[str, str]]) -> dict[str, list[str]]:
     """
     families: dict[str, list[str]] = {}
     for row in rows:
-        bus_id = str(row.get("Bus Id") or "").strip()
+        bus_id = str(row.get(BUS_ID) or "").strip()
         family = bus_family_name(row)
         if bus_id and family:
             families.setdefault(family, []).append(bus_id)

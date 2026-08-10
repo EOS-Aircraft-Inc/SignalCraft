@@ -13,6 +13,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from visualizer.data.models import (
+    SYSTEM_TEXTUAL_NAME,
+    SYSTEM_UNIQUE_ID,
     TOPOLOGY_ANALOG,
     TOPOLOGY_COLORS,
     TOPOLOGY_DISCRETE,
@@ -43,23 +45,25 @@ def _bus_color(bus_mode: object) -> str:
 
 
 def _lru_to_function(systems: pd.DataFrame) -> dict[str, tuple[str, str]]:
-    """Map equipment acronym -> (function acronym, function name)."""
-    if systems.empty or "Acronym" not in systems.columns:
+    """Map equipment UniqueId -> (function UniqueId, function name)."""
+    if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
         return {}
     fn_names: dict[str, str] = {}
     if "Type" in systems.columns:
         for _, row in systems.iterrows():
             if str(row.get("Type") or "").strip().lower() != "system":
                 continue
-            acr = str(row.get("Acronym") or "").strip()
+            acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
             if acr:
-                fn_names[acr] = str(row.get("System Name") or acr).strip() or acr
+                fn_names[acr] = (
+                    str(row.get(SYSTEM_TEXTUAL_NAME) or acr).strip() or acr
+                )
 
     mapping: dict[str, tuple[str, str]] = {}
     if "Functional system" not in systems.columns:
         return mapping
     for _, row in systems.iterrows():
-        acr = str(row.get("Acronym") or "").strip()
+        acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
         fsys = str(row.get("Functional system") or "").strip()
         if acr and fsys:
             mapping[acr] = (fsys, fn_names.get(fsys, fsys))
@@ -153,16 +157,80 @@ def _edge_link_kind(graph: nx.DiGraph, src: str, tgt: str) -> str:
     return TOPOLOGY_UNIDIRECTIONAL
 
 
-def _vis_edges_from_digraph(graph: nx.DiGraph) -> list[dict]:
+def _layout_density(graph: nx.DiGraph) -> dict[str, float | int | bool]:
+    """Return density-adaptive layout knobs for the non-grouped topology view.
+
+    Sparse graphs keep today's defaults; dense Full-network hub graphs scale
+    repulsion, spring length, overlap avoidance, iterations, and canvas height.
+    """
+    n = graph.number_of_nodes()
+    e = graph.number_of_edges()
+    max_deg = 0
+    if n:
+        max_deg = max(dict(graph.degree()).values(), default=0)
+
+    # Soft thresholds: typical Generic stays near t=0; Full instances climb toward 1.
+    t_n = max(0.0, min(1.0, (n - 40) / 80.0))
+    t_e = max(0.0, min(1.0, (e - 60) / 120.0))
+    t_d = max(0.0, min(1.0, (max_deg - 8) / 20.0))
+    t = max(t_n, t_e, t_d)
+    # Curved fan-out only for large graphs (Full network). High degree alone on a
+    # small Generic map must not flip dense — that would wave Attach-2-style views.
+    dense = bool(n > 60 or e > 100)
+
+    def lerp(a: float, b: float) -> float:
+        return a + (b - a) * t
+
+    return {
+        "dense": dense,
+        "t": t,
+        "n": n,
+        "e": e,
+        "max_deg": max_deg,
+        "gravitationalConstant": lerp(-5000, -14000),
+        "springLength": lerp(110, 180),
+        "springConstant": lerp(0.05, 0.03),
+        "avoidOverlap": lerp(0.3, 0.8),
+        "iterations": int(round(lerp(140, 220))),
+        "height": int(round(lerp(640, 900))),
+        "postGravity": lerp(-3500, -9000),
+        "postSpringLength": lerp(110, 160),
+        "postSpringConstant": lerp(0.04, 0.03),
+        "postAvoidOverlap": lerp(0.2, 0.6),
+        "damping": 0.45,
+        "postDamping": 0.55,
+    }
+
+
+def _node_mass(degree: int) -> float:
+    """Heavier hubs so shared buses stay central while leaves spread out."""
+    return 1.0 + min(max(degree, 0), 20) * 0.15
+
+
+def _edge_smooth(dense: bool, index: int) -> dict[str, object]:
+    if not dense:
+        return {"type": "continuous"}
+    return {
+        "type": "curvedCW" if index % 2 == 0 else "curvedCCW",
+        "roundness": 0.15 + (index % 5) * 0.025,
+    }
+
+
+def _vis_edges_from_digraph(
+    graph: nx.DiGraph, *, dense: bool = False
+) -> list[dict]:
     """Collapse opposite directed pairs; color from the owning bus topology."""
     emitted: set[tuple[str, str]] = set()
     vis_edges: list[dict] = []
+    edge_index = 0
     for src, tgt in graph.edges():
         pair = tuple(sorted((src, tgt)))
         if pair in emitted:
             continue
         emitted.add(pair)
         link_kind = _edge_link_kind(graph, src, tgt)
+        smooth = _edge_smooth(dense, edge_index)
+        edge_index += 1
         if graph.has_edge(tgt, src):
             # Prefer shared coloring when both directions exist on a digital bus.
             if link_kind == TOPOLOGY_UNIDIRECTIONAL:
@@ -171,22 +239,36 @@ def _vis_edges_from_digraph(graph: nx.DiGraph) -> list[dict]:
                     link_kind = TOPOLOGY_SHARED
             color = topology_color(link_kind)
             label = formal_topology_label(link_kind) or link_kind
+            # Power is undirected on the diagram (nominal flow is stored, not drawn).
+            if link_kind == TOPOLOGY_POWER:
+                arrows: dict = {
+                    "to": {"enabled": False},
+                    "from": {"enabled": False},
+                }
+                width = 1.5
+            else:
+                arrows = {"to": {"enabled": True}, "from": {"enabled": True}}
+                width = 2 if link_kind == TOPOLOGY_SHARED else 1.5
             vis_edges.append(
                 {
                     "from": src,
                     "to": tgt,
-                    "arrows": {"to": {"enabled": True}, "from": {"enabled": True}},
+                    "arrows": arrows,
                     "color": {"color": color},
-                    "width": 2 if link_kind == TOPOLOGY_SHARED else 1.5,
-                    "smooth": {"type": "continuous"},
+                    "width": width,
+                    "smooth": smooth,
                     "title": label,
                 }
             )
         else:
             color = topology_color(link_kind)
             label = formal_topology_label(link_kind) or link_kind
-            # Shared-medium buses stay dual-arrow even when this LRU is RX-only.
-            if link_kind == TOPOLOGY_SHARED:
+            if link_kind == TOPOLOGY_POWER:
+                # Power supply: no arrowheads (bidirectional by nature).
+                arrows = {"to": {"enabled": False}, "from": {"enabled": False}}
+                width = 1.5
+            elif link_kind == TOPOLOGY_SHARED:
+                # Shared-medium buses stay dual-arrow even when this LRU is RX-only.
                 arrows = {"to": {"enabled": True}, "from": {"enabled": True}}
                 width = 2
             else:
@@ -194,7 +276,6 @@ def _vis_edges_from_digraph(graph: nx.DiGraph) -> list[dict]:
                 width = 1.5 if link_kind in {
                     TOPOLOGY_ANALOG,
                     TOPOLOGY_DISCRETE,
-                    TOPOLOGY_POWER,
                 } else 1
             vis_edges.append(
                 {
@@ -203,7 +284,7 @@ def _vis_edges_from_digraph(graph: nx.DiGraph) -> list[dict]:
                     "arrows": arrows,
                     "color": {"color": color},
                     "width": width,
-                    "smooth": {"type": "continuous"},
+                    "smooth": smooth,
                     "title": label,
                 }
             )
@@ -367,12 +448,34 @@ def render_draggable_bus_topology(
         return
 
     regions: list[dict] = []
+    layout = _layout_density(graph)
     if group_by_function:
         vis_nodes, vis_edges, regions = _build_function_regions(
             graph, systems if systems is not None else pd.DataFrame()
         )
         height = max(height, 720)
+        phys_g = -12000.0
+        phys_spring = 200.0
+        phys_k = 0.02
+        phys_overlap = 1.0
+        phys_iters = 200
+        post_g = -3500.0
+        post_spring = 110.0
+        post_k = 0.04
+        post_overlap = 0.2
     else:
+        height = max(height, int(layout["height"]))
+        phys_g = float(layout["gravitationalConstant"])
+        phys_spring = float(layout["springLength"])
+        phys_k = float(layout["springConstant"])
+        phys_overlap = float(layout["avoidOverlap"])
+        phys_iters = int(layout["iterations"])
+        post_g = float(layout["postGravity"])
+        post_spring = float(layout["postSpringLength"])
+        post_k = float(layout["postSpringConstant"])
+        post_overlap = float(layout["postAvoidOverlap"])
+        degrees = dict(graph.degree())
+        dense = bool(layout["dense"])
         vis_nodes = []
         for node_id, data in graph.nodes(data=True):
             kind = data.get("kind", "lru")
@@ -397,9 +500,10 @@ def render_draggable_bus_topology(
                     "shape": shape,
                     "kind": kind,
                     "bus_mode": mode,
+                    "mass": _node_mass(int(degrees.get(node_id, 0))),
                 }
             )
-        vis_edges = _vis_edges_from_digraph(graph)
+        vis_edges = _vis_edges_from_digraph(graph, dense=dense)
 
     nodes_json = json.dumps(vis_nodes)
     edges_json = json.dumps(vis_edges)
@@ -563,15 +667,15 @@ def render_draggable_bus_topology(
           enabled: true,
           stabilization: {{
             enabled: true,
-            iterations: grouped ? 200 : 140,
+            iterations: grouped ? 200 : {phys_iters},
             fit: true
           }},
           barnesHut: {{
-            gravitationalConstant: grouped ? -12000 : -5000,
-            springLength: grouped ? 200 : 110,
-            springConstant: grouped ? 0.02 : 0.05,
+            gravitationalConstant: grouped ? -12000 : {phys_g},
+            springLength: grouped ? 200 : {phys_spring},
+            springConstant: grouped ? 0.02 : {phys_k},
             damping: 0.45,
-            avoidOverlap: grouped ? 1 : 0.3
+            avoidOverlap: grouped ? 1 : {phys_overlap}
           }}
         }},
         interaction: {{
@@ -654,11 +758,11 @@ def render_draggable_bus_topology(
             enabled: true,
             stabilization: {{ enabled: true, fit: false }},
             barnesHut: {{
-              gravitationalConstant: -3500,
-              springLength: 110,
-              springConstant: 0.04,
+              gravitationalConstant: {post_g},
+              springLength: {post_spring},
+              springConstant: {post_k},
               damping: 0.55,
-              avoidOverlap: 0.2
+              avoidOverlap: {post_overlap}
             }}
           }}
         }});

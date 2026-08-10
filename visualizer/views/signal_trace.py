@@ -19,10 +19,11 @@ def _order_hops(hops: pd.DataFrame) -> pd.DataFrame:
     role_order = {
         "origin": 0,
         "command": 1,
-        "computed": 2,
-        "relay": 3,
-        "other": 4,
-        "unlinked": 5,
+        "request": 2,
+        "computed": 3,
+        "relay": 4,
+        "other": 5,
+        "unlinked": 6,
     }
     if "hop_role" in work.columns:
         work["_role_rank"] = work["hop_role"].map(lambda r: role_order.get(str(r), 9))

@@ -15,10 +15,10 @@ def system_filter(
     *,
     systems: pd.DataFrame | None = None,
 ) -> list[str]:
-    """Table filter for a System/acronym column.
+    """Table filter for a system UniqueId column.
 
-    When ``systems`` is provided, options show ``Acronym — Name``; returned
-    values are always bare acronyms for filtering.
+    When ``systems`` is provided, options show ``UniqueId — Name``; returned
+    values are always bare UniqueIds for filtering.
     """
     if df.empty or column not in df.columns:
         return []

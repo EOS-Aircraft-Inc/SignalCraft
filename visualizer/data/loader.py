@@ -167,6 +167,8 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
             }
             if role == "Command":
                 return "command"
+            if role == "Request":
+                return "request"
             if role == "Computed":
                 if writer and owners and writer not in owners:
                     return "relay"
@@ -225,7 +227,7 @@ def _lru_tokens_for_acronym(
 
     Prefer tokens already present on the graph (from ``10_Databuses``). Otherwise
     expand from the ``0_Systems`` tree so singletons under a multiplied ancestor
-    become ``Acronym-1..N`` (e.g. ``GBX-1..4``).
+    become ``UniqueId-1..N`` (e.g. ``GBX-1..4``).
     """
     acronym = str(acronym or "").strip()
     if not acronym:
@@ -432,8 +434,9 @@ def _add_interface_links_from_signals(
             phys_tokens = [physical]
             owner_tokens = [owner]
 
-        # Measurement / default: physical -> owner. Command: owner -> physical.
-        if role == "Command":
+        # Measurement / default: physical -> owner.
+        # Command / Request / Power: owner -> physical (source/controller to load/target).
+        if role in {"Command", "Request", "Power"}:
             left_acr, right_acr = owner, physical
             left_tokens, right_tokens = owner_tokens, phys_tokens
         else:

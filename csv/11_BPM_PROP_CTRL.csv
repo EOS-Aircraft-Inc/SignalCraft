@@ -1,0 +1,5 @@
+Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-078,Backup turbine torque command,BPM,HICU,,SIG-089,,TBD,,,BNR,,,,,,TBD,,"PLA from the segregated backup channel SIG-010, translated by BPM into an overall torque demand.",TBD,TBD,TBD
+DBUS-079,Backup electric motor 1 torque command,BPM,HICU,,SIG-091,,TBD,,,BNR,,,,,,TBD,,"PLA from the segregated backup channel SIG-010, translated by BPM into an overall torque demand.",TBD,TBD,TBD
+DBUS-080,Backup electric motor 2 torque command,BPM,HICU,,SIG-092,,TBD,,,BNR,,,,,,TBD,,"PLA from the segregated backup channel SIG-010, translated by BPM into an overall torque demand.",TBD,TBD,TBD
+DBUS-081,Backup propeller speed command,BPM,HICU,,SIG-090,,TBD,,,BNR,,,,,,TBD,,"PLA from the segregated backup channel SIG-010, translated by BPM into a propeller speed demand.",TBD,TBD,TBD

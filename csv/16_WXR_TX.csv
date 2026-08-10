@@ -1,0 +1,2 @@
+Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-WXR-001,Weather environmental conditions,WXR,DCU,,SIG-173,,TBD,,,TBD,,,,,,,TBD,Dedicated weather radar output to the display unit. The DCU passes the picture to IMA on the display link and publishes it on AVIO_HS for the FCC.,Yes,TBD,TBD

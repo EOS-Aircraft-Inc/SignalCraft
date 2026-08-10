@@ -1,6 +1,0 @@
-﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,message_or_label,bit_or_field,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
-BSIG-AC-010,Total energy available and hybridization mode,FCC,FMS;IMA,,SIG-133,TBD,,TBD,,,,,,,TBD,"Moved from Aircraft_Backbone: FCC -> avionics reporting, not an input to FCC.",TBD,TBD,TBD
-DBUS-STAT-001,FCC status,FCC,IMA,,SIG-134,TBD,,TBD,,,,,,,TBD,Moved from the retired Avionics_Status bus (BUS-017).,TBD,TBD,TBD
-DBUS-065,Power Lever RVDT,FCC,IMA;FMS,,SIG-007,TBD,,BNR,,,,,,,TBD,"Low-integrity, informational only; selective FCC->avionics report, distinct from the inter-FCC exchange on FCS_Control.",TBD,TBD,TBD
-DBUS-065-B,Power Lever Potentiometer,FCC,IMA;FMS,,SIG-010,TBD,,BNR,,,,,,,TBD,"Low-integrity, informational only; selective FCC->avionics report, distinct from the inter-FCC exchange on FCS_Control.",TBD,TBD,TBD
-DBUS-065-C,Power Lever Idle Proximity,FCC,IMA;FMS,,SIG-011,TBD,,BNR,,,,,,,TBD,"Low-integrity, informational only; selective FCC->avionics report, distinct from the inter-FCC exchange on FCS_Control.",TBD,TBD,TBD

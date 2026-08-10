@@ -1,0 +1,52 @@
+﻿UniqueId,Textual Name,Installed In/Part of,Functional system,Type,Multiplicity,Instance Token,Description,Notes
+AVIO,Avionics,,,System,,,Aircraft avionics domain,
+FCS,Flight Control System,,,System,,,Global flight control system,
+PDS,Power Distribution System,,,System,,,High-voltage distribution from the storage assemblies to the propulsion loads,Currently covers HVPDU and IMD only; low-voltage distribution is not modelled yet
+PEMS,Power and Energy Management System,,,System,,,"Power and energy management: mission energy strategy, power allocation to the propulsion effectors and nacelle command distribution",Covers MMS and HICU. The power-management computation itself is hosted by the FCC; that hosting choice does not move the FCC interfaces out of FCS.
+PROP,Propulsion System,,,System,,,"Propulsion: hybrid propulsion packages, thermal engine, electric motors, combining gearbox and propeller",
+FUEL,Fuel System,,,System,,,Fuel storage and delivery to the propulsion packages,Storage is in the three tanks; delivery to each propulsion package is handled by the FCU (one per HPP)
+THERM,Thermal system,,,System,,,Thermal management of the propulsion packages (IPTMS) and of the storage assemblies (BTMS),
+ESS,Energy Storage System,,,System,,,"Electrical energy storage: four HVDC assemblies, each holding twelve battery packs with their BMU, a master BMS and a charge controller",Function only. The storage hardware is contained in the HVDC assemblies; see HVDC for the containment.
+AC,Aircraft,,,Aircraft,1,,Complete aircraft,Root of the containment tree
+BAY,Avionics bays,AC,,Zone,1,,Avionics bay,
+CKPT,Cockpit,AC,,Zone,1,,Pilot controls and displays,
+WING,Wing,AC,,Zone,2,WING-{n},Two wings,
+NAC,Nacelle,AC,,Zone,4,NAC-{n},Four nacelle installations,
+NOSE,Aircraft nose,AC,,Zone,1,,,
+FCC,Flight Control Computer,BAY,FCS,Controller,3,FCC-{n},Primary flight control computer,Quantity subject to supplier confirmation. The FCC also hosts the power-management computation (working assumption); it stays in the FCS grouping because that hosting choice does not change its interfaces.
+ICM,Interface Control Module,BAY,FCS,Controller,3,ICM-{n},Pilot-control acquisition modules,Acquires the cockpit controls and publishes them on the aircraft backbone
+FMS,Flight Management System,BAY,AVIO,Component,2,FMS-{n},,
+IRU,Inertial Reference Unit,BAY,AVIO,Component,1,,Inertial reference units providing aircraft attitude and acceleration,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+ADC,Air Data Computer,BAY,AVIO,Component,1,,Air Data Computer,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+WXR,Weather Radar,BAY,AVIO,Component,1,,Weather radar (environmental sensing),Placeholder for AVIO_HS environmental inputs
+DCU,Data Concentrator Unit,BAY,AVIO,Component,1,,Placeholder for avionics data collector and distributor,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+IMA,Integrated Modular Avionics,BAY,AVIO,Component,1,,Integrated Modular Avionics - host of multiple applications in one server. Use data collected through DCU.,Kept as a single entity for now to keep the review focused on the HPP; avionics redundancy to be refined later
+BPM,Backup Power Management,BAY,PEMS,Controller,1,,Independent backup propulsion command controller,Single aircraft-level controller
+MMS,Mission Management System,BAY,PEMS,Controller,1,,"Aircraft-level mission and energy management; retrieves the flight mission from FMS and provides energy/hybridization strategy to the FCC power-management function, which retains command authority over the propulsion effectors.",Single aircraft-level controller.
+FTANK,Fuel Tank,AC,FUEL,Component,3,FTANK_CENTER;FTANK_LEFT;FTANK_RIGHT,One center tank and two wing tanks,Three aircraft-level tanks with an explicit token list. Parented to the aircraft rather than to the wing: a per-wing parent would give six tanks and would not accept the center tank.
+BTMS,Battery Thermal Management System,WING,THERM,Component,1,,Battery thermal management; one per wing,Each BTMS conditions the two HVDC assemblies of its wing.
+HICU,Hybrid Integrated Control Unit,NAC,PEMS,Controller,1,,Nacelle command distributor between aircraft-level functions and local controllers in the nacelle. Act as a data concentrator.,One per nacelle. Hosts part of the control functions otherwise performed by the EPECS.
+IPTMS,Integrated Propulsion Thermal Management System,NAC,THERM,Component,1,,Propulsion and gearbox thermal management,
+HPP,Hybrid Propulsion Package,NAC,PROP,Component,1,,"One thermal engine, two electric engines, gearbox and controls",
+EPECS,Engine and Propeller Electronic Control System,HPP,PROP,Controller,1,,Local turbine and propeller controller,
+TURB,Thermal Engine,HPP,PROP,Component,1,,One thermal engine per HPP,
+FCU,Fuel Control Unit,HPP,FUEL,Component,1,,Link between the aircraft fuel system and the HPP; meters fuel to the thermal engine,One per HPP. Fuel measurements at the FCU and its metering and shutdown effectors belong here rather than to the aircraft-level FUEL system.
+GBX,Combining Gearbox,HPP,PROP,Component,1,,One combining gearbox per HPP,
+PROPELLER,Propeller,HPP,PROP,Component,1,,One propeller per HPP,
+PCU,Propeller Control Unit,PROPELLER,PROP,Component,1,,Dual-channel propeller pitch control unit,
+OSG,Propeller Overspeed Governor,PROPELLER,PROP,Component,1,,Overspeed governor,
+FEATH_PUMP,Auxiliary Feathering Pump,PROPELLER,PROP,Component,1,,,
+EM,Electric Motor,HPP,PROP,Component,2,EM-{n},Two electric motors per HPP,Motor sectors deferred pending supplier definition
+EMC,Electric Motor Controller,EM,PROP,Controller,1,,One controller/inverter function per electric motor assembly,Installed in EM: the EM-{n} token comes from the motor and is not restated at this level.
+HVDC,High Voltage DC Assembly,NAC,ESS,Component,1,,"One HVDC assembly per nacelle, four in total; each holds twelve battery packs, one master BMS, one charge controller and the HVPDU","ESS is now a function, so the assembly is parented where it is installed. One per nacelle rather than four: the nacelle control bus addresses its packs as PACK-1..12 within NAC-{n}, which only closes if the twelve packs are nacelle-local. HVDC-2 informally means the assembly of NAC-2; no token is restated here."
+HVPDU,High-Voltage Power Distribution Unit,HVDC,PDS,Component,1,,"One HVPDU per HVDC assembly, feeding the two motor controllers of the nacelle","Part of the HVDC assembly, but its function is distribution rather than storage, hence PDS. Installed in the engine bay (J1) while the packs sit in the aft nacelle (J4)."
+IMD,Insulation Monitoring Device,HVPDU,PDS,Component,1,,One IMD per HVPDU,Working assumption
+PACK,Battery Pack,HVDC,ESS,Component,12,PACK-{n},Twelve battery packs per HVDC assembly,"Twelve packs per HVDC assembly. Token uses {n}, unpadded, so 10 and above stay multi-digit."
+BMU,Battery Management Unit,PACK,ESS,Controller,1,,Nominal pack monitoring and control,One per pack. Cell-level acquisition is internal to the pack and is not modelled.
+MBMS,Master Battery Management System,HVDC,ESS,Controller,1,,HVDC-level coordination and aircraft interface,"Separate LRU, one per HVDC assembly"
+CHGC,Charge Controller,HVDC,ESS,Controller,1,,Charging protocol and command function,One charge controller per HVDC assembly
+F_B_PUMP,Fuel boost pump,HPP,FUEL,Component,1,,Aircraft side fuel boost pump,"Even if fuel pump are per tank, there is one dedicated to each nacelle"
+LVPDU,Low Voltage Power Distribution Unit,AC,PDS,Component,3,LVPDU_AFT;LVPDU_CENTER;LVPDU_FWD,,
+DCDC,Step-down DC/DC Converter,HVPDU,PDS,Component,1,,Steps the 800 V HV network down to the 28 V LV network.,"One per HVPDU, so one per nacelle. Takes its HV input from the HVPDU (SIG-139) and supplies the LVPDU (SIG-137)."
+LVBAT,Low voltage battery,LVPDU,PDS,Component,1,,,
+DCDC_UP,Step-up DC/DC Converter,HVPDU,PDS,Component,1,,Steps the 28 V LV network up to the 800 V HV network.,"One per HVPDU, so one per nacelle, mirroring the step-down converter. Provides a path to energise the HV network from the LV side."

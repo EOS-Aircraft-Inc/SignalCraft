@@ -7,13 +7,44 @@ used by scripts and the visualizer. Prefer these over string literals.
 from __future__ import annotations
 
 README_SHEET = "README"
+COLUMN_HELP_SHEET = "Column_Help"
 SYSTEMS_SHEET = "0_Systems"
 SIGNALS_SHEET = "1_Signals"
 DATABUSES_SHEET = "10_Databuses"
 
+# Primary keys / identity columns.
+SYSTEM_UNIQUE_ID = "UniqueId"
+SIGNAL_ID = "Signal Id"
+BUS_ID = "Bus Id"
+ALLOCATION_ID = "Allocation Id"
+DATA_ID = "Data Id"  # legacy payload key; prefer ALLOCATION_ID
+
+# Common display / cross-reference columns.
+SYSTEM_TEXTUAL_NAME = "Textual Name"
+SIGNAL_NAME = "Signal Name"
+INSTALLED_IN = "Installed In/Part of"
+FUNCTIONAL_SYSTEM = "Functional system"
+PHYSICAL_SYSTEM = "Physical System"
+SIGNAL_OWNER = "Signal Owner"
+REPEATED_PER = "Repeated Per"
+RELATED_TO = "Related to"
+INTERFACE_TYPE = "Interface Type"
+BUS_DEFINITION = "Bus Definition"
+BUS_NAME = "name"
+WRITER = "Writer"
+RECEIVER = "Receiver"
+TOPOLOGY = "topology"
+WRITER_LRU = "writer_lru"
+RECEIVER_LRUS = "receiver_lrus"
+SIGNAL_ID_REF = "signal_id"  # payload column referencing SIGNAL_ID
+
+# Non-data workbook tabs (docs / guides). Excluded from edit engine and payloads.
+DOC_SHEETS = frozenset({README_SHEET, COLUMN_HELP_SHEET})
+
 CONTROLLED_SHEETS = frozenset(
     {
         README_SHEET,
+        COLUMN_HELP_SHEET,
         SYSTEMS_SHEET,
         SIGNALS_SHEET,
         DATABUSES_SHEET,
@@ -23,6 +54,7 @@ CONTROLLED_SHEETS = frozenset(
 # Contiguous leading sheets for reorder_sheets (payload tabs follow).
 LEADING_SHEETS = (
     README_SHEET,
+    COLUMN_HELP_SHEET,
     SYSTEMS_SHEET,
     SIGNALS_SHEET,
     DATABUSES_SHEET,

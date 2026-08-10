@@ -2,7 +2,7 @@
   "upsert": {
     "0_Systems": [
       {
-        "System Id": "ZONE-NAC",
+        "UniqueId": "ZONE-NAC",
         "Multiplicity": "6"
       }
     ]

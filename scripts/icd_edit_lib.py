@@ -36,55 +36,74 @@ from icd_csv import (
 from icd_instances import family_map
 from icd_paths import DEFAULT_CSV_DIR
 from icd_sheets import (
+    ALLOCATION_ID,
+    BUS_DEFINITION,
+    BUS_ID,
     CONTROLLED_SHEETS,
+    DATA_ID,
     DATABUSES_SHEET,
+    DOC_SHEETS,
+    FUNCTIONAL_SYSTEM,
+    INSTALLED_IN,
+    PHYSICAL_SYSTEM,
     README_SHEET,
+    RECEIVER,
+    RECEIVER_LRUS,
+    RELATED_TO,
+    REPEATED_PER,
+    SIGNAL_ID,
+    SIGNAL_ID_REF,
+    SIGNAL_OWNER,
     SIGNALS_SHEET,
+    SYSTEM_UNIQUE_ID,
     SYSTEMS_SHEET,
+    WRITER,
+    WRITER_LRU,
 )
 
 CONTROLLED = set(CONTROLLED_SHEETS)
 
 PRIMARY_KEY: dict[str, str] = {
-    SYSTEMS_SHEET: "System Id",
-    SIGNALS_SHEET: "Signal Id",
-    DATABUSES_SHEET: "Bus Id",
+    SYSTEMS_SHEET: SYSTEM_UNIQUE_ID,
+    SIGNALS_SHEET: SIGNAL_ID,
+    DATABUSES_SHEET: BUS_ID,
 }
 
 ID_PREFIX: dict[str, str] = {
-    SYSTEMS_SHEET: "SYS",
     SIGNALS_SHEET: "SIG",
     DATABUSES_SHEET: "DBUS",
 }
 
-# Semicolon-separated fields that may hold system acronyms / scope dims.
+# Semicolon-separated fields that may hold system UniqueIds / scope dims.
 ACRONYM_FIELDS: dict[str, list[str]] = {
-    SYSTEMS_SHEET: ["Acronym", "Installed In/Part of", "Functional system"],
-    SIGNALS_SHEET: ["Physical System", "Signal Owner", "Repeated Per"],
-    DATABUSES_SHEET: ["Writer", "Receiver", "master_lru", "equipment_connected"],
+    SYSTEMS_SHEET: [SYSTEM_UNIQUE_ID, INSTALLED_IN, FUNCTIONAL_SYSTEM],
+    SIGNALS_SHEET: [PHYSICAL_SYSTEM, SIGNAL_OWNER, REPEATED_PER],
+    DATABUSES_SHEET: [WRITER, RECEIVER, "master_lru", "equipment_connected"],
 }
 
-PAYLOAD_ACRONYM_FIELDS = ["writer_lru", "receiver_lrus"]
+PAYLOAD_ACRONYM_FIELDS = [WRITER_LRU, RECEIVER_LRUS]
 
 # Columns that may hold cross-sheet identity references.
 ID_REF_FIELDS: dict[str, list[str]] = {
-    SIGNALS_SHEET: ["Related to"],
-    DATABUSES_SHEET: ["Bus Definition", "definition_tab"],
+    SIGNALS_SHEET: [RELATED_TO],
+    DATABUSES_SHEET: [BUS_DEFINITION, "definition_tab"],
 }
 
 PAYLOAD_ID_FIELDS = [
-    "signal_id",
+    SIGNAL_ID_REF,
 ]
 
 PAYLOAD_DEFAULT_FIELDS = [
-    "Allocation Id",
+    ALLOCATION_ID,
     "data_name",
-    "writer_lru",
-    "receiver_lrus",
+    WRITER_LRU,
+    RECEIVER_LRUS,
     "instance_dimension",
-    "signal_id",
+    SIGNAL_ID_REF,
+    "Message ID",
     "message_or_label",
-    "bit_or_field",
+    "start bit",
+    "stop bit",
     "encoding",
     "unit",
     "scale",
@@ -162,7 +181,7 @@ class IcdEditor:
         self.sheets: dict[str, tuple[list[str], list[dict[str, str]]]] = {}
         for entry in self.manifest["sheets"]:
             name = str(entry["sheet_name"])
-            if name == README_SHEET:
+            if name in DOC_SHEETS:
                 continue
             try:
                 fields, rows = read_sheet(name, self.csv_dir, self.manifest)
@@ -179,10 +198,10 @@ class IcdEditor:
         if sheet in PRIMARY_KEY:
             return PRIMARY_KEY[sheet]
         fields, _ = self._fields_rows(sheet)
-        if "Allocation Id" in fields:
-            return "Allocation Id"
-        if "Data Id" in fields:
-            return "Data Id"
+        if ALLOCATION_ID in fields:
+            return ALLOCATION_ID
+        if DATA_ID in fields:
+            return DATA_ID
         if "data_id" in fields:
             return "data_id"
         raise KeyError(f"No primary key for sheet {sheet}")
@@ -316,10 +335,13 @@ class IcdEditor:
 
                 row_id = str(item.get(key, "")).strip()
                 if not row_id:
+                    if sheet == SYSTEMS_SHEET:
+                        # UniqueId is the reference key — never auto-allocate.
+                        continue
                     prefix = ID_PREFIX.get(sheet, "ID")
                     if sheet not in ID_PREFIX and key in {
-                        "Allocation Id",
-                        "Data Id",
+                        ALLOCATION_ID,
+                        DATA_ID,
                     }:
                         prefix = "DBUS"
                     row_id = next_id(existing_ids + collect_ids(rows, key), prefix)
@@ -401,20 +423,15 @@ class IcdEditor:
         families = family_map(buses)
 
         for item in upserts:
-            sid = str(item.get("System Id") or "").strip()
+            sid = str(item.get(SYSTEM_UNIQUE_ID) or "").strip()
             row = systems.get(sid)
-            if row is None and "Acronym" in item:
-                # match by acronym
-                acr = str(item.get("Acronym") or "").strip()
-                row = next(
-                    (r for r in systems.values() if r.get("Acronym", "").strip() == acr),
-                    None,
-                )
             if row is None:
                 continue
             if "Multiplicity" not in item and "Instance Token" not in item:
                 continue
-            acronym = str(item.get("Acronym") or row.get("Acronym") or "").strip()
+            unique_id = str(
+                item.get(SYSTEM_UNIQUE_ID) or row.get(SYSTEM_UNIQUE_ID) or ""
+            ).strip()
             old_mult = (row.get("Multiplicity") or "").strip()
             new_mult = str(item.get("Multiplicity", old_mult)).strip()
             if not new_mult or new_mult == old_mult:
@@ -434,17 +451,17 @@ class IcdEditor:
                     if stem and not all(
                         any(stem in m for stem in [stem]) for m in members
                     ):
-                        # loose: member contains acronym or family relates
+                        # loose: member contains UniqueId or family relates
                         pass
-                if acronym and not any(
-                    acronym in m or acronym.lower() in family.lower() for m in members
+                if unique_id and not any(
+                    unique_id in m or unique_id.lower() in family.lower()
+                    for m in members
                 ):
-                    # still allow if family name contains acronym
-                    if acronym not in family:
+                    if unique_id not in family:
                         continue
                 impacts.append(
                     {
-                        "acronym": acronym,
+                        "acronym": unique_id,
                         "family": family,
                         "old_multiplicity": old_n,
                         "new_multiplicity": new_n,
@@ -463,7 +480,7 @@ class IcdEditor:
         if DATABUSES_SHEET not in self.sheets:
             return changes
         fields, rows = self._fields_rows(DATABUSES_SHEET)
-        index = {str(r.get("Bus Id", "")).strip(): r for r in rows}
+        index = {str(r.get(BUS_ID, "")).strip(): r for r in rows}
 
         for impact in impacts:
             members = list(impact["members"])
@@ -492,7 +509,7 @@ class IcdEditor:
                     for col in fields:
                         old_val = template.get(col, "")
                         new_val = old_val
-                        if col == "Bus Id":
+                        if col == BUS_ID:
                             new_val = new_id
                         elif col == "name" and old_val:
                             # replace trailing number in name if present
@@ -505,7 +522,7 @@ class IcdEditor:
                                 new_id,
                                 col,
                                 "",
-                                new_val if col != "Bus Definition" else family,
+                                new_val if col != BUS_DEFINITION else family,
                                 action="insert",
                             )
                         )
@@ -519,7 +536,7 @@ class IcdEditor:
                             CellChange(
                                 DATABUSES_SHEET,
                                 bus_id,
-                                "Bus Id",
+                                BUS_ID,
                                 bus_id,
                                 "",
                                 action="delete_row",
@@ -593,17 +610,17 @@ class IcdEditor:
                 if ch.sheet != DATABUSES_SHEET:
                     continue
                 if ch.action == "delete_row":
-                    bus_rows = [r for r in bus_rows if r.get("Bus Id") != ch.row_key]
+                    bus_rows = [r for r in bus_rows if r.get(BUS_ID) != ch.row_key]
                     pending_inserts.pop(ch.row_key, None)
                 elif ch.action == "insert":
                     row = pending_inserts.setdefault(
-                        ch.row_key, {"Bus Id": ch.row_key}
+                        ch.row_key, {BUS_ID: ch.row_key}
                     )
                     row[ch.column] = ch.new
                 elif ch.action == "set":
                     applied = False
                     for r in bus_rows:
-                        if r.get("Bus Id") == ch.row_key:
+                        if r.get(BUS_ID) == ch.row_key:
                             r[ch.column] = ch.new
                             applied = True
                             break
@@ -612,9 +629,9 @@ class IcdEditor:
             bus_rows.extend(pending_inserts.values())
             families = set(family_map(bus_rows).keys())
             bus_ids = {
-                str(r.get("Bus Id") or "").strip()
+                str(r.get(BUS_ID) or "").strip()
                 for r in bus_rows
-                if str(r.get("Bus Id") or "").strip()
+                if str(r.get(BUS_ID) or "").strip()
             }
 
         bus_refs = bus_ids | families
@@ -624,7 +641,11 @@ class IcdEditor:
             for raw in items or []:
                 item = dict(raw)
                 if sheet == SYSTEMS_SHEET:
-                    sid = str(item.get("System Id") or "").strip()
+                    sid = str(item.get(SYSTEM_UNIQUE_ID) or "").strip()
+                    if not sid:
+                        errors.append(
+                            f"0_Systems upsert requires {SYSTEM_UNIQUE_ID}"
+                        )
                     existing = (
                         self._row_index(SYSTEMS_SHEET).get(sid, {})
                         if SYSTEMS_SHEET in self.sheets
@@ -665,29 +686,30 @@ class IcdEditor:
                                         "Instance Token"
                                     )
                 if sheet == SIGNALS_SHEET:
-                    for col in ("Physical System", "Signal Owner", "Repeated Per"):
+                    for col in (PHYSICAL_SYSTEM, SIGNAL_OWNER, REPEATED_PER):
                         if col not in item:
                             continue
                         for ref in split_refs(str(item.get(col) or "")):
                             if ref and ref not in systems and ref not in {"TBD", "N/A"}:
                                 if systems:
                                     errors.append(
-                                        f"{sheet}: unknown system acronym '{ref}' in {col}"
+                                        f"{sheet}: unknown system '{ref}' in {col}"
                                     )
-                    for ref in split_refs(str(item.get("Related to") or "")):
+                    for ref in split_refs(str(item.get(RELATED_TO) or "")):
                         if not ref:
                             continue
                         if ref not in signal_ids:
                             errors.append(
-                                f"{sheet}: Related to '{ref}' is not a known Signal Id"
+                                f"{sheet}: {RELATED_TO} '{ref}' is not a known "
+                                f"{SIGNAL_ID}"
                             )
-                for col in ("Bus Definition", "definition_tab"):
+                for col in (BUS_DEFINITION, "definition_tab"):
                     if col not in item:
                         continue
                     # On 10_Databuses, Bus Definition / definition_tab *defines*
                     # the family — it need not already exist.
                     if sheet == DATABUSES_SHEET and col in {
-                        "Bus Definition",
+                        BUS_DEFINITION,
                         "definition_tab",
                     }:
                         continue
@@ -697,13 +719,13 @@ class IcdEditor:
                                 f"{sheet}: {col} '{ref}' is not a known bus or family"
                             )
                 for col in (
-                    "Physical System",
-                    "Signal Owner",
-                    "Repeated Per",
-                    "writer_lru",
-                    "Installed In/Part of",
-                    "Writer",
-                    "Receiver",
+                    PHYSICAL_SYSTEM,
+                    SIGNAL_OWNER,
+                    REPEATED_PER,
+                    WRITER_LRU,
+                    INSTALLED_IN,
+                    WRITER,
+                    RECEIVER,
                 ):
                     if col not in item:
                         continue
@@ -715,18 +737,20 @@ class IcdEditor:
                             continue
                         if systems:
                             errors.append(
-                                f"{sheet}: unknown system acronym '{ref}' in {col}"
+                                f"{sheet}: unknown system '{ref}' in {col}"
                             )
                 if sheet not in CONTROLLED or self._is_payload_sheet(sheet):
-                    if "signal_id" in item:
-                        sid = str(item.get("signal_id") or "").strip()
+                    if SIGNAL_ID_REF in item:
+                        sid = str(item.get(SIGNAL_ID_REF) or "").strip()
                         if sid and sid not in signal_ids:
                             errors.append(
-                                f"{sheet}: signal_id '{sid}' is not a known Signal Id"
+                                f"{sheet}: {SIGNAL_ID_REF} '{sid}' is not a known "
+                                f"{SIGNAL_ID}"
                             )
                         if ";" in sid:
                             errors.append(
-                                f"{sheet}: signal_id must reference exactly one Signal Id"
+                                f"{sheet}: {SIGNAL_ID_REF} must reference exactly "
+                                f"one {SIGNAL_ID}"
                             )
 
         # New primary keys must not collide with existing unless rewrite owns them.
@@ -758,7 +782,7 @@ class IcdEditor:
         try:
             return self._primary_key(sheet)
         except KeyError:
-            return "Allocation Id"
+            return ALLOCATION_ID
 
     def _simulate(self, plan: list[CellChange]) -> dict[str, Any]:
         ids: dict[str, dict[str, dict[str, str]]] = {}
@@ -792,9 +816,9 @@ class IcdEditor:
 
         acronyms: set[str] = set()
         for row in ids.get(SYSTEMS_SHEET, {}).values():
-            acr = (row.get("Acronym") or "").strip()
-            if acr:
-                acronyms.add(acr)
+            uid = (row.get(SYSTEM_UNIQUE_ID) or "").strip()
+            if uid:
+                acronyms.add(uid)
         return {"ids": ids, "acronyms": acronyms}
 
     def apply_plan(self, plan: list[CellChange]) -> list[str]:

@@ -1,7 +1,7 @@
 """Labeled entity pickers for the Edit data UI.
 
-External references display as ``Id — Name`` / ``Acronym — Name`` and widgets
-return bare ids/acronyms for persistence. Filter text boxes are opt-in
+External references display as ``UniqueId — Textual Name`` and widgets
+return bare UniqueIds for persistence. Filter text boxes are opt-in
 (``with_filter=True``) — do not add them by default.
 """
 
@@ -13,8 +13,14 @@ from itertools import product
 import pandas as pd
 import streamlit as st
 
+from visualizer.data.models import (
+    INSTALLED_IN,
+    SYSTEM_TEXTUAL_NAME,
+    SYSTEM_UNIQUE_ID,
+)
+
 _SEP = " — "
-_PARENT_COL = "Installed In/Part of"
+_PARENT_COL = INSTALLED_IN
 _COUNTER = re.compile(r"\{(n+)\}")
 
 
@@ -43,13 +49,13 @@ def system_acronym_labels(
     include_types: set[str] | None = None,
     exclude_types: set[str] | None = None,
 ) -> tuple[list[str], dict[str, str]]:
-    """``Acronym — System Name`` filtered by Type, mapped back to acronym."""
+    """``UniqueId — Textual Name`` filtered by Type, mapped back to UniqueId."""
     labels: list[str] = []
     label_to_acr: dict[str, str] = {}
-    if systems.empty or "Acronym" not in systems.columns:
+    if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
         return labels, label_to_acr
     for _, row in systems.iterrows():
-        acr = str(row.get("Acronym") or "").strip()
+        acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
         if not acr:
             continue
         typ = str(row.get("Type") or "").strip()
@@ -57,7 +63,7 @@ def system_acronym_labels(
             continue
         if exclude_types is not None and typ in exclude_types:
             continue
-        name = str(row.get("System Name") or "").strip()
+        name = str(row.get(SYSTEM_TEXTUAL_NAME) or "").strip()
         label = f"{acr}{_SEP}{name}" if name else acr
         labels.append(label)
         label_to_acr[label] = acr
@@ -68,17 +74,17 @@ def system_acronym_labels(
 def dimension_acronym_labels(
     systems: pd.DataFrame,
 ) -> tuple[list[str], dict[str, str]]:
-    """``Acronym — Name`` for systems with Multiplicity > 1 (instance dimensions)."""
+    """``UniqueId — Name`` for systems with Multiplicity > 1 (instance dimensions)."""
     labels: list[str] = []
     label_to_acr: dict[str, str] = {}
     if systems.empty:
         return labels, label_to_acr
     for _, row in systems.iterrows():
-        acr = str(row.get("Acronym") or "").strip()
+        acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
         mult = str(row.get("Multiplicity") or "").strip()
         if not acr or not mult.isdigit() or int(mult) <= 1:
             continue
-        name = str(row.get("System Name") or "").strip()
+        name = str(row.get(SYSTEM_TEXTUAL_NAME) or "").strip()
         label = f"{acr}{_SEP}{name}" if name else acr
         labels.append(label)
         label_to_acr[label] = acr
@@ -92,11 +98,15 @@ def dimension_acronyms(systems: pd.DataFrame) -> list[str]:
 
 
 def acronym_options(systems: pd.DataFrame) -> list[str]:
-    """Bare acronym list (prefer ``system_acronym_labels`` for UI pickers)."""
-    if systems.empty or "Acronym" not in systems.columns:
+    """Bare UniqueId list (prefer ``system_acronym_labels`` for UI pickers)."""
+    if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
         return []
     return sorted(
-        {str(a).strip() for a in systems["Acronym"].dropna() if str(a).strip()}
+        {
+            str(a).strip()
+            for a in systems[SYSTEM_UNIQUE_ID].dropna()
+            if str(a).strip()
+        }
     )
 
 
@@ -148,18 +158,18 @@ def instance_endpoint_labels(
 ) -> tuple[list[str], dict[str, str]]:
     """Exhaustive Writer/Receiver endpoints: instance tokens + singletons.
 
-    Unlike the generic ``Acronym — Name`` filter list, this expands multiplicity
-    (``FCC-1``, ``HICU-1``, ``BMU-1-1``, …) and labels each with the system name.
+    Unlike the generic ``UniqueId — Name`` filter list, this expands multiplicity
+    (``FCC-1``, ``HICU-1``, ``BMU-1-1``, …) and labels each with the textual name.
     """
     exclude_types = exclude_types or {"Aircraft", "System", "Zone"}
     labels: list[str] = []
     label_to_val: dict[str, str] = {}
-    if systems.empty or "Acronym" not in systems.columns:
+    if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
         return labels, label_to_val
 
     by_acr: dict[str, dict[str, str]] = {}
     for _, row in systems.iterrows():
-        acr = str(row.get("Acronym") or "").strip()
+        acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
         if acr:
             by_acr[acr] = {c: str(row.get(c, "") or "") for c in systems.columns}
 
@@ -177,7 +187,7 @@ def instance_endpoint_labels(
         typ = (row.get("Type") or "").strip()
         if typ in exclude_types:
             continue
-        name = (row.get("System Name") or "").strip()
+        name = (row.get(SYSTEM_TEXTUAL_NAME) or "").strip()
         mult_s = (row.get("Multiplicity") or "").strip()
         mult = int(mult_s) if mult_s.isdigit() else 1
         pattern = (row.get("Instance Token") or "").strip()
@@ -195,7 +205,7 @@ def instance_endpoint_labels(
             _add(f"{acr}-" + "-".join(str(i) for i in idxs), name)
 
     acr_names = {
-        a: (by_acr[a].get("System Name") or "").strip() for a in by_acr
+        a: (by_acr[a].get(SYSTEM_TEXTUAL_NAME) or "").strip() for a in by_acr
     }
     for raw in extra_tokens or []:
         tok = str(raw or "").strip()

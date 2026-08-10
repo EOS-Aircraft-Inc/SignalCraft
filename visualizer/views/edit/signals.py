@@ -21,7 +21,7 @@ from visualizer.data.models import INTERFACE_TYPES, SIGNAL_ID
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import render_apply_panel, sync_fields
 
-SIGNAL_ROLES = ["Measurement", "Command", "Computed", "Status", "Other", ""]
+SIGNAL_ROLES = ["Measurement", "Command", "Request", "Computed", "Power"]
 EDITABLE_FIELDS = [
     "Physical Id",
     "Signal Name",

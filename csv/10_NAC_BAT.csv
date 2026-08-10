@@ -1,0 +1,17 @@
+Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-044,Pack current,BMU,MBMS,PACK-{n},SIG-038,,TBD,,,BNR,A,,,,,,TBD,,TBD,TBD,TBD
+DBUS-045,Pack terminal voltage,BMU,MBMS,PACK-{n},SIG-039,,TBD,,,BNR,V,,,,,,TBD,Loaded terminal voltage; the rest voltage is DBUS-101.,TBD,TBD,TBD
+DBUS-101,Pack open circuit voltage,BMU,MBMS,PACK-{n},SIG-152,,TBD,,,BNR,V,,,,,,TBD,,TBD,TBD,TBD
+DBUS-046,Pack mean temperature,BMU,MBMS,PACK-{n},SIG-040,,TBD,,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-102,Pack maximum temperature,BMU,MBMS,PACK-{n},SIG-153,,TBD,,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-103,Pack minimum temperature,BMU,MBMS,PACK-{n},SIG-154,,TBD,,,BNR,degC,,,,,,TBD,,TBD,TBD,TBD
+DBUS-104,Pack minimum cell voltage,BMU,MBMS,PACK-{n},SIG-155,,TBD,,,BNR,V,,,,,,TBD,,TBD,TBD,TBD
+DBUS-105,Pack maximum cell voltage,BMU,MBMS,PACK-{n},SIG-156,,TBD,,,BNR,V,,,,,,TBD,,TBD,TBD,TBD
+DBUS-106,Pack state of charge,BMU,MBMS,PACK-{n},SIG-157,,TBD,,,BNR,%,,,,,,TBD,Consolidated by the MBMS into the assembly value SIG-163.,TBD,TBD,TBD
+DBUS-107,Pack state of health,BMU,MBMS,PACK-{n},SIG-158,,TBD,,,BNR,%,,,,,,TBD,Not consolidated to HICU or the avionics; pack state of health stays inside the nacelle for maintenance use.,TBD,TBD,TBD
+DBUS-108,Pack state of power - charge,BMU,MBMS,PACK-{n},SIG-159,,TBD,,,BNR,kW,,,,,,TBD,,TBD,TBD,TBD
+DBUS-109,Pack state of power - discharge,BMU,MBMS,PACK-{n},SIG-160,,TBD,,,BNR,kW,,,,,,TBD,,TBD,TBD,TBD
+DBUS-110,Pack failure flag,BMU,MBMS,PACK-{n},SIG-161,,TBD,,,Discrete,,,,,,,TBD,Consolidated by the MBMS into the assembly fault word SIG-169.,TBD,TBD,TBD
+DBUS-050,Pack contactor status,BMU,MBMS,PACK-{n},SIG-068,,TBD,,,Discrete,,,,,,,TBD,HICU sees the assembly connection state through the pack count SIG-166 on NAC_CTRL.,TBD,TBD,TBD
+DBUS-111,Pack cumulative energy output,BMU,MBMS,PACK-{n},SIG-162,,TBD,,,BNR,kWh,,,,,,TBD,,TBD,TBD,TBD
+DBUS-112,Battery charging inhibit,BMU,MBMS;CHGC,PACK-{n},SIG-114,,TBD,,,Discrete,,,,,,,TBD,Pack-level inhibit sent to the MBMS and directly to the charge controller so charging can be stopped without a consolidation delay.,TBD,TBD,TBD

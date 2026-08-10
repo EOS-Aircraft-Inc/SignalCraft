@@ -1,0 +1,27 @@
+Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+BSIG-AC-002,Mission definition and constraints,FMS,MMS,,SIG-125,,TBD,,,TBD,,,,,,,TBD,Mission retrieval: FMS -> MMS (was FMS -> FCC directly).,TBD,TBD,TBD
+BSIG-AC-003,MMS energy / hybridization strategy,MMS,FCC,,SIG-126,,TBD,,,TBD,,,,,,,TBD,MMS computes the operating mode / hybridization profile from the mission (was written directly by FMS) and provides it to FCC's power-management function.,TBD,TBD,TBD
+BSIG-AC-004,Weather environmental conditions,DCU,FCC,,SIG-173,,TBD,,,TBD,,,,,,,TBD,Relayed by the DCU from the weather radar (inbound leg WXR_TX DBUS-WXR-001). The air data part of the environmental picture reaches the FCC directly on ADC_TX as SIG-127.,TBD,TBD,TBD
+BSIG-AC-005,Total fuel available,DCU,FMS,,SIG-128,,TBD,,,TBD,,,,,,,TBD,Relayed by the DCU from the IMA (inbound leg DCU_IMA DBUS-DISP-002).,TBD,TBD,TBD
+BSIG-AC-007,Nacelle health and available power,HICU,FCC,,SIG-118,,TBD,,,TBD,,,,,,,TBD,"Encoding, rate and validity TBD",TBD,TBD,TBD
+BSIG-AC-008,HVPDU actual power,HICU,FCC,,SIG-130,,TBD,,,TBD,,,,,,,TBD,Relayed by HICU from the HVPDU; inbound leg NAC_CTRL DBUS-092.,TBD,TBD,TBD
+BSIG-AC-009,BTMS temperature target,FMS;FCC,HICU,,SIG-131,,TBD,,,TBD,,,,,,,TBD,"HICU relays the target to the nacelle on NAC_CTRL: IPTMS leg DBUS-051, BTMS leg DBUS-100. FMS is a co-writer alongside FCC.",TBD,TBD,TBD
+BSIG-AC-011,TMS coolant status,HICU,FCC,,SIG-132,,TBD,,,TBD,,,,,,,TBD,Relayed by HICU; inbound legs NAC_CTRL DBUS-099 (BTMS) and DBUS-053 (IPTMS).,TBD,TBD,TBD
+BSIG-AC-012,HV line current,HICU,DCU,,SIG-035,,TBD,,,BNR,A,,,,,,TBD,Relayed by HICU from the HVPDU (inbound leg NAC_CTRL DBUS-087). IMA only for now; further receivers can be added on the bus as needed.,Yes,TBD,TBD
+BSIG-AC-013,HV line voltage,HICU,DCU,,SIG-036,,TBD,,,BNR,V,,,,,,TBD,Relayed by HICU from the HVPDU (inbound leg NAC_CTRL DBUS-088).,Yes,TBD,TBD
+BSIG-AC-014,HVPDU EMC feed current,HICU,DCU,EM-{n},SIG-143,,TBD,,,BNR,A,,,,,,TBD,Relayed by HICU from the HVPDU (inbound leg NAC_CTRL DBUS-089); one value per motor controller.,Yes,TBD,TBD
+BSIG-AC-015,HVPDU auxiliary feed current,HICU,DCU,,SIG-144,,TBD,,,BNR,A,,,,,,TBD,Relayed by HICU from the HVPDU (inbound leg NAC_CTRL DBUS-090).,Yes,TBD,TBD
+BSIG-AC-016,HVPDU temperature,HICU,DCU,,SIG-145,,TBD,,,BNR,degC,,,,,,TBD,Relayed by HICU from the HVPDU (inbound leg NAC_CTRL DBUS-091).,Yes,TBD,TBD
+BSIG-AC-017,BTMS loop 1 coolant inlet temperature,HICU,DCU,,SIG-146,,TBD,,,BNR,degC,,,,,,TBD,"Relayed by HICU from the BTMS (inbound leg NAC_CTRL DBUS-093). Each BTMS is seen by two HICUs, so the relaying HICU has to be designated to avoid a duplicated report on the backbone.",Yes,TBD,TBD
+BSIG-AC-018,BTMS loop 1 coolant outlet temperature,HICU,DCU,,SIG-147,,TBD,,,BNR,degC,,,,,,TBD,Relayed by HICU from the BTMS (inbound leg NAC_CTRL DBUS-094).,Yes,TBD,TBD
+BSIG-AC-019,BTMS loop 1 coolant differential pressure,HICU,DCU,,SIG-148,,TBD,,,BNR,,,,,,,TBD,Relayed by HICU from the BTMS (inbound leg NAC_CTRL DBUS-095).,Yes,TBD,TBD
+BSIG-AC-020,BTMS loop 2 coolant inlet temperature,HICU,DCU,,SIG-149,,TBD,,,BNR,degC,,,,,,TBD,Relayed by HICU from the BTMS (inbound leg NAC_CTRL DBUS-096).,Yes,TBD,TBD
+BSIG-AC-021,BTMS loop 2 coolant outlet temperature,HICU,DCU,,SIG-150,,TBD,,,BNR,degC,,,,,,TBD,Relayed by HICU from the BTMS (inbound leg NAC_CTRL DBUS-097).,Yes,TBD,TBD
+BSIG-AC-022,BTMS loop 2 coolant differential pressure,HICU,DCU,,SIG-151,,TBD,,,BNR,,,,,,,TBD,Relayed by HICU from the BTMS (inbound leg NAC_CTRL DBUS-098).,Yes,TBD,TBD
+BSIG-AC-023,HVDC assembly state of charge,HICU,DCU,,SIG-163,,TBD,,,BNR,%,,,,,,TBD,Relayed by HICU from the MBMS; inbound leg NAC_CTRL DBUS-114. IMA only for now; further receivers can be added on the bus as needed.,Yes,TBD,TBD
+BSIG-AC-024,HVDC assembly state of power - charge,HICU,DCU,,SIG-164,,TBD,,,BNR,kW,,,,,,TBD,Relayed by HICU from the MBMS (inbound leg NAC_CTRL DBUS-115).,Yes,TBD,TBD
+BSIG-AC-025,HVDC assembly state of power - discharge,HICU,DCU,,SIG-165,,TBD,,,BNR,kW,,,,,,TBD,Relayed by HICU from the MBMS; inbound leg NAC_CTRL DBUS-116.,Yes,TBD,TBD
+BSIG-AC-026,HVDC assembly number of packs connected,HICU,DCU,,SIG-166,,TBD,,,BNR,,,,0,12,,TBD,Relayed by HICU from the MBMS (inbound leg NAC_CTRL DBUS-117).,Yes,TBD,TBD
+BSIG-AC-027,HVDC assembly maximum pack temperature,HICU,DCU,,SIG-167,,TBD,,,BNR,degC,,,,,,TBD,Relayed by HICU from the MBMS (inbound leg NAC_CTRL DBUS-118).,Yes,TBD,TBD
+BSIG-AC-028,HVDC assembly minimum pack temperature,HICU,DCU,,SIG-168,,TBD,,,BNR,degC,,,,,,TBD,Relayed by HICU from the MBMS (inbound leg NAC_CTRL DBUS-119).,Yes,TBD,TBD
+BSIG-AC-029,HVDC assembly failure / fault word,HICU,DCU,,SIG-169,,TBD,,,TBD,,,,,,,TBD,Relayed by HICU from the MBMS (inbound leg NAC_CTRL DBUS-120).,Yes,TBD,TBD
