@@ -8,22 +8,34 @@ import streamlit as st
 from visualizer.components.selectors import system_acronym_labels
 
 
+def _as_columns(column: str | list[str], df: pd.DataFrame) -> list[str]:
+    cols = [column] if isinstance(column, str) else list(column)
+    return [c for c in cols if c in df.columns]
+
+
 def system_filter(
     df: pd.DataFrame,
-    column: str = "System",
+    column: str | list[str] = "System",
     key: str = "sys",
     *,
     systems: pd.DataFrame | None = None,
 ) -> list[str]:
-    """Table filter for a system UniqueId column.
+    """Table filter for one or more system UniqueId columns.
 
+    Pass several columns to offer the union of the systems they mention.
     When ``systems`` is provided, options show ``UniqueId — Name``; returned
     values are always bare UniqueIds for filtering.
     """
-    if df.empty or column not in df.columns:
+    cols = _as_columns(column, df)
+    if df.empty or not cols:
         return []
     present = sorted(
-        {str(v).strip() for v in df[column].dropna().unique() if str(v).strip()}
+        {
+            str(v).strip()
+            for col in cols
+            for v in df[col].dropna().unique()
+            if str(v).strip()
+        }
     )
     if systems is not None and not systems.empty:
         _, label_to_acr = system_acronym_labels(systems)
@@ -46,8 +58,13 @@ def apply_text_search(df: pd.DataFrame, query: str, columns: list[str]) -> pd.Da
 
 
 def filter_by_systems(
-    df: pd.DataFrame, systems: list[str], column: str = "System"
+    df: pd.DataFrame, systems: list[str], column: str | list[str] = "System"
 ) -> pd.DataFrame:
-    if not systems or df.empty or column not in df.columns:
+    """Keep rows where *any* of ``column`` matches one of ``systems``."""
+    cols = _as_columns(column, df)
+    if not systems or df.empty or not cols:
         return df
-    return df[df[column].isin(systems)]
+    mask = pd.Series(False, index=df.index)
+    for col in cols:
+        mask |= df[col].isin(systems)
+    return df.loc[mask]

@@ -29,7 +29,6 @@ from visualizer.views import (  # noqa: E402
     bus_topology,
     edit_data,
     explorer,
-    signal_trace,
 )
 
 st.set_page_config(
@@ -40,6 +39,10 @@ st.set_page_config(
 
 _EXPORT_BYTES_KEY = "sidebar_export_bytes"
 _EXPORT_NAME_KEY = "sidebar_export_download_name"
+_BANNERS = (
+    _PROJECT_ROOT / "SignalCraft_sidebar.jpg",  # 600px, ~85x lighter than the source
+    _PROJECT_ROOT / "SignalCraft.png",
+)
 
 
 @st.cache_data(show_spinner="Loading ICD CSVs…")
@@ -139,8 +142,11 @@ def _render_sidebar_io() -> None:
 
 
 def main() -> None:
-    st.sidebar.title("SignalCraft")
-    st.sidebar.caption("Source: csv/ working set")
+    banner = next((path for path in _BANNERS if path.is_file()), None)
+    if banner:
+        st.sidebar.image(str(banner), width="stretch")
+    else:  # keep the ribbon labelled if no banner ships with the checkout
+        st.sidebar.title("SignalCraft")
 
     key = csv_mtime_key()
     bundle = _cached_load(key)
@@ -156,7 +162,6 @@ def main() -> None:
             "Bus Topology",
             "Bus Explorer",
             "Signal Explorer",
-            "Signal Trace",
             "Edit data",
         ],
         index=0,
@@ -171,8 +176,6 @@ def main() -> None:
         bus_explorer.render(bundle)
     elif page == "Signal Explorer":
         explorer.render(bundle)
-    elif page == "Signal Trace":
-        signal_trace.render(bundle)
     else:
         edit_data.render(bundle)
 

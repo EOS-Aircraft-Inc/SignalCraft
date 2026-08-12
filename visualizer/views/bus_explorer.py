@@ -6,8 +6,10 @@ import pandas as pd
 import streamlit as st
 
 from visualizer.components.filters import apply_text_search
+from visualizer.components.graphs import bus_instance_figure
 from visualizer.components.selectors import labeled_select
 from visualizer.components.tables import show_dataframe
+from visualizer.data.bus_instances import build_bus_instance_graph
 from visualizer.data.loader import IcdBundle
 from visualizer.data.models import ALLOCATION_ID, SIGNAL_ID
 
@@ -103,42 +105,25 @@ def render(bundle: IcdBundle) -> None:
         st.warning("No bus definitions loaded.")
         return
 
-    query = st.text_input("Search bus definitions", key="bus_explorer_search")
+    col_select, col_search = st.columns([1.2, 1.8])
+    with col_search:
+        query = st.text_input("Search bus definitions", key="bus_explorer_search")
     view = apply_text_search(
         summary,
         query,
         ["Bus Definition", "names", "protocols", "topologies"],
     )
 
-    col_list, col_detail = st.columns([1.2, 1.8])
-    with col_list:
-        st.subheader("Generic buses")
-        show_dataframe(
-            view[
-                [
-                    c
-                    for c in [
-                        "Bus Definition",
-                        "instances",
-                        "allocations",
-                        "protocols",
-                        "topologies",
-                        "names",
-                    ]
-                    if c in view.columns
-                ]
-            ],
-            height=420,
+    options = view["Bus Definition"].astype(str).tolist()
+    labels = {
+        name: (
+            f"{name} ({int(row.allocations)} alloc, {int(row.instances)} inst)"
+            if "allocations" in view.columns and "instances" in view.columns
+            else name
         )
-        options = view["Bus Definition"].astype(str).tolist()
-        labels = {
-            name: (
-                f"{name} ({int(row.allocations)} alloc, {int(row.instances)} inst)"
-                if "allocations" in view.columns and "instances" in view.columns
-                else name
-            )
-            for name, row in view.set_index("Bus Definition").iterrows()
-        }
+        for name, row in view.set_index("Bus Definition").iterrows()
+    }
+    with col_select:
         selected = labeled_select(
             "Select Bus Definition",
             [labels.get(o, o) for o in options],
@@ -146,80 +131,114 @@ def render(bundle: IcdBundle) -> None:
             key="bus_explorer_def",
         )
 
-    with col_detail:
-        if not selected:
-            st.info("Select a Bus Definition for details.")
-            return
+    if selected:
+        _render_selection(bundle, summary, selected)
+    else:
+        st.info("Select a Bus Definition for details.")
 
-        st.subheader(selected)
-        meta = summary[summary["Bus Definition"].astype(str) == selected]
-        if not meta.empty:
-            row = meta.iloc[0]
+    st.subheader("Generic buses")
+    show_dataframe(
+        view[
+            [
+                c
+                for c in [
+                    "Bus Definition",
+                    "instances",
+                    "allocations",
+                    "protocols",
+                    "topologies",
+                    "names",
+                ]
+                if c in view.columns
+            ]
+        ],
+        height=420,
+    )
+
+    if selected:
+        st.subheader(f"{selected} — instances and connected LRUs")
+        graph = build_bus_instance_graph(buses, selected, bundle.systems)
+        if graph.instances:
             st.caption(
-                f"{int(row.get('instances', 0))} instance(s) · "
-                f"{int(row.get('allocations', 0))} allocation(s) · "
-                f"{row.get('protocols', '')} · {row.get('topologies', '')}"
+                f"{len(graph.instances)} bus instance(s): {', '.join(graph.instances)}"
             )
+        st.plotly_chart(bus_instance_figure(graph), width="stretch")
 
-        st.markdown("**Physical instances**")
-        def_col = _definition_column(buses)
-        instances = (
-            buses[buses[def_col].astype(str) == selected]
-            if def_col and not buses.empty
-            else buses.iloc[0:0]
-        )
-        show_dataframe(
-            instances[
-                [
-                    c
-                    for c in [
-                        "Bus Id",
-                        "name",
-                        "protocol",
-                        "speed",
-                        "topology",
-                        "Writer",
-                        "Receiver",
-                        "notes",
-                    ]
-                    if c in instances.columns
-                ]
-            ],
-            height=200,
+
+def _render_selection(bundle: IcdBundle, summary: pd.DataFrame, selected: str) -> None:
+    """Instance and allocation tables for the selected Bus Definition."""
+    buses = bundle.buses
+    payload = bundle.bus_payload
+
+    st.subheader(selected)
+    meta = summary[summary["Bus Definition"].astype(str) == selected]
+    if not meta.empty:
+        row = meta.iloc[0]
+        st.caption(
+            f"{int(row.get('instances', 0))} instance(s) · "
+            f"{int(row.get('allocations', 0))} allocation(s) · "
+            f"{row.get('protocols', '')} · {row.get('topologies', '')}"
         )
 
-        st.markdown("**Data on this bus**")
-        family_payload = (
-            payload[payload["definition_tab"].astype(str) == selected]
-            if not payload.empty and "definition_tab" in payload.columns
-            else payload.iloc[0:0]
-        )
-        enriched = _enrich_payload(family_payload, bundle.signals)
-        show_dataframe(
-            enriched[
-                [
-                    c
-                    for c in [
-                        ALLOCATION_ID,
-                        "data_name",
-                        "signal_id",
-                        "Signal Name",
-                        "Signal Role",
-                        "writer_lru",
-                        "receiver_lrus",
-                        "instance_dimension",
-                        "Message ID",
-                        "message_or_label",
-                        "start bit",
-                        "stop bit",
-                        "encoding",
-                        "unit",
-                        "update_period_ms",
-                        "hop_role",
-                        "notes",
-                    ]
-                    if c in enriched.columns
+    st.markdown("**Physical instances**")
+    def_col = _definition_column(buses)
+    instances = (
+        buses[buses[def_col].astype(str) == selected]
+        if def_col and not buses.empty
+        else buses.iloc[0:0]
+    )
+    show_dataframe(
+        instances[
+            [
+                c
+                for c in [
+                    "Bus Id",
+                    "name",
+                    "protocol",
+                    "speed",
+                    "topology",
+                    "Writer",
+                    "Receiver",
+                    "notes",
                 ]
-            ],
-            height=420,
-        )
+                if c in instances.columns
+            ]
+        ],
+        height=200,
+    )
+
+    st.markdown("**Data on this bus**")
+    family_payload = (
+        payload[payload["definition_tab"].astype(str) == selected]
+        if not payload.empty and "definition_tab" in payload.columns
+        else payload.iloc[0:0]
+    )
+    enriched = _enrich_payload(family_payload, bundle.signals)
+    show_dataframe(
+        enriched[
+            [
+                c
+                for c in [
+                    ALLOCATION_ID,
+                    "data_name",
+                    "signal_id",
+                    "Signal Name",
+                    "Signal Role",
+                    "writer_lru",
+                    "receiver_lrus",
+                    "instance_dimension",
+                    "Message ID",
+                    "message_or_label",
+                    "start bit",
+                    "stop bit",
+                    "encoding",
+                    "unit",
+                    "update_period_ms",
+                    "hop_role",
+                    "notes",
+                ]
+                if c in enriched.columns
+            ]
+        ],
+        height=420,
+    )

@@ -6,8 +6,8 @@ SIG-004,,Electric Motor Speed (CON),Measurement,EM_RPM,EMC,EMC,,,CAN CON motor s
 SIG-005,,Electric Motor Coolant Delta Pressure,Measurement,EM_dP,IPTMS,IPTMS,NAC;EM,,Differential pressure sensor,Analog,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
 SIG-006,,Electric Motor Coolant Outlet Temperature,Measurement,EM_Tout,IPTMS,IPTMS,NAC;EM,,Temperature sensor,Analog,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
 SIG-007,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,ICM,,,RVDT,Analog,Normalized,-1,1,,,Yes,No,Yes
-SIG-010,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,BPM,,,Potentiometer,Analog,Normalized,-1,1,,,Yes,TBD,TBD
-SIG-011,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,ICM,,,Proximity switch,Discrete,,,,,,Yes,TBD,TBD
+SIG-010,PHYS-001,Power Lever Position backup,Measurement,PLA,THROTTLE,BPM,,,Potentiometer,Analog,Normalized,-1,1,,,Yes,TBD,TBD
+SIG-011,PHYS-001,Power Lever Idle position,Measurement,PLA,THROTTLE,ICM,,,Proximity switch,Discrete,,,,,,Yes,TBD,TBD
 SIG-012,,Flap Lever Position,Measurement,FLAP_LEVER,FLAP_LEVER,ICM,,,RVDT,Analog,Normalized,-1,1,,,Yes,TBD,TBD
 SIG-014,,Turbine Operational Mode Selector,Measurement,TURB_MODE,CONTROL_PANELS,ICM,NAC,,Multiposition selector,Discrete,,,,,,Yes,TBD,TBD
 SIG-015,PHYS-002,Propeller Blade Angle,Measurement,Beta,PROPELLER,EPECS,,,"Beta probes / ring, control path",Analog,,,,,,Yes,TBD,TBD
