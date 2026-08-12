@@ -17,11 +17,10 @@ from visualizer.components.selectors import (
     table_select_id,
 )
 from visualizer.data.loader import IcdBundle
-from visualizer.data.models import INTERFACE_TYPES, SIGNAL_ID
+from visualizer.data.models import INTERFACE_TYPES, SIGNAL_ID, SIGNAL_ROLES, split_refs
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import render_apply_panel, sync_fields
 
-SIGNAL_ROLES = ["Measurement", "Command", "Request", "Computed", "Power"]
 EDITABLE_FIELDS = [
     "Physical Id",
     "Signal Name",
@@ -43,10 +42,6 @@ EDITABLE_FIELDS = [
     "On Sim ?",
 ]
 _SEP = " — "
-
-
-def _split_refs(value: str) -> list[str]:
-    return [p.strip() for p in str(value or "").split(";") if p.strip()]
 
 
 def _physical_id_labels(
@@ -106,10 +101,10 @@ def render(bundle: IcdBundle) -> None:
         sid = ""
         st.session_state.pop("edit_sig_selected_id", None)
 
+    # Repeated Per picks from the same system list, so build the labels once.
     sys_labels, sys_map = system_acronym_labels(bundle.systems)
-    dim_labels, dim_map = system_acronym_labels(bundle.systems)
     phys_labels, phys_map = _physical_id_labels(signals)
-    sig_labels, sig_map = id_name_labels(signals, SIGNAL_ID, "Signal Name")
+    _, sig_map = id_name_labels(signals, SIGNAL_ID, "Signal Name")
 
     action = st.radio(
         "Action",
@@ -148,11 +143,11 @@ def render(bundle: IcdBundle) -> None:
         acr_to_lab = {acr: lab for lab, acr in sys_map.items()}
         owner = str(original.get("Signal Owner") or "").strip()
         phys = str(original.get("Interfacing Equipment") or "").strip()
-        repeated = _split_refs(original.get("Repeated Per", ""))
+        repeated = split_refs(original.get("Repeated Per", ""))
         known_signal_ids = set(sig_map.values())
         current_related = [
             ref
-            for ref in _split_refs(original.get("Related to", ""))
+            for ref in split_refs(original.get("Related to", ""))
             if ref in known_signal_ids and ref != sid
         ]
         phys_id_val = str(original.get("Physical Id") or "").strip()
@@ -214,13 +209,13 @@ def render(bundle: IcdBundle) -> None:
     name = st.text_input("Signal Name", key="edit_sig_name")
     role_col, abbr_col, pid_col = st.columns(3)
     with role_col:
-        role_opts = [r for r in SIGNAL_ROLES if r]
+        role_opts = list(SIGNAL_ROLES)
         current_role = st.session_state.get("edit_sig_role", "")
         if current_role and current_role not in role_opts:
             role_opts = [*role_opts, current_role]
         role = st.selectbox(
             "Signal Role",
-            options=[""] + role_opts,
+            options=["", *role_opts],
             key="edit_sig_role",
         )
     with abbr_col:
@@ -262,10 +257,10 @@ def render(bundle: IcdBundle) -> None:
 
     repeated = labeled_multi_acronym(
         "Repeated Per",
-        dim_labels,
-        dim_map,
+        sys_labels,
+        sys_map,
         key="edit_sig_rep",
-        current=_split_refs(original.get("Repeated Per", ""))
+        current=split_refs(original.get("Repeated Per", ""))
         if mode == "Edit existing" and original
         else [],
     )
@@ -299,7 +294,7 @@ def render(bundle: IcdBundle) -> None:
             iface_opts = [*iface_opts, current_iface]
         iface = st.selectbox(
             "Interface Type",
-            options=[""] + iface_opts,
+            options=["", *iface_opts],
             key="edit_sig_iface",
         )
 
@@ -346,7 +341,7 @@ def render(bundle: IcdBundle) -> None:
         if patch:
             document = {"upsert": {sheet: [patch]}}
     elif mode == "Add new" and name:
-        payload = {k: v for k, v in edited.items()}
+        payload = dict(edited)
         if sid:
             payload[SIGNAL_ID] = sid
         document = {"upsert": {sheet: [payload]}}

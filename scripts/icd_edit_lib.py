@@ -14,9 +14,9 @@ Omitted fields are left unchanged. Explicit "" clears a field.
 
 from __future__ import annotations
 
-import copy
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -28,8 +28,8 @@ from icd_csv import (
     load_manifest,
     next_id,
     read_sheet,
+    require_signals_sheet,
     save_manifest,
-    sheet_index,
     split_refs,
     write_sheet,
 )
@@ -40,25 +40,24 @@ from icd_sheets import (
     BUS_DEFINITION,
     BUS_ID,
     CONTROLLED_SHEETS,
-    DATA_ID,
+    DATA_NAME,
     DATABUSES_SHEET,
     DOC_SHEETS,
-    FUNCTIONAL_SYSTEM,
+    DOMAIN,
     INSTALLED_IN,
     INTERFACING_EQUIPMENT,
-    README_SHEET,
+    LABEL,
     RECEIVER,
-    RECEIVER_LRUS,
+    REFRESH_RATE,
     RELATED_TO,
     REPEATED_PER,
+    SENDER,
     SIGNAL_ID,
-    SIGNAL_ID_REF,
     SIGNAL_OWNER,
     SIGNALS_SHEET,
     SYSTEM_UNIQUE_ID,
     SYSTEMS_SHEET,
-    WRITER,
-    WRITER_LRU,
+    system_multiplicity_error,
 )
 
 CONTROLLED = set(CONTROLLED_SHEETS)
@@ -76,12 +75,12 @@ ID_PREFIX: dict[str, str] = {
 
 # Semicolon-separated fields that may hold system UniqueIds / scope dims.
 ACRONYM_FIELDS: dict[str, list[str]] = {
-    SYSTEMS_SHEET: [SYSTEM_UNIQUE_ID, INSTALLED_IN, FUNCTIONAL_SYSTEM],
+    SYSTEMS_SHEET: [SYSTEM_UNIQUE_ID, INSTALLED_IN, DOMAIN],
     SIGNALS_SHEET: [INTERFACING_EQUIPMENT, SIGNAL_OWNER, REPEATED_PER],
-    DATABUSES_SHEET: [WRITER, RECEIVER, "master_lru", "equipment_connected"],
+    DATABUSES_SHEET: [SENDER, RECEIVER],
 }
 
-PAYLOAD_ACRONYM_FIELDS = [WRITER_LRU, RECEIVER_LRUS]
+PAYLOAD_ACRONYM_FIELDS = [SENDER, RECEIVER]
 
 # Columns that may hold cross-sheet identity references.
 ID_REF_FIELDS: dict[str, list[str]] = {
@@ -90,18 +89,18 @@ ID_REF_FIELDS: dict[str, list[str]] = {
 }
 
 PAYLOAD_ID_FIELDS = [
-    SIGNAL_ID_REF,
+    SIGNAL_ID,
 ]
 
 PAYLOAD_DEFAULT_FIELDS = [
     ALLOCATION_ID,
-    "data_name",
-    WRITER_LRU,
-    RECEIVER_LRUS,
+    DATA_NAME,
+    SENDER,
+    RECEIVER,
     "instance_dimension",
-    SIGNAL_ID_REF,
+    SIGNAL_ID,
     "Message ID",
-    "message_or_label",
+    LABEL,
     "start bit",
     "stop bit",
     "encoding",
@@ -110,7 +109,7 @@ PAYLOAD_DEFAULT_FIELDS = [
     "resolution",
     "minimum",
     "maximum",
-    "update_period_ms",
+    REFRESH_RATE,
     "validity",
     "notes",
     "On aircraft ?",
@@ -118,15 +117,6 @@ PAYLOAD_DEFAULT_FIELDS = [
     "On Sim ?",
 ]
 
-
-def resolve_signals_sheet_name(manifest: dict | None = None, csv_dir: Path | None = None) -> str:
-    """Return the signals catalog sheet present in the workbook."""
-    if manifest is None:
-        manifest = load_manifest(csv_dir or DEFAULT_CSV_DIR)
-    index = sheet_index(manifest)
-    if SIGNALS_SHEET in index:
-        return SIGNALS_SHEET
-    raise KeyError(f"{SIGNALS_SHEET} not found in workbook manifest")
 
 _TOKEN_COUNTER = re.compile(r"^(.*?)(\d+)$")
 
@@ -164,13 +154,16 @@ def _replace_token_in_refs(value: str, old: str, new: str) -> str:
 
 
 def _replace_id_in_value(value: str, old: str, new: str) -> str:
+    """Rename an id inside a cell, but only where the cell *is* that id.
+
+    A cell holding a semicolon list is rewritten token by token. Anything else
+    that merely contains the text is left alone, so renaming ``SIG-1`` never
+    damages ``SIG-10`` or a sentence in a note.
+    """
     if not value or old not in value:
         return value
-    # Exact ref tokens in semicolon lists, or whole-cell equality.
     if ";" in value or value == old:
         return _replace_token_in_refs(value, old, new)
-    if value == old:
-        return new
     return value
 
 
@@ -200,10 +193,6 @@ class IcdEditor:
         fields, _ = self._fields_rows(sheet)
         if ALLOCATION_ID in fields:
             return ALLOCATION_ID
-        if DATA_ID in fields:
-            return DATA_ID
-        if "data_id" in fields:
-            return "data_id"
         raise KeyError(f"No primary key for sheet {sheet}")
 
     def _row_index(self, sheet: str) -> dict[str, dict[str, str]]:
@@ -226,6 +215,23 @@ class IcdEditor:
             sheet, PAYLOAD_DEFAULT_FIELDS, self.csv_dir, self.manifest
         )
         self.sheets[sheet] = (list(PAYLOAD_DEFAULT_FIELDS), [])
+
+    def _allocation_ids_in_workbook(self) -> list[str]:
+        """Every allocation id already used on any bus-definition tab.
+
+        Allocation ids are unique workbook-wide, so a new one must be allocated
+        against all tabs — not just the tab being edited.
+        """
+        found: list[str] = []
+        for sheet in self.sheets:
+            if not self._is_payload_sheet(sheet):
+                continue
+            try:
+                key = self._primary_key(sheet)
+            except KeyError:
+                continue
+            found.extend(collect_ids(self.sheets[sheet][1], key))
+        return found
 
     def expand_rewrites(self, document: dict[str, Any]) -> list[CellChange]:
         changes: list[CellChange] = []
@@ -307,6 +313,9 @@ class IcdEditor:
     def plan_upserts(self, document: dict[str, Any]) -> list[CellChange]:
         changes: list[CellChange] = []
         upsert = document.get("upsert") or {}
+        # Ids handed out earlier in this same document, so two new rows on
+        # different tabs cannot be given the same allocation id.
+        reserved: list[str] = []
         for sheet, items in upsert.items():
             if not items:
                 continue
@@ -339,14 +348,15 @@ class IcdEditor:
                         # UniqueId is the reference key — never auto-allocate.
                         continue
                     prefix = ID_PREFIX.get(sheet, "ID")
-                    if sheet not in ID_PREFIX and key in {
-                        ALLOCATION_ID,
-                        DATA_ID,
-                    }:
+                    if sheet not in ID_PREFIX and key == ALLOCATION_ID:
                         prefix = "DBUS"
-                    row_id = next_id(existing_ids + collect_ids(rows, key), prefix)
+                    pool = existing_ids + collect_ids(rows, key) + reserved
+                    if self._is_payload_sheet(sheet):
+                        pool += self._allocation_ids_in_workbook()
+                    row_id = next_id(pool, prefix)
                     item[key] = row_id
                     existing_ids.append(row_id)
+                    reserved.append(row_id)
 
                 if row_id in index:
                     row = index[row_id]
@@ -445,20 +455,11 @@ class IcdEditor:
             for family, members in families.items():
                 if len(members) != old_n:
                     continue
-                # Prefer families whose bus ids end with _1.._N matching token style.
-                if token and "{n" in token:
-                    stem = token.split("{")[0].rstrip("-_")
-                    if stem and not all(
-                        any(stem in m for stem in [stem]) for m in members
-                    ):
-                        # loose: member contains UniqueId or family relates
-                        pass
                 if unique_id and not any(
                     unique_id in m or unique_id.lower() in family.lower()
                     for m in members
-                ):
-                    if unique_id not in family:
-                        continue
+                ) and unique_id not in family:
+                    continue
                 impacts.append(
                     {
                         "acronym": unique_id,
@@ -513,8 +514,12 @@ class IcdEditor:
                             new_val = new_id
                         elif col == "name" and old_val:
                             # replace trailing number in name if present
-                            new_val = re.sub(r"\d+$", str(i), old_val) if re.search(r"\d+$", old_val) else f"{old_val} {i}"
-                        elif col in ("Writer", "Receiver"):
+                            new_val = (
+                                re.sub(r"\d+$", str(i), old_val)
+                                if re.search(r"\d+$", old_val)
+                                else f"{old_val} {i}"
+                            )
+                        elif col in (SENDER, RECEIVER):
                             new_val = _renumber_instance_refs(old_val, old_n, i)
                         changes.append(
                             CellChange(
@@ -543,6 +548,124 @@ class IcdEditor:
                             )
                         )
         return changes
+
+    def _check_upsert_references(
+        self,
+        document: dict[str, Any],
+        *,
+        systems: set[str],
+        signal_ids: set[str],
+        bus_refs: set[str],
+    ) -> list[str]:
+        """Validate the references written in the document's upsert rows.
+
+        Every id or UniqueId an upsert mentions must already exist after the
+        edit, so a typo is refused instead of landing in the CSV.
+        """
+        errors: list[str] = []
+        upsert = document.get("upsert") or {}
+        for sheet, items in upsert.items():
+            for raw in items or []:
+                item = dict(raw)
+                if sheet == SYSTEMS_SHEET:
+                    sid = str(item.get(SYSTEM_UNIQUE_ID) or "").strip()
+                    if not sid:
+                        errors.append(
+                            f"0_Systems upsert requires {SYSTEM_UNIQUE_ID}"
+                        )
+                    existing = (
+                        self._row_index(SYSTEMS_SHEET).get(sid, {})
+                        if SYSTEMS_SHEET in self.sheets
+                        else {}
+                    )
+                    # Judge the row as it will look after the edit, but only when
+                    # the edit touches these fields — a pre-existing problem must
+                    # not block an unrelated fix (the integrity check reports it).
+                    if {"Type", "Multiplicity", "Instance Token"} & set(item):
+
+                        def merged(column: str, row=existing, patch=item) -> str:
+                            source = patch if column in patch else row
+                            return str(source.get(column) or "").strip()
+
+                        message = system_multiplicity_error(
+                            merged("Type"),
+                            merged("Multiplicity"),
+                            merged("Instance Token"),
+                        )
+                        if message:
+                            errors.append(f"{SYSTEMS_SHEET} {sid or '?'}: {message}")
+                if sheet == SIGNALS_SHEET:
+                    for col in (INTERFACING_EQUIPMENT, SIGNAL_OWNER, REPEATED_PER):
+                        if col not in item:
+                            continue
+                        for ref in split_refs(str(item.get(col) or "")):
+                            if (
+                                systems
+                                and ref
+                                and ref not in systems
+                                and ref not in {"TBD", "N/A"}
+                            ):
+                                errors.append(
+                                    f"{sheet}: unknown system '{ref}' in {col}"
+                                )
+                    for ref in split_refs(str(item.get(RELATED_TO) or "")):
+                        if not ref:
+                            continue
+                        if ref not in signal_ids:
+                            errors.append(
+                                f"{sheet}: {RELATED_TO} '{ref}' is not a known "
+                                f"{SIGNAL_ID}"
+                            )
+                for col in (BUS_DEFINITION, "definition_tab"):
+                    if col not in item:
+                        continue
+                    # On 10_Databuses, Bus Definition / definition_tab *defines*
+                    # the family — it need not already exist.
+                    if sheet == DATABUSES_SHEET and col in {
+                        BUS_DEFINITION,
+                        "definition_tab",
+                    }:
+                        continue
+                    for ref in split_refs(str(item.get(col) or "")):
+                        if ref and ref not in bus_refs and ref not in {"TBD", "N/A"}:
+                            errors.append(
+                                f"{sheet}: {col} '{ref}' is not a known bus or family"
+                            )
+                for col in (
+                    INTERFACING_EQUIPMENT,
+                    SIGNAL_OWNER,
+                    REPEATED_PER,
+                    INSTALLED_IN,
+                    SENDER,
+                    RECEIVER,
+                ):
+                    if col not in item:
+                        continue
+                    for ref in split_refs(str(item.get(col) or "")):
+                        if not ref or ref in {"TBD", "N/A"}:
+                            continue
+                        base = ref.split("-")[0] if "-" in ref else ref
+                        if ref in systems or base in systems:
+                            continue
+                        if systems:
+                            errors.append(
+                                f"{sheet}: unknown system '{ref}' in {col}"
+                            )
+                if (
+                    sheet not in CONTROLLED or self._is_payload_sheet(sheet)
+                ) and SIGNAL_ID in item:
+                    sid = str(item.get(SIGNAL_ID) or "").strip()
+                    if sid and sid not in signal_ids:
+                        errors.append(
+                            f"{sheet}: {SIGNAL_ID} '{sid}' is not defined in "
+                            f"{SIGNALS_SHEET}"
+                        )
+                    if ";" in sid:
+                        errors.append(
+                            f"{sheet}: {SIGNAL_ID} must reference exactly one signal"
+                        )
+
+        return errors
 
     def preflight(
         self,
@@ -576,182 +699,32 @@ class IcdEditor:
                     f"{change.sheet}: cannot delete unknown id '{change.row_key}'"
                 )
 
-        for change in plan:
-            if change.action == "delete_row":
-                continue
-            if change.action == "insert" and change.column == self._primary_key_safe(
-                change.sheet
-            ):
-                # new id collision check against original + other inserts
-                pass
-
-        # ID uniqueness for inserts/renames
-        for sheet, id_map in simulated["ids"].items():
-            seen: dict[str, int] = {}
-            for rid in id_map:
-                seen[rid] = seen.get(rid, 0) + 1
-            for rid, count in seen.items():
-                if count > 1:
-                    errors.append(f"{sheet}: duplicate id after edit: {rid}")
+        errors.extend(self._check_id_uniqueness(plan))
 
         # Reference checks on upsert payloads in the document (provided fields).
         systems = set(simulated.get("acronyms") or [])
-        signals_sheet = resolve_signals_sheet_name(self.manifest, self.csv_dir)
+        signals_sheet = require_signals_sheet(self.manifest)
         signal_ids = set(simulated["ids"].get(signals_sheet, {}).keys())
-        bus_ids = set(simulated["ids"].get(DATABUSES_SHEET, {}).keys())
-        families = set(family_map(list(simulated["ids"].get(DATABUSES_SHEET, {}).values())).keys())
-        # Rebuild bus rows after plan mutations so new Bus Definition values count
-        # as known families (creating a bus can introduce a new family name).
-        bus_rows = []
-        if DATABUSES_SHEET in self.sheets:
-            bus_rows = [dict(r) for r in self.sheets[DATABUSES_SHEET][1]]
-            pending_inserts: dict[str, dict[str, str]] = {}
-            for ch in plan:
-                if ch.sheet != DATABUSES_SHEET:
-                    continue
-                if ch.action == "delete_row":
-                    bus_rows = [r for r in bus_rows if r.get(BUS_ID) != ch.row_key]
-                    pending_inserts.pop(ch.row_key, None)
-                elif ch.action == "insert":
-                    row = pending_inserts.setdefault(
-                        ch.row_key, {BUS_ID: ch.row_key}
-                    )
-                    row[ch.column] = ch.new
-                elif ch.action == "set":
-                    applied = False
-                    for r in bus_rows:
-                        if r.get(BUS_ID) == ch.row_key:
-                            r[ch.column] = ch.new
-                            applied = True
-                            break
-                    if not applied and ch.row_key in pending_inserts:
-                        pending_inserts[ch.row_key][ch.column] = ch.new
-            bus_rows.extend(pending_inserts.values())
-            families = set(family_map(bus_rows).keys())
-            bus_ids = {
-                str(r.get(BUS_ID) or "").strip()
-                for r in bus_rows
-                if str(r.get(BUS_ID) or "").strip()
-            }
+        # Bus rows after the plan, so a Bus Definition introduced by this edit
+        # already counts as a known family.
+        bus_rows = self._simulated_rows(DATABUSES_SHEET, plan)
+        families = set(family_map(bus_rows).keys())
+        bus_ids = {
+            str(r.get(BUS_ID) or "").strip()
+            for r in bus_rows
+            if str(r.get(BUS_ID) or "").strip()
+        }
 
         bus_refs = bus_ids | families
 
-        upsert = document.get("upsert") or {}
-        for sheet, items in upsert.items():
-            for raw in items or []:
-                item = dict(raw)
-                if sheet == SYSTEMS_SHEET:
-                    sid = str(item.get(SYSTEM_UNIQUE_ID) or "").strip()
-                    if not sid:
-                        errors.append(
-                            f"0_Systems upsert requires {SYSTEM_UNIQUE_ID}"
-                        )
-                    existing = (
-                        self._row_index(SYSTEMS_SHEET).get(sid, {})
-                        if SYSTEMS_SHEET in self.sheets
-                        else {}
-                    )
-                    typ = str(
-                        item.get("Type") if "Type" in item else existing.get("Type", "")
-                    ).strip()
-                    if "Multiplicity" in item or typ:
-                        mult = str(
-                            item.get("Multiplicity")
-                            if "Multiplicity" in item
-                            else existing.get("Multiplicity", "")
-                        ).strip()
-                        if typ in {"Aircraft", "System"} and mult and mult != "1":
-                            errors.append(
-                                f"0_Systems {sid or '?'}: Type '{typ}' requires "
-                                "empty Multiplicity (or '1')"
-                            )
-                        elif typ in {"Zone", "Component", "Controller"}:
-                            if "Multiplicity" in item and (
-                                not mult.isdigit() or int(mult) < 1
-                            ):
-                                errors.append(
-                                    f"0_Systems {sid or '?'}: Type '{typ}' requires "
-                                    f"Multiplicity as a positive integer (got {mult!r})"
-                                )
-                            elif mult.isdigit() and int(mult) > 1:
-                                token = str(
-                                    item.get("Instance Token")
-                                    if "Instance Token" in item
-                                    else existing.get("Instance Token", "")
-                                ).strip()
-                                if not token:
-                                    errors.append(
-                                        f"0_Systems {sid or '?'}: Type '{typ}' with "
-                                        f"Multiplicity {mult} requires a non-empty "
-                                        "Instance Token"
-                                    )
-                if sheet == SIGNALS_SHEET:
-                    for col in (INTERFACING_EQUIPMENT, SIGNAL_OWNER, REPEATED_PER):
-                        if col not in item:
-                            continue
-                        for ref in split_refs(str(item.get(col) or "")):
-                            if ref and ref not in systems and ref not in {"TBD", "N/A"}:
-                                if systems:
-                                    errors.append(
-                                        f"{sheet}: unknown system '{ref}' in {col}"
-                                    )
-                    for ref in split_refs(str(item.get(RELATED_TO) or "")):
-                        if not ref:
-                            continue
-                        if ref not in signal_ids:
-                            errors.append(
-                                f"{sheet}: {RELATED_TO} '{ref}' is not a known "
-                                f"{SIGNAL_ID}"
-                            )
-                for col in (BUS_DEFINITION, "definition_tab"):
-                    if col not in item:
-                        continue
-                    # On 10_Databuses, Bus Definition / definition_tab *defines*
-                    # the family — it need not already exist.
-                    if sheet == DATABUSES_SHEET and col in {
-                        BUS_DEFINITION,
-                        "definition_tab",
-                    }:
-                        continue
-                    for ref in split_refs(str(item.get(col) or "")):
-                        if ref and ref not in bus_refs and ref not in {"TBD", "N/A"}:
-                            errors.append(
-                                f"{sheet}: {col} '{ref}' is not a known bus or family"
-                            )
-                for col in (
-                    INTERFACING_EQUIPMENT,
-                    SIGNAL_OWNER,
-                    REPEATED_PER,
-                    WRITER_LRU,
-                    INSTALLED_IN,
-                    WRITER,
-                    RECEIVER,
-                ):
-                    if col not in item:
-                        continue
-                    for ref in split_refs(str(item.get(col) or "")):
-                        if not ref or ref in {"TBD", "N/A"}:
-                            continue
-                        base = ref.split("-")[0] if "-" in ref else ref
-                        if ref in systems or base in systems:
-                            continue
-                        if systems:
-                            errors.append(
-                                f"{sheet}: unknown system '{ref}' in {col}"
-                            )
-                if sheet not in CONTROLLED or self._is_payload_sheet(sheet):
-                    if SIGNAL_ID_REF in item:
-                        sid = str(item.get(SIGNAL_ID_REF) or "").strip()
-                        if sid and sid not in signal_ids:
-                            errors.append(
-                                f"{sheet}: {SIGNAL_ID_REF} '{sid}' is not a known "
-                                f"{SIGNAL_ID}"
-                            )
-                        if ";" in sid:
-                            errors.append(
-                                f"{sheet}: {SIGNAL_ID_REF} must reference exactly "
-                                f"one {SIGNAL_ID}"
-                            )
+        errors.extend(
+            self._check_upsert_references(
+                document,
+                systems=systems,
+                signal_ids=signal_ids,
+                bus_refs=bus_refs,
+            )
+        )
 
         # New primary keys must not collide with existing unless rewrite owns them.
         rewrite_ids = {
@@ -765,16 +738,18 @@ class IcdEditor:
             if ch.column != pk:
                 continue
             original = set(self._all_ids(ch.sheet)) if ch.sheet in self.sheets else set()
-            if ch.new in original and rewrite_ids.get(ch.new) is None:
-                # insert of brand-new id that somehow exists
-                if ch.old == "" and ch.new in original:
-                    # Could be re-plan artifact; only error if not updating
-                    existing_upsert = False
-                    for raw in (upsert.get(ch.sheet) or []):
-                        if str(raw.get(pk) or "").strip() == ch.new:
-                            existing_upsert = True
-                    if not existing_upsert:
-                        errors.append(f"{ch.sheet}: id already used: {ch.new}")
+            # An insert whose id already exists, unless a rewrite owns it or the
+            # document is really updating that row.
+            if (
+                ch.old == ""
+                and ch.new in original
+                and rewrite_ids.get(ch.new) is None
+                and not any(
+                    str(raw.get(pk) or "").strip() == ch.new
+                    for raw in ((document.get("upsert") or {}).get(ch.sheet) or [])
+                )
+            ):
+                errors.append(f"{ch.sheet}: id already used: {ch.new}")
 
         return errors
 
@@ -783,6 +758,74 @@ class IcdEditor:
             return self._primary_key(sheet)
         except KeyError:
             return ALLOCATION_ID
+
+    def _simulated_rows(
+        self, sheet: str, plan: list[CellChange]
+    ) -> list[dict[str, str]]:
+        """Rows of ``sheet`` as they will look once ``plan`` is applied.
+
+        A list, not a dict keyed by id, so two rows that end up sharing an
+        identifier both survive and can be reported as a duplicate.
+        """
+        rows = [dict(r) for r in self.sheets[sheet][1]] if sheet in self.sheets else []
+        try:
+            key = self._primary_key(sheet)
+        except KeyError:
+            return rows
+
+        inserts: dict[str, dict[str, str]] = {}
+        for change in plan:
+            if change.sheet != sheet:
+                continue
+            if change.action == "delete_row":
+                rows = [
+                    r for r in rows if str(r.get(key, "")).strip() != change.row_key
+                ]
+                inserts.pop(change.row_key, None)
+                continue
+            target = next(
+                (r for r in rows if str(r.get(key, "")).strip() == change.row_key),
+                None,
+            )
+            if target is None:
+                target = inserts.setdefault(change.row_key, {key: change.row_key})
+            target[change.column] = change.new
+        rows.extend(inserts.values())
+        return rows
+
+    def _check_id_uniqueness(self, plan: list[CellChange]) -> list[str]:
+        """Primary keys must stay unique per sheet, and allocations workbook-wide.
+
+        ``Allocation Id`` is unique across the whole workbook, not just within a
+        definition tab (workbook ``README``), so the same id must never land on
+        two payload sheets. The integrity check enforces this after the fact;
+        catching it here means the edit is refused before anything is written.
+        """
+        errors: list[str] = []
+        allocation_owner: dict[str, str] = {}
+
+        for sheet in self.sheets:
+            try:
+                key = self._primary_key(sheet)
+            except KeyError:
+                continue
+            ids = collect_ids(self._simulated_rows(sheet, plan), key)
+            for row_id, count in sorted(Counter(ids).items()):
+                if count > 1:
+                    errors.append(
+                        f"{sheet}: {key} '{row_id}' would appear on {count} rows"
+                    )
+            if not self._is_payload_sheet(sheet):
+                continue
+            for row_id in sorted(set(ids)):
+                owner = allocation_owner.setdefault(row_id, sheet)
+                if owner != sheet:
+                    errors.append(
+                        f"{sheet}: {ALLOCATION_ID} '{row_id}' is already used on "
+                        f"'{owner}' — allocation ids must be unique across every "
+                        "bus-definition tab"
+                    )
+        return errors
 
     def _simulate(self, plan: list[CellChange]) -> dict[str, Any]:
         ids: dict[str, dict[str, dict[str, str]]] = {}
@@ -807,9 +850,7 @@ class IcdEditor:
             row[ch.column] = ch.new
             pk = self._primary_key_safe(ch.sheet)
             if ch.column == pk and ch.old and ch.old != ch.new and ch.old in ids[ch.sheet]:
-                # id rename inside row map
-                if ch.old != ch.row_key:
-                    pass
+                # A renamed row moves to its new id in the simulated map.
                 moved = ids[ch.sheet].pop(ch.old, row)
                 moved[pk] = ch.new
                 ids[ch.sheet][ch.new] = moved
@@ -937,7 +978,7 @@ def run_edit(
         # original; apply sequentially.
         summary = editor.apply_plan(plan)
         return EditResult(ok=True, plan=plan, summary=summary)
-    except Exception as exc:  # noqa: BLE001 — surface as edit error
+    except Exception as exc:
         return EditResult(ok=False, errors=[str(exc)])
 
 

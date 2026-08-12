@@ -14,7 +14,7 @@
       "sheet_name": "Column_Help",
       "csv_file": "02_Column_Help.csv",
       "sheet_state": "visible",
-      "max_row": 64,
+      "max_row": 63,
       "max_column": 4
     },
     {
@@ -39,7 +39,7 @@
       "csv_file": "05_10_Databuses.csv",
       "sheet_state": "visible",
       "max_row": 29,
-      "max_column": 13
+      "max_column": 12
     },
     {
       "order": 6,

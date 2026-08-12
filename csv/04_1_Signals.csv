@@ -6,8 +6,8 @@ SIG-004,,Electric Motor Speed (CON),Measurement,EM_RPM,EMC,EMC,,,CAN CON motor s
 SIG-005,,Electric Motor Coolant Delta Pressure,Measurement,EM_dP,IPTMS,IPTMS,NAC;EM,,Differential pressure sensor,Analog,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
 SIG-006,,Electric Motor Coolant Outlet Temperature,Measurement,EM_Tout,IPTMS,IPTMS,NAC;EM,,Temperature sensor,Analog,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
 SIG-007,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,ICM,,,RVDT,Analog,Normalized,-1,1,,,Yes,No,Yes
-SIG-010,PHYS-001,Power Lever Position backup,Measurement,PLA,THROTTLE,BPM,,,Potentiometer,Analog,Normalized,-1,1,,,Yes,TBD,TBD
-SIG-011,PHYS-001,Power Lever Idle position,Measurement,PLA,THROTTLE,ICM,,,Proximity switch,Discrete,,,,,,Yes,TBD,TBD
+SIG-010,PHYS-001,Power Lever Position backup,Measurement,PLA_BACKUP,THROTTLE,BPM,,,Potentiometer,Analog,Normalized,-1,1,,,Yes,TBD,TBD
+SIG-011,PHYS-001,Power Lever Idle position,Measurement,PLA_IDLE_SW,THROTTLE,ICM,,,Proximity switch,Discrete,,,,,,Yes,TBD,TBD
 SIG-012,,Flap Lever Position,Measurement,FLAP_LEVER,FLAP_LEVER,ICM,,,RVDT,Analog,Normalized,-1,1,,,Yes,TBD,TBD
 SIG-014,,Turbine Operational Mode Selector,Measurement,TURB_MODE,CONTROL_PANELS,ICM,NAC,,Multiposition selector,Discrete,,,,,,Yes,TBD,TBD
 SIG-015,PHYS-002,Propeller Blade Angle,Measurement,Beta,PROPELLER,EPECS,,,"Beta probes / ring, control path",Analog,,,,,,Yes,TBD,TBD
@@ -106,23 +106,23 @@ SIG-112,,EPECS 28VDC Supply,Power,28V_EPECS,EPECS,LVPDU,,,28V,Power,,,,,,Yes,TBD
 SIG-113,,Battery Pack Pyrofuse Command,Command,PACK_PYRO_CMD,PACK,MBMS,,SIG-080;SIG-082;SIG-192,,Discrete,,,,,"Hardwired discrete from the MBMS to the pack pyrofuse triggering hardware. The MBMS fires it on its own authority, from its own monitoring and from the top-level isolation request. Independent of the contactor command, and separate from the HVPDU / cable pyrofuse. Not carried on the battery bus.",Yes,TBD,TBD
 SIG-114,,Battery Charging Inhibit,Measurement,CHG_INHIBIT,PACK,BMU,,SIG-153;SIG-156;SIG-157,,Discrete,,,,,Command authority for an independent critical protection path is open.,Yes,TBD,TBD
 SIG-115,,Calibrated Airspeed,Measurement,CAS,ADC,ADC,,,,Analog,,,,,,TBD,TBD,TBD
-SIG-116,,Per-nacelle Power Allocation,Computed,,,FCC,NAC,SIG-126;SIG-118,,Digital,,,,"Power-management split of the total demand across the four nacelles, from the energy strategy and the reported nacelle capability.",,Yes,TBD,TBD
-SIG-117,,TOGA Activation,Computed,,,FCC,,SIG-007;SIG-010,,Digital,,,,Take-off / go-around detection from the consolidated power lever position.,,Yes,TBD,TBD
-SIG-118,,Nacelle Status and Available Power,Computed,,,HICU,,SIG-059;SIG-064;SIG-163,,Digital,,,,"Nacelle capability and health consolidated from the EMC, EPECS and ESS reports arriving on the nacelle bus.",,Yes,TBD,TBD
-SIG-119,,Active Rating Reference,Computed,,,HICU,,SIG-014,,Digital,,,,"Rating selected for the current phase, derived from the turbine mode selector and the FCC power-management state.",,Yes,TBD,TBD
-SIG-120,,Propulsion Operating Mode,Computed,,,HICU,,SIG-014,,Digital,,,,"Hybrid operating mode issued to EPECS, derived from the mode selector and the FCC energy strategy.",,Yes,TBD,TBD
-SIG-121,,Synchrophasing Command,Computed,,,HICU,,SIG-017,,Digital,,,,Propeller phase alignment request computed from the propeller speed and phase feedback of the nacelles.,,Yes,TBD,TBD
-SIG-124,,IPTMS Status and Operating Limits,Computed,,,IPTMS,,SIG-050;SIG-051;SIG-052;SIG-053;SIG-054;SIG-055;SIG-056;SIG-057;SIG-058,,Digital,,,,Cooling capability and health consolidated from both loop sensor sets.,,Yes,TBD,TBD
-SIG-125,,Mission Definition and Constraints,Computed,,,FMS,,,,Digital,,,,"Flight plan, phase and performance constraints computed by the FMS.",,Yes,TBD,TBD
-SIG-126,,Energy and Hybridization Strategy,Computed,,,MMS,,SIG-125;SIG-163;SIG-128,,Digital,,,,"Operating mode and hybridization profile computed by the MMS from the mission, the stored energy state and the fuel available.",,Yes,TBD,TBD
-SIG-127,,Air Data Environmental Conditions,Computed,,,ADC,,SIG-069;SIG-115;SIG-173,,Digital,,,,"Air data and weather picture computed by the ADC from their own probes, which are not modelled in this ICD.",Air data part of the environmental picture only; the weather part is a separate signal owned by the WXR.,Yes,TBD,TBD
-SIG-128,,Total Fuel Available,Computed,,,IMA,,,,Digital,,,,Totalised by the IMA. The inputs to this computation are not yet defined.,,Yes,TBD,TBD
-SIG-130,,HVPDU Actual Power,Computed,,,HVPDU,,SIG-035;SIG-036,,Digital,,,,Delivered power computed by the HVPDU from its own bus current and voltage measurements.,,Yes,TBD,TBD
-SIG-131,,BTMS Temperature Target,Computed,,,FCC,,SIG-126,,Digital,,,,Battery thermal target issued from the mission and energy strategy.,"Aircraft-level battery thermal target written by the FMS and FCC to the HICU, which relays it to the BTMS. The IPTMS coolant target is a separate signal.",Yes,TBD,TBD
-SIG-132,,BTMS Coolant Status,Computed,,,BTMS,,SIG-146;SIG-147;SIG-148;SIG-149;SIG-150;SIG-151,,Digital,,,,Cooling capability and health consolidated by the BTMS from its two loop sensor sets.,"BTMS thermal status only; the IPTMS status is computed and reported independently, and the two are never combined into one word.",Yes,TBD,TBD
-SIG-133,,Total Energy Available and Hybridization Mode,Computed,,,FCC,,SIG-126;SIG-163;SIG-128,,Digital,,,,Energy summary the FCC broadcasts to avionics for display and mission re-planning.,"Low-integrity, informational only.",Yes,TBD,TBD
-SIG-134,,FCC Status,Computed,,,FCC,,,,Digital,,,,FCC health and mode word broadcast to avionics.,,Yes,TBD,TBD
-SIG-135,,Autothrust Command,Computed,,,FCC,,SIG-117,,Digital,,,,Autothrust engagement and target exchanged between FCC channels.,,Yes,TBD,TBD
+SIG-116,,Per-nacelle Power Allocation,Computed,PEMS_POWER_ALLOC,,FCC,NAC,SIG-126;SIG-118,,Digital,,,,"Power-management split of the total demand across the four nacelles, from the energy strategy and the reported nacelle capability.",,Yes,TBD,TBD
+SIG-117,,TOGA Activation,Computed,PEMS_TOGA,,FCC,,SIG-007;SIG-010,,Digital,,,,Take-off / go-around detection from the consolidated power lever position.,,Yes,TBD,TBD
+SIG-118,,Nacelle Status and Available Power,Computed,HICU_FEEDBACK,,HICU,,SIG-059;SIG-064;SIG-163,,Digital,,,,"Nacelle capability and health consolidated from the EMC, EPECS and ESS reports arriving on the nacelle bus.",,Yes,TBD,TBD
+SIG-119,,Active Rating Reference,Computed,HICU_ACTIVE_RATING,,HICU,,SIG-014,,Digital,,,,"Rating selected for the current phase, derived from the turbine mode selector and the FCC power-management state.",,Yes,TBD,TBD
+SIG-120,,Propulsion Operating Mode,Computed,HICU_PROP_MODE,,HICU,,SIG-014,,Digital,,,,"Hybrid operating mode issued to EPECS, derived from the mode selector and the FCC energy strategy.",,Yes,TBD,TBD
+SIG-121,,Synchrophasing Command,Computed,HICU_SYNCHROPHASING,,HICU,,SIG-017,,Digital,,,,Propeller phase alignment request computed from the propeller speed and phase feedback of the nacelles.,,Yes,TBD,TBD
+SIG-124,,IPTMS Status and Operating Limits,Computed,IPTMS_STATUS,,IPTMS,,SIG-050;SIG-051;SIG-052;SIG-053;SIG-054;SIG-055;SIG-056;SIG-057;SIG-058,,Digital,,,,Cooling capability and health consolidated from both loop sensor sets.,,Yes,TBD,TBD
+SIG-125,,Mission Definition and Constraints,Computed,FMS_MISSION,,FMS,,,,Digital,,,,"Flight plan, phase and performance constraints computed by the FMS.",,Yes,TBD,TBD
+SIG-126,,Energy and Hybridization Strategy,Computed,MMS_MISSION,,MMS,,SIG-125;SIG-163;SIG-128,,Digital,,,,"Operating mode and hybridization profile computed by the MMS from the mission, the stored energy state and the fuel available.",,Yes,TBD,TBD
+SIG-127,,Air Data Environmental Conditions,Computed,ADC_PLACEHOLDER,,ADC,,,,Digital,,,,"Air data and weather picture computed by the ADC from their own probes, which are not modelled in this ICD.",Air data part of the environmental picture only; the weather part is a separate signal owned by the WXR.,Yes,TBD,TBD
+SIG-128,,Total Fuel Available,Computed,TOTAL_FUEL,,IMA,,,,Digital,,,,Totalised by the IMA. The inputs to this computation are not yet defined.,,Yes,TBD,TBD
+SIG-130,,HVPDU Actual Power,Computed,HVPDU_POWER_FB,,HVPDU,,SIG-035;SIG-036,,Digital,,,,Delivered power computed by the HVPDU from its own bus current and voltage measurements.,,Yes,TBD,TBD
+SIG-131,,BTMS Temperature Target,Computed,BTMS_TEMP_CMD,,FCC,,SIG-126,,Digital,,,,Battery thermal target issued from the mission and energy strategy.,"Aircraft-level battery thermal target written by the FMS and FCC to the HICU, which relays it to the BTMS. The IPTMS coolant target is a separate signal.",Yes,TBD,TBD
+SIG-132,,BTMS Coolant Status,Computed,BTMS_STATUS,,BTMS,,SIG-146;SIG-147;SIG-148;SIG-149;SIG-150;SIG-151,,Digital,,,,Cooling capability and health consolidated by the BTMS from its two loop sensor sets.,"BTMS thermal status only; the IPTMS status is computed and reported independently, and the two are never combined into one word.",Yes,TBD,TBD
+SIG-133,,Total Energy Available and Hybridization Mode,Computed,PEMS_STATUS,,FCC,,SIG-126;SIG-163;SIG-128,,Digital,,,,Energy summary the FCC broadcasts to avionics for display and mission re-planning.,"Low-integrity, informational only.",Yes,TBD,TBD
+SIG-134,,FCC Status,Computed,FCC_STATUS,,FCC,,,,Digital,,,,FCC health and mode word broadcast to avionics.,,Yes,TBD,TBD
+SIG-135,,Autothrust Command,Computed,AUTOTHRUST_CMD,,FCC,,SIG-117,,Digital,,,,Autothrust engagement and target exchanged between FCC channels.,,Yes,TBD,TBD
 SIG-136,,Fuel level on the reserve,Measurement,MIN_FUEL,FTANK,HICU,,,,Discrete,,,,,,TBD,TBD,TBD
 SIG-137,,LVPDU Power,Power,LVPDU_POWER,LVPDU,DCDC,,,28V,Power,,,,,,TBD,TBD,TBD
 SIG-138,,LV Battery Power,Power,LVBAT_POWER,LVPDU,LVBAT,,,28V,Power,,,,,28 V link between the LV battery and the LVPDU. The nominal direction recorded is the battery feeding the LVPDU; charging uses the same physical link.,TBD,TBD,TBD
@@ -177,7 +177,7 @@ SIG-186,,FMS Time to Go,Computed,FMS_TTG,,FMS,,SIG-185,,Digital,min,,,Estimated 
 SIG-187,,FMS Active Waypoint Identifier,Computed,FMS_WPT_ID,,FMS,,SIG-184;SIG-185,,Digital,,,,"Identifier of the waypoint the aircraft is currently navigating to. Character data, not a numeric value.",,Yes,TBD,TBD
 SIG-188,,FMS UTC,Computed,FMS_UTC,,FMS,,,,Digital,hh:mm:ss,,,Coordinated universal time maintained by the FMS and used as the common time reference for the avionics.,,Yes,TBD,TBD
 SIG-189,,FMS Target Altitude,Computed,FMS_ALT_TGT,,FMS,,SIG-182,,Digital,ft,,,Altitude target of the active vertical flight plan segment.,,Yes,TBD,TBD
-SIG-190,,FMS Target Airspeed,Computed,FMS_SPD_TGT,,FMS,,SIG-115,,Digital,kt,,,Airspeed target of the active flight plan segment.,,Yes,TBD,TBD
+SIG-190,,FMS Target Airspeed,Computed,FMS_SPD_TGT,,FMS,,,,Digital,kt,,,Airspeed target of the active flight plan segment.,,Yes,TBD,TBD
 SIG-191,,FMS Status and Fault Word,Computed,FMS_STATUS,,FMS,,,,Digital,,,,"FMS operating mode, navigation validity and internal fault summary.",,Yes,TBD,TBD
 SIG-192,,Pack Isolation Request,Request,PACK_ISOL_REQ,MBMS,HICU,,SIG-082;SIG-113;SIG-170,Digital command,Digital,,,,,"Top-level request from the HICU to the MBMS to isolate a pack, carrying the target pack in the payload. The MBMS retains authority over the means and fires the hardwired contactor and pyrofuse discretes itself, with or without this request. Distinct from the assembly connect / disconnect request.",Yes,TBD,TBD
 SIG-193,,Step-up Converter Low Voltage Power,Power,DCDC_UP_LV_POWER,DCDC_UP,LVPDU,,SIG-194;SIG-138,28V,Power,,,,,28 V feed from the LV network into the step-up converter.,Yes,TBD,TBD

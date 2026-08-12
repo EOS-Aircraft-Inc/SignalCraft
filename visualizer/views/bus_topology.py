@@ -5,17 +5,17 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from visualizer.components.graphs import render_draggable_bus_topology
 from visualizer.components.tables import show_dataframe
+from visualizer.components.topology_page import render_draggable_bus_topology
 from visualizer.data.loader import IcdBundle
 from visualizer.data.models import (
+    BUS_DEFINITION,
     TOPOLOGY_ANALOG,
     TOPOLOGY_DISCRETE,
     TOPOLOGY_POWER,
     TOPOLOGY_SHARED,
     TOPOLOGY_UNIDIRECTIONAL,
 )
-
 
 _INTERFACE_KINDS = {TOPOLOGY_ANALOG, TOPOLOGY_DISCRETE, TOPOLOGY_POWER}
 _DIGITAL_KINDS = {TOPOLOGY_UNIDIRECTIONAL, TOPOLOGY_SHARED}
@@ -25,13 +25,7 @@ _LINK_KINDS = _INTERFACE_KINDS | _DIGITAL_KINDS
 def _bus_families(buses) -> list[str]:
     if buses.empty:
         return []
-    column = (
-        "definition_tab"
-        if "definition_tab" in buses.columns
-        else "Bus Definition"
-        if "Bus Definition" in buses.columns
-        else ""
-    )
+    column = BUS_DEFINITION if BUS_DEFINITION in buses.columns else ""
     if column:
         values = [str(v).strip() for v in buses[column].tolist() if str(v).strip()]
         return sorted(set(values))
@@ -50,9 +44,9 @@ def _edges_for_family(edges, nodes, buses, family: str):
                 "node_id",
             ].astype(str)
         )
-    if not bus_ids and not buses.empty and "definition_tab" in buses.columns:
+    if not bus_ids and not buses.empty and BUS_DEFINITION in buses.columns:
         bus_ids = set(
-            buses.loc[buses["definition_tab"].astype(str) == family, "Bus Id"]
+            buses.loc[buses[BUS_DEFINITION].astype(str) == family, "Bus Id"]
             .astype(str)
             .tolist()
         )
@@ -192,7 +186,7 @@ def render(bundle: IcdBundle) -> None:
         key="topo_view_mode",
         help=(
             "Full network uses every physical bus and LRU instance from 10_Databuses "
-            "Writer/Receiver. Generic view keeps one node per Bus Definition and "
+            "Sender/Receiver. Generic view keeps one node per Bus Definition and "
             "bare system acronyms (no instance expansion)."
         ),
     )
@@ -207,19 +201,19 @@ def render(bundle: IcdBundle) -> None:
             "LRUs re-settle."
         )
         group_by_function = st.checkbox(
-            "Group by function",
+            "Group per domain",
             value=False,
             key="topo_group_by_function",
             help=(
                 "Place LRU nodes inside non-overlapping boxes for each "
-                "0_Systems row with Type = System (via Functional system)."
+                "0_Systems row with Type = Domain (via the Domain column)."
             ),
         )
         nodes = bundle.generic_nodes
         edges = bundle.generic_edges
     else:
         st.caption(
-            "Full network: exhaustive bus and LRU instances from Writer/Receiver. "
+            "Full network: exhaustive bus and LRU instances from Sender/Receiver. "
             "Orange = LRU · link colors: Power red · Analog brown · Discrete orange · "
             "Digital mono blue · Digital shared purple. Analog/Discrete/Power are "
             "direct LRU↔LRU links (databus boxes only). "
@@ -266,7 +260,15 @@ def render(bundle: IcdBundle) -> None:
         )
 
     families = _bus_families(bundle.buses)
-    family = st.selectbox("Bus family", options=["(all)"] + families, key="topo_family")
+    family = st.selectbox(
+        "Bus Definition",
+        options=["(all)", *families],
+        key="topo_family",
+        help=(
+            "Several bus instances can share one definition — the payload is "
+            "authored once, on the tab of that name."
+        ),
+    )
     show_all = family == "(all)"
 
     plot_edges = edges if show_all else _edges_for_family(
@@ -380,15 +382,20 @@ def render(bundle: IcdBundle) -> None:
     if generic:
         st.subheader("Bus definitions")
         buses = bundle.buses
-        if not show_all and not buses.empty and "definition_tab" in buses.columns:
-            buses = buses[buses["definition_tab"].astype(str) == family]
+        if not show_all and not buses.empty and BUS_DEFINITION in buses.columns:
+            buses = buses[buses[BUS_DEFINITION].astype(str) == family]
         # One row per definition for the summary table.
-        if not buses.empty and "definition_tab" in buses.columns:
+        if not buses.empty and BUS_DEFINITION in buses.columns:
             summary = (
-                buses.groupby("definition_tab", dropna=False)
+                buses.groupby(BUS_DEFINITION, dropna=False)
                 .agg(
                     instances=("Bus Id", "count"),
-                    protocols=("protocol", lambda s: "; ".join(sorted({str(x) for x in s if str(x).strip()}))),
+                    protocols=(
+                        "protocol",
+                        lambda s: "; ".join(
+                            sorted({str(x) for x in s if str(x).strip()})
+                        ),
+                    ),
                     topologies=(
                         "topology",
                         lambda s: "; ".join(sorted({str(x) for x in s if str(x).strip()})),
@@ -397,16 +404,13 @@ def render(bundle: IcdBundle) -> None:
                 .reset_index()
             )
             if not show_all:
-                summary = summary[summary["definition_tab"].astype(str) == family]
+                summary = summary[summary[BUS_DEFINITION].astype(str) == family]
             show_dataframe(summary, height=220)
     else:
-        st.subheader("Buses in family")
+        st.subheader("Buses using this definition")
         buses = bundle.buses
-        if not show_all and not buses.empty:
-            if "definition_tab" in buses.columns:
-                buses = buses[buses["definition_tab"].astype(str) == family]
-            elif "Bus Definition" in buses.columns:
-                buses = buses[buses["Bus Definition"].astype(str) == family]
+        if not show_all and not buses.empty and BUS_DEFINITION in buses.columns:
+            buses = buses[buses[BUS_DEFINITION].astype(str) == family]
         show_dataframe(
             buses[
                 [
@@ -415,12 +419,11 @@ def render(bundle: IcdBundle) -> None:
                         "Bus Id",
                         "name",
                         "Bus Definition",
-                        "definition_tab",
+                        "Bus description",
                         "protocol",
                         "topology",
-                        "Writer",
+                        "Sender",
                         "Receiver",
-                        "notes",
                     ]
                     if c in buses.columns
                 ]
@@ -428,7 +431,7 @@ def render(bundle: IcdBundle) -> None:
             height=260,
         )
 
-    st.subheader("Payloads on selected family")
+    st.subheader("Data on this definition")
     payload = bundle.bus_payload
     if not show_all and not payload.empty:
         payload = payload[payload["definition_tab"].astype(str) == family]
@@ -439,10 +442,10 @@ def render(bundle: IcdBundle) -> None:
                 for c in [
                     "Allocation Id",
                     "definition_tab",
-                    "data_name",
-                    "writer_lru",
-                    "receiver_lrus",
-                    "signal_id",
+                    "Data name",
+                    "Sender",
+                    "Receiver",
+                    "Signal Id",
                     "hop_role",
                 ]
                 if c in payload.columns

@@ -1,4 +1,4 @@
-﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
 DBUS-200,HICU freshness to EMC,HICU,EMC,EM-{n},SIG-221,1Y1,fcc_cmd,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",DOC=1Y1 DLC8; OEM fcc_freshness,Yes,TBD,TBD
 DBUS-201,EPU enable command,HICU,EMC,EM-{n},SIG-222,1Y1,fcc_cmd,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM epu_en,Yes,TBD,TBD
 DBUS-202,HVDC ready set,HICU,EMC,EM-{n},SIG-223,1Y1,fcc_cmd,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM hv_set,Yes,TBD,TBD

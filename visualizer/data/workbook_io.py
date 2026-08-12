@@ -2,25 +2,18 @@
 
 from __future__ import annotations
 
-import sys
 import tempfile
 from pathlib import Path
 
-from openpyxl import load_workbook  # pyright: ignore[reportMissingModuleSource]
-
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_SCRIPTS = _PROJECT_ROOT / "scripts"
-if str(_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS))
-
-from csv_to_excel import rebuild_workbook  # noqa: E402
-from excel_to_csv import export_workbook  # noqa: E402
-from icd_paths import DEFAULT_CSV_DIR, DEFAULT_REBUILT  # noqa: E402
-from icd_sheets import (  # noqa: E402
+from csv_to_excel import rebuild_workbook
+from excel_to_csv import export_workbook
+from icd_paths import DEFAULT_CSV_DIR, DEFAULT_REBUILT
+from icd_sheets import (
     DATABUSES_SHEET,
     SIGNALS_SHEET,
     SYSTEMS_SHEET,
 )
+from openpyxl import load_workbook  # pyright: ignore[reportMissingModuleSource]
 
 REQUIRED_SHEETS = (SYSTEMS_SHEET, SIGNALS_SHEET, DATABUSES_SHEET)
 

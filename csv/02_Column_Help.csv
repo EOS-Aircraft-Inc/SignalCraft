@@ -2,17 +2,25 @@
 0_Systems,UniqueId,Stable unique key for the system row. Used as the reference everywhere else. Add the row before using the id.,Exact unique id (e.g. FCC; NAC; EM)
 0_Systems,Textual Name,Human-readable equipment or grouping name.,
 0_Systems,Installed In/Part of,"Containment parent UniqueId, the parent could the Aircraft, a zone (which represent a virtual grouping) or another component. Empty for aircraft root or functional-only rows.",UniqueId from 0_Systems
-0_Systems,Functional system,"Optional functional grouping only. Not used for instance expansion, only for reivew and display.",UniqueId of a Type=System row
+0_Systems,Domain,"Optional functional grouping only. Not used for instance expansion, only for review and display.",UniqueId of a Type=Domain row
 0_Systems,Type,"Aircraft is use as start of the tree for component hiearchy.
 
-System is an abstract grouping of physical component (use only to ease review)
+
+
+Domain is an abstract grouping of physical component (use only to ease review)
+
+
 
 Zone are intermediate grouping elements when no physical component exist.
 
+
+
 Component regroup final LRU and group of component.
 
-Controller is the same as Component but highlight that some computation logic is present (not direct impact on interfaces)",Aircraft; System; Zone; Component; Controller
-0_Systems,Multiplicity,Count per parent instance (not aircraft total). Empty or 1 for Aircraft/System.,Positive integer; empty for Aircraft/System
+
+
+Controller is the same as Component but highlight that some computation logic is present (not direct impact on interfaces)",Aircraft; Domain; Zone; Component; Controller
+0_Systems,Multiplicity,Count per parent instance (not aircraft total). Empty or 1 for Aircraft/Domain.,Positive integer; empty for Aircraft/Domain
 0_Systems,Instance Token,"Token this level adds to the instance path when Multiplicity > 1. Empty if Multiplicity = 1. Where the token is a fixed list, the position of an entry in that list is the ordinal used in instance names (LVPDU_AFT is LVPDU-1).",xxx-{n}; or fixed list (e.g. A;B;C)
 0_Systems,Description,Free-text description of the system.,
 0_Systems,Notes,Free-text notes describing the system as it currently stands.,
@@ -20,10 +28,15 @@ Controller is the same as Component but highlight that some computation logic is
 1_Signals,Physical Id,Optional grouping label when two or more Signal Ids share the same physical meaning or interface. Leave blank when the signal is unique. Not a foreign key.,unique id per physical aspect that are used multiple time
 1_Signals,Signal Name,Name of what is measured or commanded.,
 1_Signals,Signal Role,"What kind of interface the row is, which also fixes how Interfacing Equipment and Signal Owner relate. 
+
 Measurement: state acquired by a controller from sensing hardware, including crew levers, selectors and pushbuttons; Interfacing equipement to Owner.
+
 Command: hardwired drive of an effector or safety device; Owner to Physical; Analog or Discrete.
+
 Request: setpoint, enable or mode asked of another controller over a data bus; Owner to Interfacing Equipment; Digital.
+
 Computed: value derived by its owner, defined as an intermediate and derived state from other inputs. Interfacing Equipment empty.
+
 Power: electrical supply, Owner is the source and Interfacing Equipment the load. See the Signal Role philosophy section in README.",Measurement; Command; Request; Computed; Power
 1_Signals,Abbreviation,Short label for the signal.,
 1_Signals,Interfacing Equipment,Equipment the quantity belongs to.,UniqueId from 0_Systems
@@ -43,24 +56,23 @@ Power: electrical supply, Owner is the source and Interfacing Equipment the load
 10_Databuses,Bus Id,Stable id for this physical bus instance.,e.g. NAC_CTRL_1
 10_Databuses,name,Human-readable bus instance name.,
 10_Databuses,Bus Definition,Name of the bus-definition tab holding this bus family's allocations. The value must match the tab name exactly; this is the link between a physical bus and its payload.,Exact sheet name (e.g. NAC_CTRL)
-10_Databuses,bus_use,Short statement of what the bus is used for.,
+10_Databuses,Bus description,Short statement of what the bus is used for.,
 10_Databuses,protocol,Transport / protocol name.,e.g. RS485; A825; A429
 10_Databuses,speed,Link speed or bit rate when known.,
 10_Databuses,topology,Link shape. Digital mono/shared color the databus; Analog/Discrete/Power are non-digital kinds.,Unidirectional; Shared; Analog; Discrete; Power
-10_Databuses,Writer,"Producing LRU nodes on this bus instance, named individually. Build each name with the instance naming rule in README: base UniqueId plus one ordinal per multiplicative level of its containment chain, outermost first (HICU-3, EMC-1-2, BMU-1-7).",Semicolon-separated instance names derived from 0_Systems
-10_Databuses,Receiver,"Receiving LRU nodes on this bus instance, named individually. Same rule as Writer: base UniqueId plus one ordinal per multiplicative level, outermost first.",Semicolon-separated instance names derived from 0_Systems
-10_Databuses,notes,Free-text notes describing the bus as it currently stands. Do not record change history here.,
+10_Databuses,Sender,"Sending LRU nodes on this bus instance, named individually. Build each name with the instance naming rule in README: base UniqueId plus one ordinal per multiplicative level of its containment chain, outermost first (HICU-3, EMC-1-2, BMU-1-7).",Semicolon-separated instance names derived from 0_Systems
+10_Databuses,Receiver,"Receiving LRU nodes on this bus instance, named individually. Same rule as Sender: base UniqueId plus one ordinal per multiplicative level, outermost first.",Semicolon-separated instance names derived from 0_Systems
 10_Databuses,On aircraft ?,Platform applicability flag.,Yes; No; TBD; or free text
 10_Databuses,On FND ?,Platform applicability flag.,Yes; No; TBD; or free text
 10_Databuses,On Sim ?,Platform applicability flag.,Yes; No; TBD; or free text
 Bus-definition tabs,Allocation Id,"Stable primary key for the allocation row. Must be unique across all bus-definition tabs, not only within one tab. Never reuse; keep the value unchanged if the row moves to another tab.","Free text, unique workbook-wide"
-Bus-definition tabs,data_name,Human-readable name of the data item as carried on this bus.,
-Bus-definition tabs,writer_lru,"Producing LRU. Must be a node of every bus instance that uses this definition, i.e. present in the Writer list of the matching 10_Databuses rows.",Semicolon-separated UniqueIds from 0_Systems
-Bus-definition tabs,receiver_lrus,"Consuming LRUs. Each must be a node of every bus instance that uses this definition, i.e. present in the Receiver list of the matching 10_Databuses rows.",Semicolon-separated UniqueIds from 0_Systems
+Bus-definition tabs,Data name,Human-readable name of the data item as carried on this bus.,
+Bus-definition tabs,Sender,"Producing LRU. Must be a node of every bus instance that uses this definition, i.e. present in the Sender list of the matching 10_Databuses rows.",Semicolon-separated UniqueIds from 0_Systems
+Bus-definition tabs,Receiver,"Consuming LRUs. Each must be a node of every bus instance that uses this definition, i.e. present in the Receiver list of the matching 10_Databuses rows.",Semicolon-separated UniqueIds from 0_Systems
 Bus-definition tabs,instance_dimension,Repeat of this allocation within a single bus instance. Empty when the definition already yields one occurrence per bus instance.,Instance Token from 0_Systems (e.g. PACK-{n}; EM-{n})
-Bus-definition tabs,signal_id,"Foreign key to the canonical logical signal, exactly one per allocation. A signal crossing a relay keeps one Signal Id and appears as several allocations; relay hops never create extra rows in 1_Signals.",Existing Signal Id from 1_Signals
+Bus-definition tabs,Signal Id,"Foreign key to the canonical logical signal, exactly one per allocation. A signal crossing a relay keeps one Signal Id and appears as several allocations; relay hops never create extra rows in 1_Signals.",Existing Signal Id from 1_Signals
 Bus-definition tabs,Message ID,"Transport message identity (A825/CAN DOC or arbitration id, or A429 label).",One Message ID = one frame type for bandwidth/load analysis.
-Bus-definition tabs,message_or_label,Human message / frame name when useful.,Optional companion to Message ID.
+Bus-definition tabs,Label,Human message / frame name when useful.,Optional companion to Message ID.
 Bus-definition tabs,start bit,MSB of the field within the message (inclusive).,Pair with stop bit; replaces bit_or_field.
 Bus-definition tabs,stop bit,LSB of the field within the message (inclusive).,Pair with start bit; replaces bit_or_field.
 Bus-definition tabs,encoding,Wire encoding of the value.,e.g. BNR; BCD; Discrete; TBD
@@ -69,7 +81,7 @@ Bus-definition tabs,scale,Scale factor between the engineering value and the wir
 Bus-definition tabs,resolution,Least significant bit value or quantisation step.,
 Bus-definition tabs,minimum,Lower bound of the encoding on this bus: the smallest value the field can represent. Usually wider than the functional minimum in 1_Signals.,
 Bus-definition tabs,maximum,Upper bound of the encoding on this bus: the largest value the field can represent. Usually wider than the functional maximum in 1_Signals.,
-Bus-definition tabs,update_period_ms,"Nominal refresh period of this data item, in milliseconds.",Positive number; TBD until defined
+Bus-definition tabs,Refresh rate,"Nominal refresh period of this data item, in milliseconds.",Positive number; TBD until defined
 Bus-definition tabs,validity,"How the receiver determines that the data item is valid (validity bit, sign status matrix, freshness timeout).",Free text; TBD until defined
 Bus-definition tabs,notes,Free-text notes describing the interface as it currently stands. Do not record change history here.,
 Bus-definition tabs,On aircraft ?,Platform applicability flag.,Yes; No; TBD; or free text

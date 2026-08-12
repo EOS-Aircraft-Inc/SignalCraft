@@ -11,10 +11,9 @@ import csv
 import json
 from pathlib import Path
 
-from openpyxl import load_workbook  # pyright: ignore[reportMissingModuleSource]
-
 from icd_csv import safe_filename
 from icd_paths import DEFAULT_CSV_DIR, DEFAULT_WORKBOOK, MANIFEST_NAME
+from openpyxl import load_workbook  # pyright: ignore[reportMissingModuleSource]
 
 
 def export_workbook(workbook_path: Path, output_dir: Path) -> None:

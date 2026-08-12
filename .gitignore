@@ -179,3 +179,8 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# SignalCraft: review workbook rebuilt from csv/ by scripts/csv_to_excel.py.
+# Regenerated on demand; never the source of truth.
+ICD_Database_rebuilt.xlsx
+~$ICD_Database.xlsx

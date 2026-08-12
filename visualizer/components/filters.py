@@ -13,6 +13,18 @@ def _as_columns(column: str | list[str], df: pd.DataFrame) -> list[str]:
     return [c for c in cols if c in df.columns]
 
 
+def _present_values(df: pd.DataFrame, cols: list[str]) -> list[str]:
+    """Sorted distinct non-empty values held across ``cols``."""
+    return sorted(
+        {
+            str(v).strip()
+            for col in cols
+            for v in df[col].dropna().unique()
+            if str(v).strip()
+        }
+    )
+
+
 def system_filter(
     df: pd.DataFrame,
     column: str | list[str] = "System",
@@ -29,14 +41,7 @@ def system_filter(
     cols = _as_columns(column, df)
     if df.empty or not cols:
         return []
-    present = sorted(
-        {
-            str(v).strip()
-            for col in cols
-            for v in df[col].dropna().unique()
-            if str(v).strip()
-        }
-    )
+    present = _present_values(df, cols)
     if systems is not None and not systems.empty:
         _, label_to_acr = system_acronym_labels(systems)
         acr_to_label = {acr: lab for lab, acr in label_to_acr.items()}
@@ -44,6 +49,28 @@ def system_filter(
         chosen = st.multiselect("System", options, key=key)
         return [label_to_acr.get(c, c) for c in chosen]
     return st.multiselect("System", present, key=key)
+
+
+def value_filter(
+    df: pd.DataFrame,
+    column: str | list[str],
+    *,
+    label: str,
+    key: str,
+) -> list[str]:
+    """Table filter over the distinct values a plain column holds.
+
+    Same shape as ``system_filter`` but for controlled-vocabulary columns such
+    as ``Signal Role``. Options are the values actually present in the sheet, so
+    a vocabulary entry nobody has used yet never appears as an empty filter.
+    """
+    cols = _as_columns(column, df)
+    if df.empty or not cols:
+        return []
+    present = _present_values(df, cols)
+    if not present:
+        return []
+    return st.multiselect(label, present, key=key)
 
 
 def apply_text_search(df: pd.DataFrame, query: str, columns: list[str]) -> pd.DataFrame:
@@ -57,14 +84,21 @@ def apply_text_search(df: pd.DataFrame, query: str, columns: list[str]) -> pd.Da
     return df.loc[mask]
 
 
-def filter_by_systems(
-    df: pd.DataFrame, systems: list[str], column: str | list[str] = "System"
+def filter_by_values(
+    df: pd.DataFrame, values: list[str], column: str | list[str]
 ) -> pd.DataFrame:
-    """Keep rows where *any* of ``column`` matches one of ``systems``."""
+    """Keep rows where *any* of ``column`` matches one of ``values``."""
     cols = _as_columns(column, df)
-    if not systems or df.empty or not cols:
+    if not values or df.empty or not cols:
         return df
     mask = pd.Series(False, index=df.index)
     for col in cols:
-        mask |= df[col].isin(systems)
+        mask |= df[col].isin(values)
     return df.loc[mask]
+
+
+def filter_by_systems(
+    df: pd.DataFrame, systems: list[str], column: str | list[str] = "System"
+) -> pd.DataFrame:
+    """Keep rows whose system column matches one of ``systems``."""
+    return filter_by_values(df, systems, column)

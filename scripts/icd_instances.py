@@ -55,22 +55,11 @@ class SystemTree:
     def acronyms(self) -> set[str]:
         return set(self.rows)
 
-    def is_domain(self, acronym: str) -> bool:
-        row = self.rows.get(acronym)
-        if row is None:
-            return False
-        # Domains were historically System Type=domain; functional System rows
-        # (empty Multiplicity) are the non-instantiated grouping equivalent.
-        typ = (row.get("Type") or row.get("System Type") or "").strip().lower()
-        return typ == "domain"
-
     def parent(self, acronym: str) -> str:
         row = self.rows.get(acronym)
         if not row:
             return ""
-        return (
-            row.get(INSTALLED_IN) or row.get("Installed In") or ""
-        ).strip()
+        return (row.get(INSTALLED_IN) or "").strip()
 
     def multiplicity(self, acronym: str) -> int:
         row = self.rows.get(acronym)
@@ -105,35 +94,10 @@ class SystemTree:
             _COUNTER.sub(f"{index:0{width}d}", token) for index in range(1, count + 1)
         ]
 
-    def scope_tokens(self, acronym: str) -> set[str]:
-        """Tokens identifying one instance of ``acronym``, root token excluded.
-
-        Aircraft-level systems have no distinguishing token, so they fall back
-        to the root token to keep the notation non-empty.
-        """
-        found: set[str] = set()
-        for node in self.chain(acronym):
-            found.update(self.tokens(node))
-        found.discard(ROOT_TOKEN)
-        return found or {ROOT_TOKEN}
-
-    def dimensions(self, acronym: str) -> list[str]:
-        """Dimension acronyms one instance of ``acronym`` is indexed by.
-
-        Outermost first, so an EMC parameter reads ``NAC;EM``. Only levels
-        holding more than one instance per parent contribute: a singleton is
-        never an index because there is nothing to choose between.
-        """
-        found: list[str] = []
-        for node in reversed(self.chain(acronym)):
-            if self.multiplicity(node) > 1 and node not in found:
-                found.append(node)
-        return found
-
     def instance_tokens(self, acronym: str) -> list[str]:
         """Exhaustive endpoint tokens for ``acronym`` (e.g. ``GBX-1..4``, ``EMC-1-1``).
 
-        Mirrors the Writer/Receiver naming used on ``10_Databuses``:
+        Mirrors the Sender/Receiver naming used on ``10_Databuses``:
 
         - own Multiplicity > 1 with an Instance Token → expand that pattern, and
           when ancestors also multiply, prefix ancestor indices
@@ -180,30 +144,6 @@ class SystemTree:
             ]
 
         return [acronym]
-
-    @property
-    def dimension_acronyms(self) -> set[str]:
-        """UniqueIds usable as a dimension in an Instance Scope."""
-        return {
-            acronym for acronym in self.rows if self.multiplicity(acronym) > 1
-        }
-
-    def total(self, acronym: str) -> int:
-        """Number of instances of ``acronym`` on the aircraft."""
-        if acronym not in self.rows or self.is_domain(acronym):
-            return 0
-        count = 1
-        for node in self.chain(acronym):
-            count *= self.multiplicity(node)
-        return count
-
-    def all_tokens(self) -> set[str]:
-        """Every valid instance token, usable to validate an instance field."""
-        found = {ROOT_TOKEN}
-        for acronym in self.rows:
-            found.update(self.tokens(acronym))
-        return found
-
 
 def bus_family_name(row: Mapping[str, str]) -> str:
     """Family handle for a ``10_Databuses`` row (``Bus Definition`` preferred)."""

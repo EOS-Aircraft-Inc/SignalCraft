@@ -17,13 +17,12 @@ SYSTEM_UNIQUE_ID = "UniqueId"
 SIGNAL_ID = "Signal Id"
 BUS_ID = "Bus Id"
 ALLOCATION_ID = "Allocation Id"
-DATA_ID = "Data Id"  # legacy payload key; prefer ALLOCATION_ID
 
 # Common display / cross-reference columns.
 SYSTEM_TEXTUAL_NAME = "Textual Name"
 SIGNAL_NAME = "Signal Name"
 INSTALLED_IN = "Installed In/Part of"
-FUNCTIONAL_SYSTEM = "Functional system"
+DOMAIN = "Domain"
 INTERFACING_EQUIPMENT = "Interfacing Equipment"
 SIGNAL_OWNER = "Signal Owner"
 REPEATED_PER = "Repeated Per"
@@ -31,12 +30,18 @@ RELATED_TO = "Related to"
 INTERFACE_TYPE = "Interface Type"
 BUS_DEFINITION = "Bus Definition"
 BUS_NAME = "name"
-WRITER = "Writer"
-RECEIVER = "Receiver"
+BUS_DESCRIPTION = "Bus description"
 TOPOLOGY = "topology"
-WRITER_LRU = "writer_lru"
-RECEIVER_LRUS = "receiver_lrus"
-SIGNAL_ID_REF = "signal_id"  # payload column referencing SIGNAL_ID
+
+# Endpoint columns. 10_Databuses names bus-instance nodes, the bus-definition
+# tabs name the endpoints of one allocation; both use the same column names.
+SENDER = "Sender"
+RECEIVER = "Receiver"
+
+# Bus-definition tab columns.
+DATA_NAME = "Data name"
+LABEL = "Label"
+REFRESH_RATE = "Refresh rate"
 
 # Non-data workbook tabs (docs / guides). Excluded from edit engine and payloads.
 DOC_SHEETS = frozenset({README_SHEET, COLUMN_HELP_SHEET})
@@ -59,6 +64,95 @@ LEADING_SHEETS = (
     SIGNALS_SHEET,
     DATABUSES_SHEET,
 )
+
+# Formal Type values on 0_Systems. A Type=Domain row declares a domain, which
+# other rows then reference from their Domain column.
+SYSTEM_TYPES = (
+    "Aircraft",
+    "Domain",
+    "Zone",
+    "Component",
+    "Controller",
+)
+
+# Aircraft / Domain rows are hierarchy or functional labels, never instantiated:
+# Multiplicity stays empty (a literal "1" is tolerated) and there is no token.
+NO_INSTANCE_SYSTEM_TYPES = frozenset({"Aircraft", "Domain"})
+
+# Zone / Component / Controller are real equipment and are counted per parent.
+INSTANTIATED_SYSTEM_TYPES = frozenset({"Zone", "Component", "Controller"})
+
+
+def normalize_system_type(value: object) -> str:
+    """Match a 0_Systems Type to its formal spelling, ignoring case."""
+    text = str(value or "").strip()
+    for formal in SYSTEM_TYPES:
+        if text.lower() == formal.lower():
+            return formal
+    return text
+
+
+def system_multiplicity_error(
+    system_type: object,
+    multiplicity: object,
+    instance_token: object = "",
+) -> str | None:
+    """Explain why Multiplicity / Instance Token do not suit this Type, else None.
+
+    One rule shared by the integrity check, the edit engine preflight and the
+    System list editor, so all three agree:
+
+    - Aircraft / Domain: Multiplicity empty or "1", and no Instance Token.
+    - Zone / Component / Controller: Multiplicity is a positive integer, and
+      anything above 1 needs an Instance Token to name its instances.
+    - Any other (or empty) Type is not judged here.
+    """
+    typ = normalize_system_type(system_type)
+    mult = str(multiplicity or "").strip()
+    token = str(instance_token or "").strip()
+
+    if typ in NO_INSTANCE_SYSTEM_TYPES:
+        if token or (mult and mult != "1"):
+            return (
+                f"Type '{typ}' is a label, not equipment: Multiplicity must be "
+                f"empty or '1' (got {mult or 'empty'!r}) and Instance Token must "
+                "be empty."
+            )
+        return None
+
+    if typ in INSTANTIATED_SYSTEM_TYPES:
+        if not mult.isdigit() or int(mult) < 1:
+            return (
+                f"Type '{typ}' requires Multiplicity as a positive integer, the "
+                f"count per parent instance (got {mult or 'empty'!r})."
+            )
+        if int(mult) > 1 and not token:
+            return (
+                f"Type '{typ}' with Multiplicity {mult} requires a non-empty "
+                "Instance Token to name the instances."
+            )
+    return None
+
+
+# Formal Signal Role values on 1_Signals, in reading order.
+SIGNAL_ROLES = (
+    "Measurement",
+    "Command",
+    "Request",
+    "Computed",
+    "Power",
+)
+
+# Direction of the physical interface implied by a role. Measurement flows from
+# the Interfacing Equipment to the Owner; Command and Power flow the other way.
+# Request and Computed are digital and have no hardwired leg of their own.
+ROLES_TOWARD_OWNER = frozenset({"Measurement"})
+ROLES_FROM_OWNER = frozenset({"Command", "Power"})
+
+# Roles a bus allocation drives away from its owner (adds Request, which is a
+# bus message rather than a hardwired drive).
+BUS_ROLES_FROM_OWNER = frozenset({"Command", "Request", "Power"})
+
 
 # Formal Interface Type values on 1_Signals.
 INTERFACE_TYPES = (

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from icd_paths import DEFAULT_CSV_DIR, MANIFEST_NAME
+from icd_sheets import SIGNALS_SHEET
 
 
 def load_manifest(csv_dir: Path = DEFAULT_CSV_DIR) -> dict[str, Any]:
@@ -71,6 +72,13 @@ def write_sheet(
         for row in rows:
             writer.writerow({key: row.get(key, "") for key in fieldnames})
     return path
+
+
+def require_signals_sheet(manifest: dict[str, Any]) -> str:
+    """Return the signals catalog sheet name, or raise if the workbook lacks it."""
+    if SIGNALS_SHEET in sheet_index(manifest):
+        return SIGNALS_SHEET
+    raise KeyError(f"{SIGNALS_SHEET} not found in workbook manifest")
 
 
 def safe_filename(sheet_name: str) -> str:
@@ -144,8 +152,9 @@ def next_id(existing: list[str], prefix: str, width: int | None = None) -> str:
     return f"{prefix}-{next_number:0{digits}d}"
 
 
-def split_refs(value: str) -> list[str]:
-    return [item.strip() for item in value.split(";") if item.strip()]
+def split_refs(value: object) -> list[str]:
+    """Split a semicolon-separated cell into clean tokens (the ICD convention)."""
+    return [item.strip() for item in str(value or "").split(";") if item.strip()]
 
 
 def join_refs(values: list[str]) -> str:

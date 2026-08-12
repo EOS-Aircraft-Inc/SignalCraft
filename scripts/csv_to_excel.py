@@ -12,11 +12,14 @@ import json
 from pathlib import Path
 from typing import TypedDict
 
-from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
-from openpyxl.styles import Alignment, Font, PatternFill  # pyright: ignore[reportMissingModuleSource]
-from openpyxl.utils import get_column_letter  # pyright: ignore[reportMissingModuleSource]
-
 from icd_paths import DEFAULT_CSV_DIR, DEFAULT_REBUILT, DEFAULT_WORKBOOK, MANIFEST_NAME
+from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
+from openpyxl.styles import (  # pyright: ignore[reportMissingModuleSource]
+    Alignment,
+    Font,
+    PatternFill,
+)
+from openpyxl.utils import get_column_letter  # pyright: ignore[reportMissingModuleSource]
 
 HEADER_FILL = PatternFill("solid", fgColor="1F4E78")
 HEADER_FONT = Font(color="FFFFFF", bold=True)

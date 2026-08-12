@@ -7,21 +7,18 @@ return bare UniqueIds for persistence. Filter text boxes are opt-in
 
 from __future__ import annotations
 
-import re
-from itertools import product
-
 import pandas as pd
 import streamlit as st
+from icd_instances import SystemTree
 
 from visualizer.data.models import (
-    INSTALLED_IN,
+    RECEIVER,
+    SENDER,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
 )
 
 _SEP = " — "
-_PARENT_COL = INSTALLED_IN
-_COUNTER = re.compile(r"\{(n+)\}")
 
 
 def id_name_labels(
@@ -71,83 +68,16 @@ def system_acronym_labels(
     return labels, label_to_acr
 
 
-def dimension_acronym_labels(
-    systems: pd.DataFrame,
-) -> tuple[list[str], dict[str, str]]:
-    """``UniqueId — Name`` for systems with Multiplicity > 1 (instance dimensions)."""
-    labels: list[str] = []
-    label_to_acr: dict[str, str] = {}
-    if systems.empty:
-        return labels, label_to_acr
-    for _, row in systems.iterrows():
-        acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
-        mult = str(row.get("Multiplicity") or "").strip()
-        if not acr or not mult.isdigit() or int(mult) <= 1:
-            continue
-        name = str(row.get(SYSTEM_TEXTUAL_NAME) or "").strip()
-        label = f"{acr}{_SEP}{name}" if name else acr
-        labels.append(label)
-        label_to_acr[label] = acr
-    labels.sort()
-    return labels, label_to_acr
-
-
-def dimension_acronyms(systems: pd.DataFrame) -> list[str]:
-    _, label_to_acr = dimension_acronym_labels(systems)
-    return sorted(set(label_to_acr.values()))
-
-
-def acronym_options(systems: pd.DataFrame) -> list[str]:
-    """Bare UniqueId list (prefer ``system_acronym_labels`` for UI pickers)."""
+def rows_by_unique_id(systems: pd.DataFrame) -> dict[str, dict[str, str]]:
+    """0_Systems rows as plain string dicts, keyed by UniqueId."""
+    out: dict[str, dict[str, str]] = {}
     if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
-        return []
-    return sorted(
-        {
-            str(a).strip()
-            for a in systems[SYSTEM_UNIQUE_ID].dropna()
-            if str(a).strip()
-        }
-    )
-
-
-def _expand_token_pattern(pattern: str, count: int) -> list[str]:
-    pattern = (pattern or "").strip()
-    if not pattern or count < 1:
-        return []
-    match = _COUNTER.search(pattern)
-    if not match:
-        return [p.strip() for p in pattern.split(";") if p.strip()]
-    width = len(match.group(1))
-    return [
-        _COUNTER.sub(f"{index:0{width}d}", pattern) for index in range(1, count + 1)
-    ]
-
-
-def _containment_chain(
-    by_acr: dict[str, dict[str, str]], acronym: str
-) -> list[str]:
-    result: list[str] = []
-    node = acronym
-    while node and node in by_acr and node not in result:
-        result.append(node)
-        node = (by_acr[node].get(_PARENT_COL) or "").strip()
-    return result
-
-
-def _multi_ancestor_counts(
-    by_acr: dict[str, dict[str, str]], acronym: str
-) -> list[int]:
-    """Multiplicities of ancestors with Multiplicity > 1, outermost first."""
-    chain = list(reversed(_containment_chain(by_acr, acronym)))  # root → leaf
-    counts: list[int] = []
-    for node in chain:
-        if node == acronym:
-            break
-        mult_s = (by_acr[node].get("Multiplicity") or "").strip()
-        mult = int(mult_s) if mult_s.isdigit() else 0
-        if mult > 1:
-            counts.append(mult)
-    return counts
+        return out
+    for _, row in systems.iterrows():
+        uid = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
+        if uid:
+            out[uid] = {c: str(row.get(c, "") or "") for c in systems.columns}
+    return out
 
 
 def instance_endpoint_labels(
@@ -156,22 +86,19 @@ def instance_endpoint_labels(
     exclude_types: set[str] | None = None,
     extra_tokens: list[str] | None = None,
 ) -> tuple[list[str], dict[str, str]]:
-    """Exhaustive Writer/Receiver endpoints: instance tokens + singletons.
+    """Exhaustive Sender/Receiver endpoints: instance tokens + singletons.
 
     Unlike the generic ``UniqueId — Name`` filter list, this expands multiplicity
     (``FCC-1``, ``HICU-1``, ``BMU-1-1``, …) and labels each with the textual name.
     """
-    exclude_types = exclude_types or {"Aircraft", "System", "Zone"}
+    exclude_types = exclude_types or {"Aircraft", "Domain", "Zone"}
     labels: list[str] = []
     label_to_val: dict[str, str] = {}
     if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
         return labels, label_to_val
 
-    by_acr: dict[str, dict[str, str]] = {}
-    for _, row in systems.iterrows():
-        acr = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
-        if acr:
-            by_acr[acr] = {c: str(row.get(c, "") or "") for c in systems.columns}
+    by_acr = rows_by_unique_id(systems)
+    tree = SystemTree(list(by_acr.values()))
 
     def _add(token: str, name: str) -> None:
         token = (token or "").strip()
@@ -188,21 +115,9 @@ def instance_endpoint_labels(
         if typ in exclude_types:
             continue
         name = (row.get(SYSTEM_TEXTUAL_NAME) or "").strip()
-        mult_s = (row.get("Multiplicity") or "").strip()
-        mult = int(mult_s) if mult_s.isdigit() else 1
-        pattern = (row.get("Instance Token") or "").strip()
 
-        if pattern and mult > 1:
-            for tok in _expand_token_pattern(pattern, mult):
-                _add(tok, name)
-            continue
-
-        ancestor_counts = _multi_ancestor_counts(by_acr, acr)
-        if not ancestor_counts:
-            _add(acr, name)
-            continue
-        for idxs in product(*[range(1, n + 1) for n in ancestor_counts]):
-            _add(f"{acr}-" + "-".join(str(i) for i in idxs), name)
+        for token in tree.instance_tokens(acr):
+            _add(token, name)
 
     acr_names = {
         a: (by_acr[a].get(SYSTEM_TEXTUAL_NAME) or "").strip() for a in by_acr
@@ -253,7 +168,7 @@ def labeled_select(
         if filt.strip():
             q = filt.strip().lower()
             options = [x for x in labels if q in x.lower()]
-    display = ([""] + options) if allow_empty else (options or [""])
+    display = (["", *options]) if allow_empty else (options or [""])
 
     if widget_key not in st.session_state:
         st.session_state[widget_key] = _label_for_value(label_to_value, current)
@@ -369,29 +284,6 @@ def table_select_id(
     return str(view.iloc[idx][id_col] or "").strip()
 
 
-def buses_for_lru(buses: pd.DataFrame, lrus: list[str]) -> list[str]:
-    """Family handles (Bus Definition) where any LRU appears in Writer/Receiver."""
-    if buses.empty or not lrus:
-        return []
-    matched = filter_buses_by_acronym(buses, lrus)
-    if matched.empty:
-        return []
-    def_col = (
-        "Bus Definition"
-        if "Bus Definition" in matched.columns
-        else "definition_tab"
-    )
-    if def_col not in matched.columns:
-        return []
-    return sorted(
-        {
-            str(v).strip()
-            for v in matched[def_col].dropna()
-            if str(v).strip()
-        }
-    )
-
-
 def _token_matches_acronym(token: str, acronym: str) -> bool:
     """True if ``token`` is the bare acronym or any of its instances (``ACR-…``)."""
     token = (token or "").strip()
@@ -406,7 +298,7 @@ def _token_matches_acronym(token: str, acronym: str) -> bool:
 def filter_buses_by_acronym(
     buses: pd.DataFrame, acronyms: str | list[str]
 ) -> pd.DataFrame:
-    """Rows where Writer or Receiver mentions any instance of the given acronym(s)."""
+    """Rows where Sender or Receiver mentions any instance of the given acronym(s)."""
     if buses.empty:
         return buses.iloc[0:0].copy()
     if isinstance(acronyms, str):
@@ -417,18 +309,12 @@ def filter_buses_by_acronym(
     if not targets:
         return buses.copy()
 
-    writer_col = "Writer" if "Writer" in buses.columns else "equipment_connected"
-    receiver_col = "Receiver" if "Receiver" in buses.columns else "equipment_connected"
-    if writer_col not in buses.columns and receiver_col not in buses.columns:
+    endpoint_cols = [c for c in (SENDER, RECEIVER) if c in buses.columns]
+    if not endpoint_cols:
         return buses.iloc[0:0].copy()
 
     def row_matches(row: pd.Series) -> bool:
-        blob = ";".join(
-            [
-                str(row.get(writer_col) or "") if writer_col in row.index else "",
-                str(row.get(receiver_col) or "") if receiver_col in row.index else "",
-            ]
-        )
+        blob = ";".join(str(row.get(col) or "") for col in endpoint_cols)
         tokens = [t.strip() for t in blob.split(";") if t.strip()]
         return any(
             _token_matches_acronym(tok, acr) for tok in tokens for acr in targets

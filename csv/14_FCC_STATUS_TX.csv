@@ -1,4 +1,4 @@
-﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
 BSIG-AC-010,Total energy available and hybridization mode,FCC,FMS;DCU,,SIG-133,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Sign / status matrix in the word, plus receiver freshness timeout",FCC to avionics reporting.,TBD,TBD,TBD
 DBUS-STAT-001,FCC status,FCC,DCU,,SIG-134,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Sign / status matrix in the word, plus receiver freshness timeout",,TBD,TBD,TBD
 DBUS-065,Power Lever RVDT,FCC,DCU;FMS,,SIG-007,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Sign / status matrix in the word, plus receiver freshness timeout","Low-integrity, informational only; selective FCC to avionics report, distinct from the inter-FCC exchange on FCS_PROP_CTRL.",TBD,TBD,TBD

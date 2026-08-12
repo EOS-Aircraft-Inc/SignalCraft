@@ -1,4 +1,4 @@
-﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
 DBUS-044,Pack current,BMU,MBMS,PACK-{n},SIG-038,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
 DBUS-045,Pack terminal voltage,BMU,MBMS,PACK-{n},SIG-039,TBD,TBD,TBD,TBD,BNR,V,,,,,100,"Frame CRC, plus receiver freshness timeout",Loaded terminal voltage; the rest voltage is a separate signal.,TBD,TBD,TBD
 DBUS-101,Pack open circuit voltage,BMU,MBMS,PACK-{n},SIG-152,TBD,TBD,TBD,TBD,BNR,V,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD

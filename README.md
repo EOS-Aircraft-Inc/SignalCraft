@@ -33,7 +33,7 @@ cd C:\path\to\SignalCraft
 uv sync
 ```
 
-This creates `.venv` and installs the locked dependencies (`pyproject.toml` / `uv.lock`). Python ≥ 3.11.
+This creates `.venv` and installs the locked dependencies (`pyproject.toml` / `uv.lock`).
 
 ## Source of truth
 
@@ -62,9 +62,7 @@ Run every command from the repo root with `uv run` (or the `.bat` wrappers, whic
 # 1. Export Excel to CSV
 uv run python .\scripts\excel_to_csv.py
 
-# 2. Edit the CSV working set (upsert / delete / rewrite JSON)
-uv run python .\scripts\icd_edit.py --json .\scripts\examples\edit_upsert_signal.example.json --dry-run
-uv run python .\scripts\icd_edit.py --json .\scripts\examples\edit_upsert_signal.example.json
+# 2. Edit the data — use the visualizer (below); it writes csv/ for you
 
 # 3. Check integrity (IDs, references, allocations)
 uv run python .\scripts\database_integrity_check.py
@@ -73,9 +71,10 @@ uv run python .\scripts\database_integrity_check.py
 uv run python .\scripts\csv_to_excel.py
 ```
 
-Windows shortcuts (same scripts, via uv): `excel_to_csv.bat`, `csv_to_excel.bat`.
+Windows shortcuts for steps 1 and 4: `excel_to_csv.bat`, `csv_to_excel.bat`.
 
-Or use **Edit data** in the visualizer (same JSON API, guided forms).
+Step 2 is the **Edit data** page of the visualizer — guided forms, with a
+dry-run before anything is written.
 
 ## Visualizer
 
@@ -85,75 +84,23 @@ uv run streamlit run visualizer/app.py
 
 See [`visualizer/README.md`](visualizer/README.md) for page descriptions. The visualizer reads the `csv/` working set (not Excel).
 
-After review, copy approved content into `ICD_Database.xlsx`, or replace the
-source workbook manually when ready.
+## Maintaining the tool
 
-## Scripts
-
-### CLIs
-
-| Script | Role |
-|---|---|
-| `scripts/excel_to_csv.py` | Export every workbook tab to `csv/` |
-| `scripts/icd_edit.py` | Blind upsert/delete/rewrite JSON edits with preflight |
-| `scripts/database_integrity_check.py` | Validate IDs, system references and signal allocations |
-| `scripts/csv_to_excel.py` | Rebuild `ICD_Database_rebuilt.xlsx` from CSV |
-| `scripts/reorder_sheets.py` | Renumber the CSV file prefixes to the reading order |
-| `visualizer/` | Streamlit visualizer (`uv run streamlit run visualizer/app.py`) |
-
-### Libraries (imported by CLIs / visualizer; not runnable)
-
-| Module | Role |
-|---|---|
-| `scripts/icd_instances.py` | Derive instance tokens and totals from the `0_Systems` tree |
-| `scripts/icd_edit_lib.py` | Edit engine shared by `icd_edit.py` and the visualizer |
-| `scripts/icd_csv.py` | Manifest and per-sheet CSV read/write |
-| `scripts/icd_paths.py` | Default workbook / `csv/` / rebuilt paths |
-| `scripts/icd_sheets.py` | Sheet names and controlled vocabulary |
-
-The integrity check separates two levels. **Errors** are broken data: unknown
-identifiers, UniqueIds missing from `0_Systems`, allocations whose `signal_id`
-is not in `1_Signals`, or duplicate `Allocation Id` values (per tab and
-workbook-wide). **Warnings** are known gaps that must not block the workflow
-(for example a payload row missing `signal_id`). Use `--quiet-warnings` for the
-count only.
-
-### Edit JSON (`icd_edit.py`)
-
-One document drives the full working set:
-
-```json
-{
-  "rewrite": {
-    "acronyms": [{ "from": "HICU", "to": "HCU" }],
-    "ids": [{ "from": "SIG-010", "to": "SIG-210" }]
-  },
-  "upsert": {
-    "1_Signals": [{ "Signal Id": "SIG-001", "Signal Name": "…" }]
-  },
-  "delete": { "IRU_TX": ["DBUS-099"] },
-  "options": { "with_buses": true }
-}
-```
-
-- **Omitted field** → leave unchanged. **Explicit `""`** → clear.
-- Upsert matches on the sheet primary key; omit the key to auto-allocate (`SIG` / `DBUS` / …). `0_Systems` requires an explicit `UniqueId` (no auto-id).
-- Payload sheets use `Allocation Id` + `signal_id` (`SIG-*`).
-- `rewrite.acronyms` renames a `0_Systems.UniqueId` and propagates it across references; `rewrite.ids` renames Signal/Bus/allocation ids.
-- If a multiplicity change impacts bus families and `options.with_buses` is omitted, the edit **aborts** until you set `true` (clone/remove buses) or `false` (systems only).
-
-Examples: `scripts/examples/edit_*.example.json`.
+Changing SignalCraft itself — adding a column, changing an allowed value,
+editing the diagram, running the checks before committing — is covered
+separately in [`DEVELOPERS.md`](DEVELOPERS.md). You do not need any of it to
+fill in the database.
 
 ## Canonical model
 
 ```text
 0_Systems  →  1_Signals  →  10_Databuses
                    ↓
-          Bus-definition tabs (signal_id → SIG-*)
+          Bus-definition tabs (Signal Id)
 ```
 
 Fill in that order: systems first (`UniqueId`), then signals, then buses, then
-allocations. Relays reuse the same `SIG-*` on several allocations — do **not**
+allocations. Relays reuse the same signals ID on several allocations — do **not**
 duplicate the signal row.
 
 `0_Systems` is a containment tree of **kinds** of equipment (not instances).
@@ -176,17 +123,17 @@ everywhere else.
 | `UniqueId` | Stable unique key used as the reference everywhere (`FCC`, `NAC`, …) |
 | `Textual Name` | Human-readable equipment or grouping name |
 | `Installed In/Part of` | Containment parent UniqueId (empty for aircraft root / functional-only rows) |
-| `Functional system` | Optional grouping for review/display only — **not** used for instances |
-| `Type` | `Aircraft` / `System` / `Zone` = hierarchy or labels; `Component` / `Controller` = real LRUs |
+| `Domain` | UniqueId of a `Type = Domain` row; review/display grouping only — **not** used for instances |
+| `Type` | `Aircraft` / `Domain` / `Zone` = hierarchy or labels; `Component` / `Controller` = real LRUs. A `Domain` row declares a domain that other rows reference from their `Domain` column |
 | `Multiplicity` | Count **per parent instance** (not aircraft total) |
-| `Instance Token` | What this level adds to the path when Mult > 1: `{n}`, `{nn}`, or a fixed list. Empty if Mult = 1 |
+| `Instance Token` | What this level adds to the path when Mult > 1: `{n}`, or a fixed list. Empty if Mult = 1 |
 | `Description` / `Notes` | Free text (notes describe current state, not change history) |
 
 Aircraft totals = product of multiplicities up the tree. A singleton under a
 multiplied parent (e.g. one GBX per nacelle) needs no token of its own; tools
 derive `GBX-1`…`GBX-4` from the parent.
 
-### Instance naming (for `10_Databuses` Writer / Receiver)
+### Instance naming (for `10_Databuses` Sender / Receiver)
 
 `0_Systems` never stores instances, but bus rows must name them. Build each
 name mechanically:
@@ -203,14 +150,14 @@ is no aircraft-level index (never `EM-4` for “fourth motor on the aircraft”)
 
 | Column | What to enter |
 |---|---|
-| `Signal Id` | Stable `SIG-*` (never reuse) |
+| `Signal Id` | Stable unique ID (never reuse) |
 | `Physical Id` | Optional; set **only** when 2+ signals share the same physical meaning (not a foreign key). Leave blank otherwise |
 | `Signal Name` / `Abbreviation` | Human labels |
 | `Signal Role` | `Measurement` \| `Command` \| `Request` \| `Computed` \| `Power` |
 | `Interfacing Equipment` | Equipment the quantity belongs to (`0_Systems` UniqueId); empty for Computed |
 | `Signal Owner` | System that owns the path / computation |
 | `Repeated Per` | Extra dimensions not already implied by owner/interfacing equipment (bare UniqueIds like `NAC` or `EM`, **not** `NAC-1`) |
-| `Related to` | Optional `;`-separated related `SIG-*` |
+| `Related to` | Optional `;`-separated related `Signal Id` |
 | `Connection Type` | Free-text sensing / connection note |
 | `Interface Type` | `Digital` \| `Analog` \| `Discrete` \| `Power` |
 | `Unit` / `Functional Minimum` / `Functional Maximum` | Engineering unit and **functional** range of the quantity in service (independent of bus encoding; allocation `minimum`/`maximum` hold the wire range) |
@@ -240,21 +187,21 @@ when roles or technologies differ. Relays keep one `Signal Id` across hops.
 | Column | What to enter |
 |---|---|
 | `Bus Id` | Stable instance id (e.g. `NAC_CTRL_1`) |
-| `name` / `bus_use` | Human label and short purpose |
+| `name` / `Bus description` | Human label and short purpose |
 | `Bus Definition` | Exact name of the payload tab for this family (`NAC_CTRL`, …) |
 | `protocol` / `speed` | Transport and bit rate when known |
 | `topology` | `Unidirectional` or `Shared` for digital buses (drives Bus Topology colors). Analog / Discrete / Power are non-digital kinds |
-| `Writer` / `Receiver` | Connected LRU **instances** (naming rule above) |
-| `notes` / platform flags | As needed |
+| `Sender` / `Receiver` | Connected LRU **instances** (naming rule above) |
+| platform flags | As needed |
 
 Several bus instances may share one `Bus Definition` so the payload is authored
-once. On a shared bus, Writer/Receiver list every node; each allocation names
+once. On a shared bus, Sender/Receiver list every node; each allocation names
 only its actual producer and intended receivers (usually a subset).
 
-`Message ID`, bit range, encoding and `update_period_ms` on the definition tab
+`Message ID`, bit range, encoding and `Refresh rate` on the definition tab
 are the inputs for bus load / bandwidth checks: each distinct `Message ID` on a
 physical bus instance is one frame type. Where suppliers have not fixed rates,
-`update_period_ms` may carry class defaults (working assumptions — see workbook
+`Refresh rate` may carry class defaults (working assumptions — see workbook
 `README`).
 
 ### 4. Bus-definition tabs — allocations on a family
@@ -264,23 +211,23 @@ one encoded item on that family.
 
 | Column | What to enter |
 |---|---|
-| `Allocation Id` | Stable row key (`DBUS-*`); **unique workbook-wide**, not only within the tab |
-| `signal_id` | Exactly one `SIG-*` from `1_Signals` (relays: same id on each hop) |
-| `data_name` | Human-readable name on this bus |
-| `writer_lru` / `receiver_lrus` | Producer and intended receivers (nodes of every instance of this definition) |
+| `Allocation Id` | Stable row key; **unique workbook-wide**, not only within the tab |
+| `Signal Id` | Exactly one `Signal Id` from `1_Signals` (relays: same id on each hop) |
+| `Data name` | Human-readable name on this bus |
+| `Sender` / `Receiver` | Producer and intended receivers (nodes of every instance of this definition) |
 | `instance_dimension` | Extra token when the bus instance alone is not enough (e.g. `PACK-{n}`, `EM-{n}`) |
 | `Message ID` | Transport identity: A825/CAN DOC or arbitration id, or A429 label |
-| `message_or_label` | Human message / frame name when useful |
+| `Label` | Human message / frame name when useful |
 | `start bit` / `stop bit` | Field bit range (MSB…LSB inclusive) |
 | `encoding` / `unit` / `scale` / `resolution` / `minimum` / `maximum` | Wire encoding and engineering mapping; `minimum`/`maximum` are the **encoding** range on this bus (often wider than the functional range on `1_Signals`) |
-| `update_period_ms` / `validity` | Refresh period and how the receiver judges validity |
+| `Refresh rate` / `validity` | Refresh period (ms) and how the receiver judges validity |
 | `notes` / platform flags | Current-state notes; applicability flags |
 
 ### Cross-cutting rules
 
-- Prefer stable ids (`SIG-*`, `DBUS-*`, bus ids, `UniqueId`); rename display names freely.
+- Prefer stable ids (Signal Id, bus ids, Unique Id); rename display names freely.
 - Cross-references use ids/UniqueIds, never Excel row numbers or formulas.
 - Multiple values in one cell → semicolon-separated.
-- Hop identity everywhere is **`signal_id`**.
+- Hop identity everywhere is **`Signal Id`**.
 - After edits: integrity check, then rebuild Excel for review; promote to
   `ICD_Database.xlsx` only when approved.

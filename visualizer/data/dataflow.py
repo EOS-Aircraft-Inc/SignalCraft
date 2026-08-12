@@ -21,11 +21,13 @@ from visualizer.data.models import (
     ALLOCATION_ID,
     INTERFACE_TYPE,
     INTERFACING_EQUIPMENT,
-    RECEIVER_LRUS,
+    RECEIVER,
     RELATED_TO,
     REPEATED_PER,
+    ROLES_FROM_OWNER,
+    ROLES_TOWARD_OWNER,
+    SENDER,
     SIGNAL_ID,
-    SIGNAL_ID_REF,
     SIGNAL_OWNER,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
@@ -33,7 +35,7 @@ from visualizer.data.models import (
     TOPOLOGY_DISCRETE,
     TOPOLOGY_POWER,
     TOPOLOGY_UNIDIRECTIONAL,
-    WRITER_LRU,
+    split_refs,
 )
 
 SIGNAL_ROLE = "Signal Role"
@@ -53,8 +55,6 @@ INTERFACE_TOPOLOGY = {
     "Power": TOPOLOGY_POWER,
 }
 
-_ROLE_TO_OWNER = {"Measurement"}  # equipment -> owner
-_ROLE_FROM_OWNER = {"Command", "Power"}  # owner -> equipment
 
 NODE_SYSTEM = "system"
 NODE_SENSOR = "sensor"
@@ -75,10 +75,6 @@ class Dataflow:
     @property
     def empty(self) -> bool:
         return self.nodes.empty
-
-
-def _split(value: object) -> list[str]:
-    return [part.strip() for part in str(value or "").split(";") if part.strip()]
 
 
 def _clean(value: object) -> str:
@@ -103,8 +99,8 @@ def related_signal_ids(signals: pd.DataFrame, signal_id: str) -> list[str]:
 
     if RELATED_TO in signals.columns:
         if not row.empty:
-            found |= set(_split(row.iloc[0].get(RELATED_TO)))
-        declares = signals[RELATED_TO].fillna("").astype(str).apply(lambda v: sid in _split(v))
+            found |= set(split_refs(row.iloc[0].get(RELATED_TO)))
+        declares = signals[RELATED_TO].fillna("").astype(str).apply(lambda v: sid in split_refs(v))
         found |= set(ids[declares])
 
     if PHYSICAL_ID in signals.columns and not row.empty:
@@ -199,7 +195,7 @@ def _add_hardwired_leg(builder: _Builder, row: pd.Series, signal_id: str) -> Non
         detail = f"{detail} · per {repeated}" if detail else f"per {repeated}"
 
     owner_node = builder.system(owner)
-    if role in _ROLE_TO_OWNER:
+    if role in ROLES_TOWARD_OWNER:
         source = (
             builder.system(equip)
             if equip and equip != owner
@@ -210,7 +206,7 @@ def _add_hardwired_leg(builder: _Builder, row: pd.Series, signal_id: str) -> Non
             )
         )
         builder.edge(source, owner_node, interface, signal=signal_id, detail=detail)
-    elif role in _ROLE_FROM_OWNER:
+    elif role in ROLES_FROM_OWNER:
         target = (
             builder.system(equip)
             if equip and equip != owner
@@ -223,22 +219,22 @@ def _add_hardwired_leg(builder: _Builder, row: pd.Series, signal_id: str) -> Non
 
 def _add_bus_legs(builder: _Builder, payload: pd.DataFrame, members: list[str]) -> None:
     """One edge per writer/receiver/bus-definition, aggregating allocations."""
-    if payload.empty or SIGNAL_ID_REF not in payload.columns:
+    if payload.empty or SIGNAL_ID not in payload.columns:
         return
     linked = payload[
-        payload[SIGNAL_ID_REF].fillna("").astype(str).str.strip().isin(members)
+        payload[SIGNAL_ID].fillna("").astype(str).str.strip().isin(members)
     ]
     for _, alloc in linked.iterrows():
         dimension = _clean(alloc.get(INSTANCE_DIMENSION))
-        for writer in _split(alloc.get(WRITER_LRU)):
-            for receiver in _split(alloc.get(RECEIVER_LRUS)):
+        for writer in split_refs(alloc.get(SENDER)):
+            for receiver in split_refs(alloc.get(RECEIVER)):
                 builder.edge(
                     builder.system(writer),
                     builder.system(receiver),
                     DIGITAL,
                     bus=_clean(alloc.get(DEFINITION_TAB)),
                     allocation=_clean(alloc.get(ALLOCATION_ID)),
-                    signal=_clean(alloc.get(SIGNAL_ID_REF)),
+                    signal=_clean(alloc.get(SIGNAL_ID)),
                     detail=f"per {dimension}" if dimension else "",
                 )
 

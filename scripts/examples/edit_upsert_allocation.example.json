@@ -2,10 +2,10 @@
   "upsert": {
     "IRU_TX": [
       {
-        "data_name": "Example allocation",
-        "signal_id": "SIG-041",
-        "writer_lru": "IRU",
-        "receiver_lrus": "FCC;DCU",
+        "Data name": "Example allocation",
+        "Signal Id": "SIG-041",
+        "Sender": "IRU",
+        "Receiver": "FCC;DCU",
         "encoding": "BNR",
         "unit": "deg",
         "notes": "Example bus allocation upsert — dry-run before apply."

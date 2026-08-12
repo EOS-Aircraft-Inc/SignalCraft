@@ -11,15 +11,12 @@ from visualizer.components.selectors import labeled_select
 from visualizer.components.tables import show_dataframe
 from visualizer.data.bus_instances import build_bus_instance_graph
 from visualizer.data.loader import IcdBundle
-from visualizer.data.models import ALLOCATION_ID, SIGNAL_ID
+from visualizer.data.models import ALLOCATION_ID, BUS_DEFINITION, SIGNAL_ID
 
 
 def _definition_column(buses: pd.DataFrame) -> str:
-    if "definition_tab" in buses.columns:
-        return "definition_tab"
-    if "Bus Definition" in buses.columns:
-        return "Bus Definition"
-    return ""
+    """The bus sheet's own column. Allocation rows use ``definition_tab``."""
+    return BUS_DEFINITION if BUS_DEFINITION in buses.columns else ""
 
 
 def _generic_bus_summary(buses: pd.DataFrame, payload: pd.DataFrame) -> pd.DataFrame:
@@ -71,23 +68,16 @@ def _enrich_payload(payload: pd.DataFrame, signals: pd.DataFrame) -> pd.DataFram
     if payload.empty:
         return payload
     work = payload.copy()
-    if signals.empty or SIGNAL_ID not in signals.columns or "signal_id" not in work.columns:
+    if signals.empty or SIGNAL_ID not in signals.columns or SIGNAL_ID not in work.columns:
         return work
     cols = [SIGNAL_ID]
     for optional in ("Signal Name", "Signal Role", "Abbreviation"):
         if optional in signals.columns:
             cols.append(optional)
     lookup = signals[cols].drop_duplicates(SIGNAL_ID)
-    merged = work.merge(
-        lookup,
-        left_on="signal_id",
-        right_on=SIGNAL_ID,
-        how="left",
-        suffixes=("", "_sig"),
-    )
-    if SIGNAL_ID in merged.columns and SIGNAL_ID != "signal_id":
-        merged = merged.drop(columns=[SIGNAL_ID], errors="ignore")
-    return merged
+    # Allocations and the signals catalog now share the Signal Id column name,
+    # so this is a plain same-key join.
+    return work.merge(lookup, on=SIGNAL_ID, how="left", suffixes=("", "_sig"))
 
 
 def render(bundle: IcdBundle) -> None:
@@ -194,12 +184,12 @@ def _render_selection(bundle: IcdBundle, summary: pd.DataFrame, selected: str) -
                 for c in [
                     "Bus Id",
                     "name",
+                    "Bus description",
                     "protocol",
                     "speed",
                     "topology",
-                    "Writer",
+                    "Sender",
                     "Receiver",
-                    "notes",
                 ]
                 if c in instances.columns
             ]
@@ -220,20 +210,20 @@ def _render_selection(bundle: IcdBundle, summary: pd.DataFrame, selected: str) -
                 c
                 for c in [
                     ALLOCATION_ID,
-                    "data_name",
-                    "signal_id",
+                    "Data name",
+                    "Signal Id",
                     "Signal Name",
                     "Signal Role",
-                    "writer_lru",
-                    "receiver_lrus",
+                    "Sender",
+                    "Receiver",
                     "instance_dimension",
                     "Message ID",
-                    "message_or_label",
+                    "Label",
                     "start bit",
                     "stop bit",
                     "encoding",
                     "unit",
-                    "update_period_ms",
+                    "Refresh rate",
                     "hop_role",
                     "notes",
                 ]

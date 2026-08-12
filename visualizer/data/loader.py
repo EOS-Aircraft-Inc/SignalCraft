@@ -3,30 +3,16 @@
 from __future__ import annotations
 
 import hashlib
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
-
-from visualizer.data.models import (
-    ALLOCATION_ID,
-    CONTROLLED_SHEETS,
-    DATABUSES_SHEET,
-    SIGNAL_ID,
-    SIGNALS_SHEET,
-    SYSTEMS_SHEET,
-)
-
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_SCRIPTS = _PROJECT_ROOT / "scripts"
-if str(_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS))
-
-from icd_csv import load_manifest, read_sheet, sheet_index  # noqa: E402
-from icd_instances import SystemTree  # noqa: E402
-from icd_paths import DEFAULT_CSV_DIR  # noqa: E402
-from icd_sheets import (  # noqa: E402
+from icd_csv import load_manifest, read_sheet, require_signals_sheet
+from icd_instances import SystemTree
+from icd_paths import DEFAULT_CSV_DIR
+from icd_sheets import (
+    BUS_DEFINITION,
+    BUS_ROLES_FROM_OWNER,
     TOPOLOGY_ANALOG,
     TOPOLOGY_DISCRETE,
     TOPOLOGY_POWER,
@@ -35,13 +21,14 @@ from icd_sheets import (  # noqa: E402
     normalize_bus_topology,
 )
 
-
-def resolve_signals_sheet(manifest: dict) -> str:
-    """Return the catalog sheet name present in the workbook."""
-    index = sheet_index(manifest)
-    if SIGNALS_SHEET in index:
-        return SIGNALS_SHEET
-    raise KeyError(f"{SIGNALS_SHEET} not found in workbook manifest")
+from visualizer.data.models import (
+    CONTROLLED_SHEETS,
+    DATABUSES_SHEET,
+    RECEIVER,
+    SENDER,
+    SIGNAL_ID,
+    SYSTEMS_SHEET,
+)
 
 
 def csv_mtime_key(csv_dir: Path | None = None) -> str:
@@ -72,18 +59,6 @@ def _split_ids(value: object) -> list[str]:
     return [part.strip() for part in text.split(";") if part.strip()]
 
 
-def _normalize_payload(frame: pd.DataFrame) -> pd.DataFrame:
-    """Normalize allocation PK and signal identity columns."""
-    work = frame.copy()
-    if ALLOCATION_ID not in work.columns and "Data Id" in work.columns:
-        work = work.rename(columns={"Data Id": ALLOCATION_ID})
-    elif ALLOCATION_ID not in work.columns and "data_id" in work.columns:
-        work = work.rename(columns={"data_id": ALLOCATION_ID})
-    if "signal_id" not in work.columns and SIGNAL_ID in work.columns:
-        work = work.rename(columns={SIGNAL_ID: "signal_id"})
-    return work
-
-
 @dataclass
 class IcdBundle:
     systems: pd.DataFrame
@@ -103,15 +78,11 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
     _ = mtime_key
     csv_dir = Path(csv_dir) if csv_dir else DEFAULT_CSV_DIR
     manifest = load_manifest(csv_dir)
-    signals_sheet = resolve_signals_sheet(manifest)
+    signals_sheet = require_signals_sheet(manifest)
 
     systems = _sheet_to_df(SYSTEMS_SHEET, csv_dir, manifest)
     signals = _sheet_to_df(signals_sheet, csv_dir, manifest)
     buses = _sheet_to_df(DATABUSES_SHEET, csv_dir, manifest)
-    if not buses.empty:
-        buses = buses.copy()
-        if "Bus Definition" in buses.columns and "definition_tab" not in buses.columns:
-            buses["definition_tab"] = buses["Bus Definition"]
 
     controlled = set(CONTROLLED_SHEETS) | {signals_sheet}
     payload_frames: list[pd.DataFrame] = []
@@ -122,7 +93,6 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
         frame = _sheet_to_df(sheet_name, csv_dir, manifest)
         if frame.empty:
             continue
-        frame = _normalize_payload(frame)
         frame["definition_tab"] = sheet_name
         payload_frames.append(frame)
 
@@ -151,15 +121,15 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
         )
 
         def derive_physical(row: pd.Series) -> str:
-            sid = str(row.get("signal_id") or "").strip()
+            sid = str(row.get(SIGNAL_ID) or "").strip()
             return str(phys_map.get(sid, "") or "")
 
         def hop_role(row: pd.Series) -> str:
-            sid = str(row.get("signal_id") or "").strip()
+            sid = str(row.get(SIGNAL_ID) or "").strip()
             if not sid:
                 return "unlinked"
             role = str(role_map.get(sid, "") or "").strip()
-            writer = str(row.get("writer_lru") or "").strip()
+            writer = str(row.get(SENDER) or "").strip()
             owners = {
                 part.strip()
                 for part in str(owner_map.get(sid, "") or "").split(";")
@@ -406,7 +376,6 @@ def _add_interface_links_from_signals(
                 "target": target,
                 "edge_type": edge_type,
                 "bus_id": bus_id,
-                "data_id": "",
                 "signal_ref": signal_ref,
                 "link_kind": link_kind,
             }
@@ -436,7 +405,7 @@ def _add_interface_links_from_signals(
 
         # Measurement / default: physical -> owner.
         # Command / Request / Power: owner -> physical (source/controller to load/target).
-        if role in {"Command", "Request", "Power"}:
+        if role in BUS_ROLES_FROM_OWNER:
             left_acr, right_acr = owner, physical
             left_tokens, right_tokens = owner_tokens, phys_tokens
         else:
@@ -501,7 +470,6 @@ def _graph_frames(
                 "target",
                 "edge_type",
                 "bus_id",
-                "data_id",
                 "signal_ref",
                 "link_kind",
             ]
@@ -518,7 +486,7 @@ def _build_generic_graph(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """One node per Bus Definition; bare (non-instantiated) LRU acronyms.
 
-    Writer/Receiver endpoints are collapsed to system acronyms. Analog /
+    Sender/Receiver endpoints are collapsed to system acronyms. Analog /
     Discrete / Power links are direct LRU↔LRU edges between those acronyms.
     """
     _ = systems
@@ -563,7 +531,6 @@ def _build_generic_graph(
                 "target": target,
                 "edge_type": edge_type,
                 "bus_id": bus_id,
-                "data_id": "",
                 "signal_ref": "",
                 "link_kind": "",
             }
@@ -571,13 +538,11 @@ def _build_generic_graph(
 
     if not buses.empty:
         for _, row in buses.iterrows():
-            family = str(
-                row.get("definition_tab") or row.get("Bus Definition") or ""
-            ).strip()
+            family = str(row.get(BUS_DEFINITION) or "").strip()
             if not family:
                 continue
-            writers = [_base_acronym(w) for w in _split_ids(row.get("Writer"))]
-            receivers = [_base_acronym(r) for r in _split_ids(row.get("Receiver"))]
+            writers = [_base_acronym(w) for w in _split_ids(row.get(SENDER))]
+            receivers = [_base_acronym(r) for r in _split_ids(row.get(RECEIVER))]
             mode = classify_bus_mode(row.get("topology"), writers, receivers)
             add_node(family, "bus", family, bus_mode=mode, family=family)
 
@@ -587,11 +552,11 @@ def _build_generic_graph(
             if not family:
                 continue
             add_node(family, "bus", family, family=family)
-            for writer in _split_ids(row.get("writer_lru")):
+            for writer in _split_ids(row.get(SENDER)):
                 acr = _base_acronym(writer)
                 add_node(acr, "lru")
                 add_edge(acr, family, "writes", family)
-            for receiver in _split_ids(row.get("receiver_lrus")):
+            for receiver in _split_ids(row.get(RECEIVER)):
                 acr = _base_acronym(receiver)
                 add_node(acr, "lru")
                 add_edge(family, acr, "reads", family)
@@ -650,7 +615,7 @@ def _build_graph(
     signals: pd.DataFrame | None = None,
     systems: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Full-network graph: physical bus + LRU instances from Writer/Receiver."""
+    """Full-network graph: physical bus + LRU instances from Sender/Receiver."""
     _ = bus_payload
     nodes: dict[str, dict[str, str]] = {}
     edges: list[dict[str, str]] = []
@@ -685,19 +650,9 @@ def _build_graph(
             bus_id = str(row.get("Bus Id") or "").strip()
             if not bus_id:
                 continue
-            writers = _split_ids(row.get("Writer")) or _split_ids(
-                row.get("equipment_connected")
-            )
-            receivers = _split_ids(row.get("Receiver"))
-            if not receivers and "equipment_connected" in row.index:
-                receivers = [
-                    e
-                    for e in _split_ids(row.get("equipment_connected"))
-                    if e not in writers
-                ]
-            family = str(
-                row.get("definition_tab") or row.get("Bus Definition") or ""
-            ).strip()
+            writers = _split_ids(row.get(SENDER))
+            receivers = _split_ids(row.get(RECEIVER))
+            family = str(row.get(BUS_DEFINITION) or "").strip()
             mode = classify_bus_mode(row.get("topology"), writers, receivers)
             add_node(
                 bus_id,
@@ -714,8 +669,7 @@ def _build_graph(
                         "target": bus_id,
                         "edge_type": "writes",
                         "bus_id": bus_id,
-                        "data_id": "",
-                        "signal_ref": "",
+                                "signal_ref": "",
                         "link_kind": mode,
                     }
                 )
@@ -728,8 +682,7 @@ def _build_graph(
                         "target": lru,
                         "edge_type": "reads",
                         "bus_id": bus_id,
-                        "data_id": "",
-                        "signal_ref": "",
+                                "signal_ref": "",
                         "link_kind": mode,
                     }
                 )
@@ -747,11 +700,11 @@ def _build_graph(
 
 
 def payloads_for_signal(bundle: IcdBundle, *, signal_id: str = "") -> pd.DataFrame:
-    """All bus-definition allocations sharing a canonical signal_id."""
+    """All bus-definition allocations sharing a canonical Signal Id."""
     frame = bundle.bus_payload
     if frame.empty or not signal_id:
         return frame.iloc[0:0].copy() if not frame.empty else frame
-    if "signal_id" not in frame.columns:
+    if SIGNAL_ID not in frame.columns:
         return frame.iloc[0:0].copy()
-    mask = frame["signal_id"].fillna("").astype(str).str.strip() == signal_id
+    mask = frame[SIGNAL_ID].fillna("").astype(str).str.strip() == signal_id
     return frame.loc[mask].copy()

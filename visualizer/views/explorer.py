@@ -5,12 +5,21 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from visualizer.components.filters import apply_text_search, filter_by_systems, system_filter
+from visualizer.components.filters import (
+    apply_text_search,
+    filter_by_systems,
+    filter_by_values,
+    system_filter,
+    value_filter,
+)
 from visualizer.components.graphs import signal_dataflow_figure
-from visualizer.components.tables import show_aggrid, show_dataframe
+from visualizer.components.selectors import table_select_id
+from visualizer.components.tables import show_dataframe
 from visualizer.data.dataflow import build_dataflow
 from visualizer.data.loader import IcdBundle, payloads_for_signal
 from visualizer.data.models import ALLOCATION_ID, SIGNAL_ID
+
+_SIGNAL_ROLE = "Signal Role"
 
 _HOP_ROLE_ORDER = {
     "origin": 0,
@@ -43,7 +52,7 @@ def render(bundle: IcdBundle) -> None:
     st.header("Signal Explorer")
     st.caption(
         f"Browse `{bundle.signals_sheet}` — one row per logical signal. "
-        "Bus allocations are linked by canonical `signal_id`. "
+        "Bus allocations are linked by canonical `Signal Id`. "
         "`Repeated Per` adds dimensions beyond those implied by Signal Owner / "
         "Interfacing Equipment; empty means every instance of the base system."
     )
@@ -53,7 +62,7 @@ def render(bundle: IcdBundle) -> None:
         c for c in ["Signal Owner", "Interfacing Equipment"] if c in bundle.signals.columns
     ]
 
-    col_system, col_search = st.columns([1.4, 1])
+    col_system, col_role, col_search = st.columns([1.4, 1, 1])
     with col_system:
         systems = system_filter(
             bundle.signals,
@@ -61,11 +70,22 @@ def render(bundle: IcdBundle) -> None:
             key="explorer_sys",
             systems=bundle.systems,
         )
+    with col_role:
+        roles = value_filter(
+            bundle.signals,
+            _SIGNAL_ROLE,
+            label=_SIGNAL_ROLE,
+            key="explorer_role",
+        )
     with col_search:
         query = st.text_input("Search", key="explorer_search")
 
     work = apply_text_search(
-        filter_by_systems(bundle.signals, systems, system_cols),
+        filter_by_values(
+            filter_by_systems(bundle.signals, systems, system_cols),
+            roles,
+            _SIGNAL_ROLE,
+        ),
         query,
         [
             SIGNAL_ID,
@@ -95,7 +115,17 @@ def render(bundle: IcdBundle) -> None:
     ]
 
     st.subheader("Signals")
-    selected = show_aggrid(work[table_cols], key="explorer_grid", selection_column=SIGNAL_ID)
+    st.caption(f"Click a row for details — {len(work)} of {len(bundle.signals)} signals.")
+    clicked = table_select_id(work[table_cols], SIGNAL_ID, key="explorer_table")
+    if clicked:
+        st.session_state["explorer_selected_id"] = clicked
+
+    # Keep the detail panel on the chosen signal across reruns and filter
+    # changes, and drop it only once that signal leaves the catalog.
+    selected = str(st.session_state.get("explorer_selected_id") or "")
+    if selected and selected not in set(bundle.signals[SIGNAL_ID].astype(str)):
+        selected = ""
+        st.session_state.pop("explorer_selected_id", None)
 
     st.divider()
     if not selected:
@@ -140,11 +170,11 @@ def render(bundle: IcdBundle) -> None:
                     for c in [
                         ALLOCATION_ID,
                         "definition_tab",
-                        "data_name",
-                        "writer_lru",
-                        "receiver_lrus",
+                        "Data name",
+                        "Sender",
+                        "Receiver",
                         "instance_dimension",
-                        "signal_id",
+                        "Signal Id",
                         "hop_role",
                     ]
                     if c in linked.columns

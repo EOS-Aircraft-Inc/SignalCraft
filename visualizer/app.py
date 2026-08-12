@@ -39,10 +39,7 @@ st.set_page_config(
 
 _EXPORT_BYTES_KEY = "sidebar_export_bytes"
 _EXPORT_NAME_KEY = "sidebar_export_download_name"
-_BANNERS = (
-    _PROJECT_ROOT / "SignalCraft_sidebar.jpg",  # 600px, ~85x lighter than the source
-    _PROJECT_ROOT / "SignalCraft.png",
-)
+_BANNER = _PROJECT_ROOT / "SignalCraft_sidebar.jpg"  # 600px wide, ~74 KB
 
 
 @st.cache_data(show_spinner="Loading ICD CSVs…")
@@ -93,7 +90,7 @@ def _render_sidebar_io() -> None:
                 st.session_state[_EXPORT_BYTES_KEY] = out.read_bytes()
                 st.session_state[_EXPORT_NAME_KEY] = out.name
             st.sidebar.success("Workbook ready — use Download below.")
-        except Exception as exc:  # noqa: BLE001 — surface rebuild errors in UI
+        except Exception as exc:
             st.sidebar.error(f"Export failed: {exc}")
 
     if st.session_state.get(_EXPORT_BYTES_KEY):
@@ -137,14 +134,13 @@ def _render_sidebar_io() -> None:
             st.rerun()
         except IncompatibleWorkbookError as exc:
             st.sidebar.error(str(exc))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             st.sidebar.error(f"Import failed: {exc}")
 
 
 def main() -> None:
-    banner = next((path for path in _BANNERS if path.is_file()), None)
-    if banner:
-        st.sidebar.image(str(banner), width="stretch")
+    if _BANNER.is_file():
+        st.sidebar.image(str(_BANNER), width="stretch")
     else:  # keep the ribbon labelled if no banner ships with the checkout
         st.sidebar.title("SignalCraft")
 

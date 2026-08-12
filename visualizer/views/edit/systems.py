@@ -13,40 +13,19 @@ from visualizer.components.selectors import (
 )
 from visualizer.data.loader import IcdBundle
 from visualizer.data.models import (
+    NO_INSTANCE_SYSTEM_TYPES,
     SYSTEM_ID,
     SYSTEM_TEXTUAL_NAME,
+    SYSTEM_TYPES,
     SYSTEM_UNIQUE_ID,
     SYSTEMS_SHEET,
+    system_multiplicity_error,
 )
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import apply_now, render_apply_panel, sync_fields
 
-STATUS_TYPES = ["Aircraft", "Zone", "Component", "Controller", "System"]
-NO_INSTANCE_TYPES = frozenset({"Aircraft", "System"})
-
-
-def _multiplicity_error(typ: str, mult: str, token: str = "") -> str | None:
-    mult = (mult or "").strip()
-    token = (token or "").strip()
-    if typ in NO_INSTANCE_TYPES:
-        if mult:
-            return (
-                f"Type '{typ}' must have an empty Multiplicity "
-                "(functional / aircraft rows are not instantiated)."
-            )
-        return None
-    if typ in {"Zone", "Component", "Controller"}:
-        if not mult.isdigit() or int(mult) < 1:
-            return (
-                f"Type '{typ}' requires Multiplicity as a positive integer "
-                f"(got {mult!r})."
-            )
-        if int(mult) > 1 and not token:
-            return (
-                f"Type '{typ}' with Multiplicity {mult} requires a non-empty "
-                "Instance Token."
-            )
-    return None
+# Multiplicity a non-instantiated row may keep without the editor rewriting it.
+_TOLERATED_NO_INSTANCE_MULTIPLICITY = frozenset({"", "1"})
 
 
 def render(bundle: IcdBundle) -> None:
@@ -80,10 +59,10 @@ def render(bundle: IcdBundle) -> None:
     )
     document: dict = {}
     functional_labels, functional_map = system_acronym_labels(
-        systems, include_types={"System"}
+        systems, include_types={"Domain"}
     )
     installed_labels, installed_map = system_acronym_labels(
-        systems, exclude_types={"System"}
+        systems, exclude_types={"Domain"}
     )
 
     if action == "Delete":
@@ -148,7 +127,7 @@ def render(bundle: IcdBundle) -> None:
                 st.session_state.pop("edit_sys_rename_mode", None)
                 st.rerun()
 
-        func_acr = str(original.get("Functional system") or "").strip()
+        func_acr = str(original.get("Domain") or "").strip()
         inst_acr = str(original.get("Installed In/Part of") or "").strip()
         func_label = next(
             (lab for lab, a in functional_map.items() if a == func_acr), ""
@@ -162,7 +141,7 @@ def render(bundle: IcdBundle) -> None:
             {
                 "edit_sys_name": original.get(SYSTEM_TEXTUAL_NAME, ""),
                 "edit_sys_type": original.get("Type", "")
-                if original.get("Type") in STATUS_TYPES
+                if original.get("Type") in SYSTEM_TYPES
                 else "",
                 "edit_sys_func_label": func_label,
                 "edit_sys_inst_label": inst_label,
@@ -192,33 +171,42 @@ def render(bundle: IcdBundle) -> None:
 
     name = st.text_input("Textual Name", key="edit_sys_name")
 
-    type_options = [""] + STATUS_TYPES
+    type_options = ["", *SYSTEM_TYPES]
     type_col, func_col = st.columns(2)
     with type_col:
         typ = st.selectbox("Type", type_options, key="edit_sys_type")
-    no_instance = typ in NO_INSTANCE_TYPES
+    no_instance = typ in NO_INSTANCE_SYSTEM_TYPES
     with func_col:
         if no_instance:
             functional = ""
-            st.caption("Functional system: empty for Aircraft / System.")
+            st.caption("Domain: empty for Aircraft / Domain rows.")
         else:
             functional = labeled_acronym_select(
-                "Functional system",
+                "Domain",
                 functional_labels,
                 functional_map,
                 key="edit_sys_func",
-                current=str(original.get("Functional system") or "")
+                current=str(original.get("Domain") or "")
                 if mode == "Edit existing" and original
                 else "",
             )
 
     if no_instance:
         installed = ""
-        mult = ""
         token = ""
+        # Keep an existing empty/"1" Multiplicity exactly as it is: rewriting it
+        # to "" here would clear the stored value on any unrelated edit (the
+        # aircraft row legitimately holds "1"). A leftover value from a previous
+        # Type, such as "3", is still cleared — that is the intended correction.
+        original_mult = str(original.get("Multiplicity") or "").strip()
+        mult = (
+            original_mult
+            if original_mult in _TOLERATED_NO_INSTANCE_MULTIPLICITY
+            else ""
+        )
         st.caption(
-            "Type **Aircraft** or **System** (functional): Installed In, "
-            "Multiplicity and Instance Token stay empty."
+            "Type **Aircraft** or **System** (functional): Installed In and "
+            "Instance Token stay empty, and Multiplicity stays empty or `1`."
         )
     else:
         installed = labeled_acronym_select(
@@ -253,7 +241,7 @@ def render(bundle: IcdBundle) -> None:
     desc = st.text_area("Description", key="edit_sys_desc")
     notes = st.text_area("Notes", key="edit_sys_notes")
 
-    mult_err = _multiplicity_error(typ or "", mult, token)
+    mult_err = system_multiplicity_error(typ or "", mult, token)
     if mult_err:
         st.error(mult_err)
 
@@ -271,7 +259,7 @@ def render(bundle: IcdBundle) -> None:
         "Description": desc,
         "Notes": notes,
         "Installed In/Part of": installed,
-        "Functional system": functional,
+        "Domain": functional,
         "Multiplicity": mult,
         "Instance Token": token,
     }
@@ -279,7 +267,7 @@ def render(bundle: IcdBundle) -> None:
         payload = {k: v for k, v in edited.items() if v != ""}
         if no_instance:
             payload.pop("Installed In/Part of", None)
-            payload.pop("Functional system", None)
+            payload.pop("Domain", None)
             payload.pop("Multiplicity", None)
             payload.pop("Instance Token", None)
         if sid.strip():

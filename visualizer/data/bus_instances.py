@@ -1,6 +1,6 @@
 """Bus instance graph: every physical instance of a Bus Definition.
 
-``10_Databuses`` names ``Writer`` and ``Receiver`` per bus instance using
+``10_Databuses`` names ``Sender`` and ``Receiver`` per bus instance using
 instance names (``HICU-3``, ``EMC-1-2``), so a definition instantiated four
 times yields four independent stars — one per physical bus with its own LRU
 instances — rather than one collapsed picture.
@@ -14,11 +14,13 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from visualizer.data.models import (
+    BUS_DEFINITION,
     BUS_ID,
     RECEIVER,
+    SENDER,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
-    WRITER,
+    split_refs,
 )
 
 ROLE_WRITER = "writer"
@@ -34,9 +36,9 @@ BUS_ROLE_COLORS = {
 }
 
 BUS_ROLE_LABELS = {
-    ROLE_WRITER: "Writer",
+    ROLE_WRITER: "Sender",
     ROLE_RECEIVER: "Receiver",
-    ROLE_BOTH: "Writer + Receiver",
+    ROLE_BOTH: "Sender + Receiver",
     ROLE_BUS: "Bus instance",
 }
 
@@ -61,10 +63,6 @@ class BusInstanceGraph:
         return self.nodes.empty
 
 
-def _split(value: object) -> list[str]:
-    return [part.strip() for part in str(value or "").split(";") if part.strip()]
-
-
 def _clean(value: object) -> str:
     return str(value or "").strip()
 
@@ -75,11 +73,7 @@ def base_system_id(instance_name: str) -> str:
 
 
 def _definition_column(buses: pd.DataFrame) -> str:
-    if "definition_tab" in buses.columns:
-        return "definition_tab"
-    if "Bus Definition" in buses.columns:
-        return "Bus Definition"
-    return ""
+    return BUS_DEFINITION if BUS_DEFINITION in buses.columns else ""
 
 
 def build_bus_instance_graph(
@@ -113,8 +107,8 @@ def build_bus_instance_graph(
     for _, bus in matching.iterrows():
         bus_id = _clean(bus.get(BUS_ID)) or _clean(bus.get("name")) or target
         instances.append(bus_id)
-        writers = set(_split(bus.get(WRITER)))
-        receivers = set(_split(bus.get(RECEIVER)))
+        writers = set(split_refs(bus.get(SENDER)))
+        receivers = set(split_refs(bus.get(RECEIVER)))
         dual = sorted(writers & receivers)
         # Split the dual-role LRUs across both sides: on a shared bus every node
         # is dual-role, and stacking them all on one side reads as a fan, not a bus.
@@ -147,7 +141,7 @@ def build_bus_instance_graph(
                             ]
                             if value
                         ),
-                        f"{len(writers)} writer(s) · {len(receivers)} receiver(s)",
+                        f"{len(writers)} sender(s) · {len(receivers)} receiver(s)",
                     ]
                     if part
                 ),

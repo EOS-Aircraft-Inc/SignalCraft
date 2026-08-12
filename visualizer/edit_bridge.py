@@ -3,17 +3,10 @@
 from __future__ import annotations
 
 import json
-import sys
-from pathlib import Path
 from typing import Any
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[1]
-_SCRIPTS = _PROJECT_ROOT / "scripts"
-if str(_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS))
-
-from icd_edit_lib import EditResult, format_result, run_edit  # noqa: E402
-from icd_paths import DEFAULT_CSV_DIR  # noqa: E402
+from icd_edit_lib import EditResult, format_result, run_edit
+from icd_paths import DEFAULT_CSV_DIR
 
 
 def apply_document(document: dict[str, Any], *, dry_run: bool = True) -> EditResult:

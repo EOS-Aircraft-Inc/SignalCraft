@@ -1,0 +1,6 @@
+# SignalCraft visualizer settings.
+# The ICD database is confidential, so nothing here may phone home.
+
+[browser]
+# Streamlit collects anonymous usage statistics by default. Off.
+gatherUsageStats = false

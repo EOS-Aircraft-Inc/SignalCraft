@@ -2,55 +2,16 @@
 
 from __future__ import annotations
 
-import re
-
 import pandas as pd
 import streamlit as st
+from icd_instances import ROOT_TOKEN, SystemTree
 
+from visualizer.components.selectors import rows_by_unique_id
 from visualizer.data.models import (
     INSTALLED_IN,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
 )
-
-_COUNTER = re.compile(r"\{(n+)\}")
-_PARENT_COL = INSTALLED_IN
-
-
-def _rows_by_unique_id(systems: pd.DataFrame) -> dict[str, dict[str, str]]:
-    out: dict[str, dict[str, str]] = {}
-    if systems.empty or SYSTEM_UNIQUE_ID not in systems.columns:
-        return out
-    for _, row in systems.iterrows():
-        uid = str(row.get(SYSTEM_UNIQUE_ID) or "").strip()
-        if uid:
-            out[uid] = {c: str(row.get(c, "") or "") for c in systems.columns}
-    return out
-
-
-def _level_tokens(mult: int, token_pattern: str) -> list[str]:
-    token_pattern = (token_pattern or "").strip()
-    if not token_pattern:
-        return []
-    match = _COUNTER.search(token_pattern)
-    if not match:
-        return [p.strip() for p in token_pattern.split(";") if p.strip()]
-    if mult < 1:
-        return []
-    width = len(match.group(1))
-    return [
-        _COUNTER.sub(f"{index:0{width}d}", token_pattern)
-        for index in range(1, mult + 1)
-    ]
-
-
-def _chain(by_id: dict[str, dict[str, str]], unique_id: str) -> list[str]:
-    result: list[str] = []
-    node = unique_id
-    while node and node in by_id and node not in result:
-        result.append(node)
-        node = (by_id[node].get(_PARENT_COL) or "").strip()
-    return result
 
 
 def containment_schema_lines(
@@ -63,7 +24,7 @@ def containment_schema_lines(
 
     ``overrides`` patches the edited row (UniqueId, parent, multiplicity, token, type).
     """
-    by_id = _rows_by_unique_id(systems)
+    by_id = rows_by_unique_id(systems)
     overrides = dict(overrides or {})
     target = (overrides.get(SYSTEM_UNIQUE_ID) or unique_id or "").strip()
     if not target:
@@ -75,24 +36,25 @@ def containment_schema_lines(
         SYSTEM_UNIQUE_ID,
         SYSTEM_TEXTUAL_NAME,
         "Type",
-        _PARENT_COL,
+        INSTALLED_IN,
         "Multiplicity",
         "Instance Token",
     ):
         if key in overrides:
             base[key] = str(overrides[key] or "")
     by_id[target] = base
+    tree = SystemTree(list(by_id.values()))
 
     typ = (base.get("Type") or "").strip()
-    if typ == "System":
+    if typ == "Domain":
         name = base.get(SYSTEM_TEXTUAL_NAME) or target
         return [
             f"<b>{target}</b> — {name}",
-            "<i>Functional system: not instantiated "
+            "<i>Domain: not instantiated "
             "(no Multiplicity / Instance Token).</i>",
         ], 0
 
-    chain = list(reversed(_chain(by_id, target)))  # root → leaf
+    chain = list(reversed(tree.chain(target)))  # root → leaf
     if not chain:
         return [f"No containment path for `{target}`."], 0
 
@@ -101,10 +63,8 @@ def containment_schema_lines(
     for depth, uid in enumerate(chain):
         row = by_id.get(uid) or {}
         name = row.get(SYSTEM_TEXTUAL_NAME) or uid
-        mult_s = (row.get("Multiplicity") or "").strip()
-        mult = int(mult_s) if mult_s.isdigit() else (1 if uid == "AC" else 0)
-        token_pat = row.get("Instance Token") or ""
-        tokens = _level_tokens(mult, token_pat)
+        mult = tree.multiplicity(uid) or (1 if uid == ROOT_TOKEN else 0)
+        tokens = tree.tokens(uid)
         if mult >= 1:
             running *= mult if mult else 1
         indent = "&nbsp;&nbsp;" * depth

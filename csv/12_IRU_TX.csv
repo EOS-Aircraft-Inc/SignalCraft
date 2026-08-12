@@ -1,4 +1,4 @@
-﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
 DBUS-001,Aircraft pitch angle,IRU,DCU;FCC;FMS,,SIG-041,TBD,TBD,TBD,TBD,BNR,deg,,,,,20,"Sign / status matrix in the word, plus receiver freshness timeout",Label and rate TBD,TBD,TBD,TBD
 DBUS-002,Aircraft roll angle,IRU,DCU;FCC;FMS,,SIG-042,TBD,TBD,TBD,TBD,BNR,deg,,,,,20,"Sign / status matrix in the word, plus receiver freshness timeout",Label and rate TBD,TBD,TBD,TBD
 DBUS-003,Aircraft heading angle,IRU,DCU;FCC;FMS,,SIG-043,TBD,TBD,TBD,TBD,BNR,deg,,,,,20,"Sign / status matrix in the word, plus receiver freshness timeout",True vs magnetic TBD; label and rate TBD,TBD,TBD,TBD

@@ -8,28 +8,28 @@ from visualizer.components.selectors import (
     filter_buses_by_acronym,
     instance_endpoint_labels,
     labeled_acronym_select,
-    labeled_multi_acronym,
     labeled_multi_select,
     system_acronym_labels,
     table_select_id,
 )
 from visualizer.data.loader import IcdBundle
-from visualizer.data.models import BUS_ID, BUS_TOPOLOGIES, DATABUSES_SHEET
+from visualizer.data.models import (
+    BUS_DEFINITION,
+    BUS_ID,
+    BUS_TOPOLOGIES,
+    DATABUSES_SHEET,
+    split_refs,
+)
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import render_apply_panel, sync_fields
 
-# Generic topology LRUs: physical equipment that rides Writer/Receiver.
+# Generic topology LRUs: physical equipment that rides Sender/Receiver.
 _GENERIC_TYPES = frozenset({"Component", "Controller"})
 
 
 def _def_col(buses) -> str:
-    if "Bus Definition" in buses.columns:
-        return "Bus Definition"
-    return "definition_tab"
-
-
-def _split_refs(value: str) -> list[str]:
-    return [p.strip() for p in str(value or "").split(";") if p.strip()]
+    """The bus sheet's own Bus Definition column."""
+    return BUS_DEFINITION
 
 
 def render(bundle: IcdBundle) -> None:
@@ -37,20 +37,19 @@ def render(bundle: IcdBundle) -> None:
     st.caption(
         "Topology index only — payload rows are edited under Bus definition. "
         "Pick a component to list every bus where any of its instances is "
-        "Writer or Receiver. Click a row to select it."
+        "Sender or Receiver. Click a row to select it."
     )
     buses = bundle.buses
-    sys_labels, sys_map = system_acronym_labels(bundle.systems)
     comp_labels, comp_map = system_acronym_labels(
-        bundle.systems, include_types=set(_GENERIC_TYPES)
+        bundle.systems, include_types=_GENERIC_TYPES
     )
     # Tokens already present on any bus — keep odd/legacy values selectable.
     bus_tokens: list[str] = []
-    for col in ("Writer", "Receiver"):
+    for col in ("Sender", "Receiver"):
         if col not in buses.columns:
             continue
         for value in buses[col].dropna():
-            bus_tokens.extend(_split_refs(str(value)))
+            bus_tokens.extend(split_refs(str(value)))
     endpoint_labels, endpoint_map = instance_endpoint_labels(
         bundle.systems, extra_tokens=bus_tokens
     )
@@ -119,11 +118,9 @@ def render(bundle: IcdBundle) -> None:
             row = buses[buses["Bus Id"] == bid].iloc[0]
             original = {c: str(row.get(c, "") or "") for c in buses.columns}
             st.markdown(f"**Selected:** `{bid}` — {original.get('name', '')}")
-            acr_to_lab = {acr: lab for lab, acr in sys_map.items()}
             ep_to_lab = {val: lab for lab, val in endpoint_map.items()}
-            master = str(original.get("master_lru") or "").strip()
-            wr_refs = _split_refs(original.get("Writer", ""))
-            rx_refs = _split_refs(original.get("Receiver", ""))
+            wr_refs = split_refs(original.get("Sender", ""))
+            rx_refs = split_refs(original.get("Receiver", ""))
             sync_fields(
                 "edit_bus",
                 bid,
@@ -138,17 +135,13 @@ def render(bundle: IcdBundle) -> None:
                     "edit_bus_rx": [
                         ep_to_lab[t] for t in rx_refs if t in ep_to_lab
                     ],
-                    "edit_bus_eq": [
-                        acr_to_lab[a]
-                        for a in _split_refs(original.get("equipment_connected", ""))
-                        if a in acr_to_lab
-                    ],
                     "edit_bus_proto": original.get("protocol", ""),
                     "edit_bus_speed": original.get("speed", ""),
                     "edit_bus_topo": original.get("topology", ""),
-                    "edit_bus_use": original.get("bus_use", ""),
-                    "edit_bus_notes": original.get("notes", ""),
-                    "edit_bus_master_label": acr_to_lab.get(master, ""),
+                    "edit_bus_use": original.get("Bus description", ""),
+                    "edit_bus_ac": original.get("On aircraft ?", ""),
+                    "edit_bus_fnd": original.get("On FND ?", ""),
+                    "edit_bus_sim": original.get("On Sim ?", ""),
                 },
             )
         else:
@@ -161,13 +154,13 @@ def render(bundle: IcdBundle) -> None:
                     "edit_bus_def": "",
                     "edit_bus_wr": [],
                     "edit_bus_rx": [],
-                    "edit_bus_eq": [],
                     "edit_bus_proto": "",
                     "edit_bus_speed": "",
                     "edit_bus_topo": "",
                     "edit_bus_use": "",
-                    "edit_bus_notes": "",
-                    "edit_bus_master_label": "",
+                    "edit_bus_ac": "",
+                    "edit_bus_fnd": "",
+                    "edit_bus_sim": "",
                 },
             )
 
@@ -176,7 +169,7 @@ def render(bundle: IcdBundle) -> None:
         with def_col_ui:
             definition = st.selectbox(
                 "Bus Definition / family",
-                [""] + families + ["(new…)"],
+                ["", *families, "(new…)"],
                 key="edit_bus_def",
             )
         with proto_col:
@@ -198,7 +191,7 @@ def render(bundle: IcdBundle) -> None:
                 topo_opts = [*topo_opts, current_topo]
             topology = st.selectbox(
                 "topology",
-                options=[""] + topo_opts,
+                options=["", *topo_opts],
                 key="edit_bus_topo",
                 help=(
                     "Unidirectional / Shared for digital buses; "
@@ -209,11 +202,11 @@ def render(bundle: IcdBundle) -> None:
         wr_col, rx_col = st.columns(2)
         with wr_col:
             writer_list = labeled_multi_select(
-                "Writer",
+                "Sender",
                 endpoint_labels,
                 endpoint_map,
                 key="edit_bus_wr",
-                current=_split_refs(original.get("Writer", ""))
+                current=split_refs(original.get("Sender", ""))
                 if mode == "Edit existing" and original
                 else [],
             )
@@ -223,51 +216,32 @@ def render(bundle: IcdBundle) -> None:
                 endpoint_labels,
                 endpoint_map,
                 key="edit_bus_rx",
-                current=_split_refs(original.get("Receiver", ""))
+                current=split_refs(original.get("Receiver", ""))
                 if mode == "Edit existing" and original
                 else [],
             )
-        eq = None
-        if "equipment_connected" in buses.columns:
-            eq = labeled_multi_acronym(
-                "equipment_connected",
-                sys_labels,
-                sys_map,
-                key="edit_bus_eq",
-                current=_split_refs(original.get("equipment_connected", ""))
-                if mode == "Edit existing" and original
-                else [],
-            )
-        master = ""
-        if "master_lru" in buses.columns:
-            master = labeled_acronym_select(
-                "master_lru",
-                sys_labels,
-                sys_map,
-                key="edit_bus_master",
-                current=str(original.get("master_lru") or "")
-                if mode == "Edit existing" and original
-                else "",
-            )
-
-        bus_use = st.text_area("bus_use", key="edit_bus_use")
-        notes = st.text_area("notes", key="edit_bus_notes")
+        bus_use = st.text_area("Bus description", key="edit_bus_use")
+        ac_col, fnd_col, sim_col = st.columns(3)
+        with ac_col:
+            on_ac = st.text_input("On aircraft ?", key="edit_bus_ac")
+        with fnd_col:
+            on_fnd = st.text_input("On FND ?", key="edit_bus_fnd")
+        with sim_col:
+            on_sim = st.text_input("On Sim ?", key="edit_bus_sim")
 
         edited = {
             "name": name,
             def_col: definition,
-            "Writer": ";".join(writer_list),
+            "Sender": ";".join(writer_list),
             "Receiver": ";".join(receiver_list),
             "protocol": protocol,
             "speed": speed,
             "topology": topology,
-            "bus_use": bus_use,
-            "notes": notes,
+            "Bus description": bus_use,
+            "On aircraft ?": on_ac,
+            "On FND ?": on_fnd,
+            "On Sim ?": on_sim,
         }
-        if eq is not None:
-            edited["equipment_connected"] = ";".join(eq)
-        if "master_lru" in buses.columns:
-            edited["master_lru"] = master
 
         if mode == "Edit existing" and bid:
             patch = sparse_upsert(DATABUSES_SHEET, BUS_ID, bid, original, edited)

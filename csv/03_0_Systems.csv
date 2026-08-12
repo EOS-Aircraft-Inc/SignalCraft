@@ -1,12 +1,12 @@
-﻿UniqueId,Textual Name,Installed In/Part of,Functional system,Type,Multiplicity,Instance Token,Description,Notes
-AVIO,Avionics,,,System,,,Aircraft avionics domain,
-FCS,Flight Control System,,,System,,,Global flight control system,
-PDS,Power Distribution System,,,System,,,High-voltage distribution from the storage assemblies to the propulsion loads,
-PEMS,Power and Energy Management System,,,System,,,"Power and energy management: mission energy strategy, power allocation to the propulsion effectors and nacelle command distribution",
-PROP,Propulsion System,,,System,,,"Propulsion: hybrid propulsion packages, thermal engine, electric motors, combining gearbox and propeller",
-FUEL,Fuel System,,,System,,,Fuel storage and delivery to the propulsion packages,Storage is in the three tanks; delivery to each propulsion package is handled by the FCU (one per HPP)
-THERM,Thermal system,,,System,,,Thermal management of the propulsion packages (IPTMS) and of the storage assemblies (BTMS),
-ESS,Energy Storage System,,,System,,,"Electrical energy storage: four HVDC assemblies, each holding twelve battery packs with their BMU, a master BMS and a charge controller",Function only; the storage hardware is contained in the HVDC assemblies.
+﻿UniqueId,Textual Name,Installed In/Part of,Domain,Type,Multiplicity,Instance Token,Description,Notes
+AVIO,Avionics,,,Domain,,,Aircraft avionics domain,
+FCS,Flight Control System,,,Domain,,,Global flight control system,
+PDS,Power Distribution System,,,Domain,,,High-voltage distribution from the storage assemblies to the propulsion loads,
+PEMS,Power and Energy Management System,,,Domain,,,"Power and energy management: mission energy strategy, power allocation to the propulsion effectors and nacelle command distribution",
+PROP,Propulsion System,,,Domain,,,"Propulsion: hybrid propulsion packages, thermal engine, electric motors, combining gearbox and propeller",
+FUEL,Fuel System,,,Domain,,,Fuel storage and delivery to the propulsion packages,Storage is in the three tanks; delivery to each propulsion package is handled by the FCU (one per HPP)
+THERM,Thermal system,,,Domain,,,Thermal management of the propulsion packages (IPTMS) and of the storage assemblies (BTMS),
+ESS,Energy Storage System,,,Domain,,,"Electrical energy storage: four HVDC assemblies, each holding twelve battery packs with their BMU, a master BMS and a charge controller",Function only; the storage hardware is contained in the HVDC assemblies.
 AC,Aircraft,,,Aircraft,1,,Complete aircraft,
 BAY,Avionics bays,AC,,Zone,1,,Avionics bay containing LRU that most need to be in a controlled environment,"Assume only one bay at this stage, separation of different LRU to different bays might be added later"
 CKPT,Cockpit,AC,,Zone,1,,Pilot controls and displays,

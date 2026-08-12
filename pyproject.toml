@@ -9,15 +9,44 @@ dependencies = [
     "openpyxl>=3.1.5",
     "pandas>=3.0.5",
     "plotly>=6.9.0",
+    # Needed only for the vis-network JavaScript file it bundles, which the Bus
+    # Topology diagram pastes into the page. Keeps the app fully offline — do
+    # not remove (see README "Offline by design").
+    "pyvis>=0.3.2",
     "streamlit>=1.60.0",
-    "streamlit-aggrid>=1.2.1.post2",
 ]
+
+[tool.pytest.ini_options]
+# Tests import the app as a package, so the repo root must be importable.
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
     "ruff>=0.16.0",
 ]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+# Pinned explicitly: ruff's default rule set changes between releases, and this
+# project is maintained by non-developers who should not get new lint errors
+# from an unrelated upgrade. Run "uv run ruff check ." before committing.
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes: undefined names, unused imports
+    "I",      # import sorting
+    "UP",     # outdated syntax for the target Python
+    "B",      # likely bugs (bugbear)
+    "SIM",    # needless complexity
+    "RUF",    # ruff's own checks
+]
+ignore = [
+    # The UI text and docstrings deliberately use en/em dashes and arrows.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]

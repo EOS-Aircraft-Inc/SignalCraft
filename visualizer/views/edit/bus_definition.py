@@ -1,4 +1,4 @@
-"""Bus definition payload editor — Allocation Id + signal_id."""
+"""Bus definition payload editor — Allocation Id + Signal Id."""
 
 from __future__ import annotations
 
@@ -15,17 +15,23 @@ from visualizer.components.selectors import (
     table_select_id,
 )
 from visualizer.data.loader import IcdBundle
-from visualizer.data.models import ALLOCATION_ID, SIGNAL_ID
+from visualizer.data.models import (
+    ALLOCATION_ID,
+    BUS_DEFINITION,
+    SIGNAL_ID,
+    split_refs,
+)
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import render_apply_panel, sync_fields
 
 
-def _split_refs(value: str) -> list[str]:
-    return [p.strip() for p in str(value or "").split(";") if p.strip()]
-
-
 def render(bundle: IcdBundle) -> None:
     st.subheader("Bus definition (payload)")
+    st.caption(
+        "One row per encoded item on a bus family. `Allocation Id` is unique "
+        "across the whole workbook, and `Signal Id` points at exactly one row of "
+        "`1_Signals` — a relay reuses the same `Signal Id` on each hop."
+    )
     payload = bundle.bus_payload
     if payload.empty or "definition_tab" not in payload.columns:
         st.warning("No bus-definition payload rows loaded.")
@@ -34,9 +40,7 @@ def render(bundle: IcdBundle) -> None:
     tabs = sorted(
         {str(t).strip() for t in payload["definition_tab"].dropna() if str(t).strip()}
     )
-    def_col = (
-        "Bus Definition" if "Bus Definition" in bundle.buses.columns else "definition_tab"
-    )
+    def_col = BUS_DEFINITION
     if def_col in bundle.buses.columns:
         for t in bundle.buses[def_col].dropna():
             t = str(t).strip()
@@ -50,7 +54,14 @@ def render(bundle: IcdBundle) -> None:
     view = apply_text_search(
         rows,
         q,
-        [ALLOCATION_ID, "data_name", "signal_id", "writer_lru"],
+        [
+            ALLOCATION_ID,
+            "Data name",
+            "Signal Id",
+            "Sender",
+            "Message ID",
+            "Label",
+        ],
     )
     st.caption("Click a row in the table to select it.")
     table_aid = table_select_id(view, ALLOCATION_ID, key=f"edit_pay_table_{sheet}")
@@ -92,26 +103,38 @@ def render(bundle: IcdBundle) -> None:
                 return
             row = rows[rows[ALLOCATION_ID] == aid].iloc[0]
             original = {c: str(row.get(c, "") or "") for c in rows.columns}
-            st.markdown(f"**Selected:** `{aid}` — {original.get('data_name', '')}")
+            st.markdown(f"**Selected:** `{aid}` — {original.get('Data name', '')}")
             acr_to_lab = {acr: lab for lab, acr in sys_map.items()}
-            writer = str(original.get("writer_lru") or "").strip()
-            rx_refs = _split_refs(original.get("receiver_lrus", ""))
-            signal_id = str(original.get("signal_id") or "").strip()
+            writer = str(original.get("Sender") or "").strip()
+            rx_refs = split_refs(original.get("Receiver", ""))
+            signal_id = str(original.get("Signal Id") or "").strip()
             sync_fields(
                 "edit_pay",
                 f"{sheet}:{aid}",
                 {
-                    "edit_pay_name": original.get("data_name", ""),
+                    "edit_pay_name": original.get("Data name", ""),
                     "edit_pay_wr_label": acr_to_lab.get(writer, ""),
                     "edit_pay_rx": [acr_to_lab[a] for a in rx_refs if a in acr_to_lab],
                     "edit_pay_sig_label": next(
                         (lab for lab, rid in sig_m.items() if rid == signal_id), ""
                     ),
                     "edit_pay_dim": original.get("instance_dimension", ""),
+                    "edit_pay_msgid": original.get("Message ID", ""),
+                    "edit_pay_msgname": original.get("Label", ""),
+                    "edit_pay_startbit": original.get("start bit", ""),
+                    "edit_pay_stopbit": original.get("stop bit", ""),
                     "edit_pay_enc": original.get("encoding", ""),
                     "edit_pay_unit": original.get("unit", ""),
-                    "edit_pay_period": original.get("update_period_ms", ""),
+                    "edit_pay_scale": original.get("scale", ""),
+                    "edit_pay_res": original.get("resolution", ""),
+                    "edit_pay_min": original.get("minimum", ""),
+                    "edit_pay_max": original.get("maximum", ""),
+                    "edit_pay_period": original.get("Refresh rate", ""),
+                    "edit_pay_validity": original.get("validity", ""),
                     "edit_pay_notes": original.get("notes", ""),
+                    "edit_pay_ac": original.get("On aircraft ?", ""),
+                    "edit_pay_fnd": original.get("On FND ?", ""),
+                    "edit_pay_sim": original.get("On Sim ?", ""),
                 },
             )
         else:
@@ -125,32 +148,44 @@ def render(bundle: IcdBundle) -> None:
                     "edit_pay_rx": [],
                     "edit_pay_sig_label": "",
                     "edit_pay_dim": "",
+                    "edit_pay_msgid": "",
+                    "edit_pay_msgname": "",
+                    "edit_pay_startbit": "",
+                    "edit_pay_stopbit": "",
                     "edit_pay_enc": "",
                     "edit_pay_unit": "",
+                    "edit_pay_scale": "",
+                    "edit_pay_res": "",
+                    "edit_pay_min": "",
+                    "edit_pay_max": "",
                     "edit_pay_period": "",
+                    "edit_pay_validity": "",
                     "edit_pay_notes": "",
+                    "edit_pay_ac": "",
+                    "edit_pay_fnd": "",
+                    "edit_pay_sim": "",
                 },
             )
 
-        data_name = st.text_input("data_name", key="edit_pay_name")
+        data_name = st.text_input("Data name", key="edit_pay_name")
         wr_col, rx_col = st.columns(2)
         with wr_col:
             writer = labeled_acronym_select(
-                "writer_lru",
+                "Sender",
                 sys_labels,
                 sys_map,
                 key="edit_pay_wr",
-                current=str(original.get("writer_lru") or "")
+                current=str(original.get("Sender") or "")
                 if mode == "Edit existing" and original
                 else "",
             )
         with rx_col:
             receiver_list = labeled_multi_acronym(
-                "receiver_lrus",
+                "Receiver",
                 sys_labels,
                 sys_map,
                 key="edit_pay_rx",
-                current=_split_refs(original.get("receiver_lrus", ""))
+                current=split_refs(original.get("Receiver", ""))
                 if mode == "Edit existing" and original
                 else [],
             )
@@ -158,37 +193,110 @@ def render(bundle: IcdBundle) -> None:
             render_containment_schema(bundle.systems, writer.split(";")[0].strip())
 
         signal_id = labeled_select(
-            "signal_id",
+            "Signal Id",
             sig_l,
             sig_m,
             key="edit_pay_sig",
-            current=str(original.get("signal_id") or "")
+            current=str(original.get("Signal Id") or "")
             if mode == "Edit existing" and original
             else "",
         )
 
-        dim_col, enc_col = st.columns(2)
-        with dim_col:
-            dim = st.text_input("instance_dimension", key="edit_pay_dim")
+        dim = st.text_input(
+            "instance_dimension",
+            key="edit_pay_dim",
+            help="Extra token when the bus instance alone is not enough, e.g. PACK-{n}.",
+        )
+
+        st.markdown("##### Transport")
+        st.caption(
+            "Every field below accepts `TBD` while the supplier design is open — "
+            "these are working assumptions until the buses are frozen."
+        )
+        msgid_col, msgname_col = st.columns(2)
+        with msgid_col:
+            message_id = st.text_input(
+                "Message ID",
+                key="edit_pay_msgid",
+                help="A825/CAN DOC or arbitration id, or the A429 label.",
+            )
+        with msgname_col:
+            message_name = st.text_input(
+                "Label", key="edit_pay_msgname",
+                help="Human-readable message / frame name.",
+            )
+        startbit_col, stopbit_col = st.columns(2)
+        with startbit_col:
+            start_bit = st.text_input(
+                "start bit", key="edit_pay_startbit", help="MSB of the field."
+            )
+        with stopbit_col:
+            stop_bit = st.text_input(
+                "stop bit", key="edit_pay_stopbit", help="LSB of the field, inclusive."
+            )
+
+        st.markdown("##### Encoding")
+        enc_col, unit_col = st.columns(2)
         with enc_col:
             encoding = st.text_input("encoding", key="edit_pay_enc")
-        unit_col, period_col = st.columns(2)
         with unit_col:
             unit = st.text_input("unit", key="edit_pay_unit")
+        scale_col, res_col = st.columns(2)
+        with scale_col:
+            scale = st.text_input("scale", key="edit_pay_scale")
+        with res_col:
+            resolution = st.text_input("resolution", key="edit_pay_res")
+        min_col, max_col = st.columns(2)
+        with min_col:
+            minimum = st.text_input(
+                "minimum",
+                key="edit_pay_min",
+                help="Encoding range on this bus — often wider than the "
+                "functional range on 1_Signals.",
+            )
+        with max_col:
+            maximum = st.text_input("maximum", key="edit_pay_max")
+        period_col, validity_col = st.columns(2)
         with period_col:
-            period = st.text_input("update_period_ms", key="edit_pay_period")
+            period = st.text_input("Refresh rate", key="edit_pay_period")
+        with validity_col:
+            validity = st.text_input(
+                "validity",
+                key="edit_pay_validity",
+                help="How the receiver judges the value is usable.",
+            )
+
         notes = st.text_area("notes", key="edit_pay_notes")
+        ac_col, fnd_col, sim_col = st.columns(3)
+        with ac_col:
+            on_ac = st.text_input("On aircraft ?", key="edit_pay_ac")
+        with fnd_col:
+            on_fnd = st.text_input("On FND ?", key="edit_pay_fnd")
+        with sim_col:
+            on_sim = st.text_input("On Sim ?", key="edit_pay_sim")
 
         edited = {
-            "data_name": data_name,
-            "writer_lru": writer,
-            "receiver_lrus": ";".join(receiver_list),
-            "signal_id": signal_id,
+            "Data name": data_name,
+            "Sender": writer,
+            "Receiver": ";".join(receiver_list),
+            "Signal Id": signal_id,
             "instance_dimension": dim,
+            "Message ID": message_id,
+            "Label": message_name,
+            "start bit": start_bit,
+            "stop bit": stop_bit,
             "encoding": encoding,
             "unit": unit,
-            "update_period_ms": period,
+            "scale": scale,
+            "resolution": resolution,
+            "minimum": minimum,
+            "maximum": maximum,
+            "Refresh rate": period,
+            "validity": validity,
             "notes": notes,
+            "On aircraft ?": on_ac,
+            "On FND ?": on_fnd,
+            "On Sim ?": on_sim,
         }
 
         if mode == "Edit existing" and aid:
@@ -196,7 +304,7 @@ def render(bundle: IcdBundle) -> None:
             if patch:
                 document = {"upsert": {sheet: [patch]}}
         elif mode == "Add new" and data_name:
-            payload_row = {k: v for k, v in edited.items()}
+            payload_row = dict(edited)
             if aid:
                 payload_row[ALLOCATION_ID] = aid
             document = {"upsert": {sheet: [payload_row]}}
