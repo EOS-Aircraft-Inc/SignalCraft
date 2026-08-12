@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import math
 import re
@@ -13,6 +14,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from visualizer.data.models import (
+    ALLOCATION_ID,
+    SIGNAL_ID,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
     TOPOLOGY_ANALOG,
@@ -25,6 +28,8 @@ from visualizer.data.models import (
     normalize_bus_topology,
     topology_color,
 )
+
+_BUS_HOVER_ALLOC_LIMIT = 10
 
 # Bus / LRU colours for topology views.
 COLOR_LRU = "#ff7f0e"
@@ -42,6 +47,168 @@ _INSTANCE_SUFFIX = re.compile(r"(-\d+)+$")
 
 def _bus_color(bus_mode: object) -> str:
     return topology_color(bus_mode, default=COLOR_BUS_DEFAULT)
+
+
+def _esc(value: object) -> str:
+    return html.escape(str(value or "").strip())
+
+
+def _bus_family_for_node(node_id: str, data: dict, buses: pd.DataFrame) -> str:
+    family = str(data.get("family") or "").strip()
+    if family:
+        return family
+    if buses.empty or "Bus Id" not in buses.columns:
+        return node_id
+    match = buses[buses["Bus Id"].astype(str) == node_id]
+    if match.empty:
+        return node_id
+    row = match.iloc[0]
+    return str(
+        row.get("definition_tab") or row.get("Bus Definition") or node_id
+    ).strip() or node_id
+
+
+def _bus_meta_lines(node_id: str, family: str, mode: str, buses: pd.DataFrame) -> list[str]:
+    lines = [f"<b>{_esc(node_id)}</b>"]
+    if family and family != node_id:
+        lines.append(f"Definition: {_esc(family)}")
+    mode_label = formal_topology_label(mode) or mode or "bus"
+    lines.append(f"Topology: {_esc(mode_label)}")
+    if buses.empty:
+        return lines
+
+    if "Bus Id" in buses.columns:
+        exact = buses[buses["Bus Id"].astype(str) == node_id]
+    else:
+        exact = buses.iloc[0:0]
+
+    family_rows = buses.iloc[0:0]
+    if "definition_tab" in buses.columns:
+        family_rows = buses[buses["definition_tab"].astype(str) == family]
+    elif "Bus Definition" in buses.columns:
+        family_rows = buses[buses["Bus Definition"].astype(str) == family]
+
+    # Generic bus node (id == definition): summarize the family.
+    if exact.empty and not family_rows.empty:
+        lines.append(f"Instances: {len(family_rows)}")
+        name = str(family_rows.iloc[0].get("name") or "").strip()
+        if name:
+            lines.append(_esc(name))
+        protos = sorted(
+            {str(v).strip() for v in family_rows.get("protocol", []) if str(v).strip()}
+        )
+        speeds = sorted(
+            {str(v).strip() for v in family_rows.get("speed", []) if str(v).strip()}
+        )
+        proto_speed = " · ".join(
+            p for p in (", ".join(_esc(x) for x in protos), ", ".join(_esc(x) for x in speeds))
+            if p
+        )
+        if proto_speed:
+            lines.append(proto_speed)
+        return lines
+
+    if exact.empty:
+        return lines
+    row = exact.iloc[0]
+    name = str(row.get("name") or "").strip()
+    if name:
+        lines.append(_esc(name))
+    proto = str(row.get("protocol") or "").strip()
+    speed = str(row.get("speed") or "").strip()
+    if proto or speed:
+        lines.append(" · ".join(p for p in (_esc(proto), _esc(speed)) if p))
+    writer = str(row.get("Writer") or "").strip()
+    receiver = str(row.get("Receiver") or "").strip()
+    if writer:
+        lines.append(f"Writer: {_esc(writer)}")
+    if receiver:
+        lines.append(f"Receiver: {_esc(receiver)}")
+    return lines
+
+
+def _payload_hover_lines(
+    family: str,
+    bus_payload: pd.DataFrame,
+    signals: pd.DataFrame | None,
+    *,
+    limit: int = _BUS_HOVER_ALLOC_LIMIT,
+) -> list[str]:
+    if not family or bus_payload is None or bus_payload.empty:
+        return ["Allocations: (none)"]
+    work = bus_payload
+    if "definition_tab" in work.columns:
+        work = work[work["definition_tab"].astype(str) == family]
+    if work.empty:
+        return ["Allocations: (none)"]
+
+    name_by_sig: dict[str, str] = {}
+    if signals is not None and not signals.empty and SIGNAL_ID in signals.columns:
+        name_col = "Signal Name" if "Signal Name" in signals.columns else ""
+        for _, srow in signals.iterrows():
+            sid = str(srow.get(SIGNAL_ID) or "").strip()
+            if sid and name_col:
+                name_by_sig[sid] = str(srow.get(name_col) or "").strip()
+
+    total = len(work)
+    lines = [f"<b>Allocations</b> ({total})" if total <= limit else f"<b>Allocations</b> (first {limit} of {total})"]
+    for _, row in work.head(limit).iterrows():
+        aid = str(row.get(ALLOCATION_ID) or row.get("Allocation Id") or "").strip()
+        sid = str(row.get("signal_id") or "").strip()
+        data_name = str(row.get("data_name") or "").strip()
+        label = data_name or name_by_sig.get(sid, "") or sid or "(unnamed)"
+        writer = str(row.get("writer_lru") or "").strip()
+        receivers = str(row.get("receiver_lrus") or "").strip()
+        path = ""
+        if writer or receivers:
+            path = f" — {_esc(writer)} -> {_esc(receivers)}"
+        prefix = f"{_esc(aid)}: " if aid else ""
+        lines.append(f"• {prefix}{_esc(label)}{path}")
+    if total > limit:
+        lines.append(f"… and {total - limit} more")
+    return lines
+
+
+def _bus_hover_title(
+    node_id: str,
+    data: dict,
+    *,
+    buses: pd.DataFrame,
+    bus_payload: pd.DataFrame,
+    signals: pd.DataFrame | None = None,
+    limit: int = _BUS_HOVER_ALLOC_LIMIT,
+) -> str:
+    mode = str(data.get("bus_mode") or "").strip()
+    family = _bus_family_for_node(node_id, data, buses)
+    lines = _bus_meta_lines(node_id, family, mode, buses)
+    lines.append("")
+    lines.extend(
+        _payload_hover_lines(family, bus_payload, signals, limit=limit)
+    )
+    return "<br>".join(lines)
+
+
+def _bus_hover_map(
+    graph: nx.DiGraph,
+    *,
+    buses: pd.DataFrame,
+    bus_payload: pd.DataFrame,
+    signals: pd.DataFrame | None = None,
+) -> dict[str, str]:
+    tips: dict[str, str] = {}
+    buses = buses if buses is not None else pd.DataFrame()
+    bus_payload = bus_payload if bus_payload is not None else pd.DataFrame()
+    for node_id, data in graph.nodes(data=True):
+        if data.get("kind") != "bus":
+            continue
+        tips[node_id] = _bus_hover_title(
+            node_id,
+            data,
+            buses=buses,
+            bus_payload=bus_payload,
+            signals=signals,
+        )
+    return tips
 
 
 def _lru_to_function(systems: pd.DataFrame) -> dict[str, tuple[str, str]]:
@@ -294,12 +461,15 @@ def _vis_edges_from_digraph(
 def _build_function_regions(
     graph: nx.DiGraph,
     systems: pd.DataFrame,
+    *,
+    bus_hovers: dict[str, str] | None = None,
 ) -> tuple[list[dict], list[dict], list[dict]]:
     """Return (vis nodes, vis edges, region descriptors) for grouped generic view."""
     mapping = _lru_to_function(systems)
     members: dict[str, list[str]] = defaultdict(list)
     fn_label: dict[str, str] = {}
     buses: list[str] = []
+    bus_hovers = bus_hovers or {}
 
     for node_id, data in graph.nodes(data=True):
         kind = data.get("kind", "lru")
@@ -402,11 +572,15 @@ def _build_function_regions(
     bus_x0 = (cols * (box_w + gap_x) - gap_x) / 2 - total_bus_width / 2
     for i, bus_id in enumerate(sorted(buses)):
         mode = graph.nodes[bus_id].get("bus_mode", "")
+        tip = bus_hovers.get(
+            bus_id,
+            f"{bus_id} ({mode or 'bus'}) — drag to reposition",
+        )
         vis_nodes.append(
             {
                 "id": bus_id,
                 "label": bus_id,
-                "title": f"{bus_id} ({mode or 'bus'}) — drag to reposition",
+                "title": tip,
                 "color": _bus_color(mode),
                 "shape": "box",
                 "kind": "bus",
@@ -430,6 +604,9 @@ def render_draggable_bus_topology(
     height: int = 640,
     group_by_function: bool = False,
     systems: pd.DataFrame | None = None,
+    buses: pd.DataFrame | None = None,
+    bus_payload: pd.DataFrame | None = None,
+    signals: pd.DataFrame | None = None,
 ) -> None:
     """Interactive topology with pinned bus nodes and free LRU physics."""
     if edges.empty or nodes.empty:
@@ -447,11 +624,20 @@ def render_draggable_bus_topology(
         )
         return
 
+    hover_map = _bus_hover_map(
+        graph,
+        buses=buses if buses is not None else pd.DataFrame(),
+        bus_payload=bus_payload if bus_payload is not None else pd.DataFrame(),
+        signals=signals,
+    )
+
     regions: list[dict] = []
     layout = _layout_density(graph)
     if group_by_function:
         vis_nodes, vis_edges, regions = _build_function_regions(
-            graph, systems if systems is not None else pd.DataFrame()
+            graph,
+            systems if systems is not None else pd.DataFrame(),
+            bus_hovers=hover_map,
         )
         height = max(height, 720)
         phys_g = -12000.0
@@ -482,9 +668,10 @@ def render_draggable_bus_topology(
             mode = data.get("bus_mode", "")
             if kind == "bus":
                 color = _bus_color(mode)
-                tip = (
+                tip = hover_map.get(
+                    node_id,
                     f"{node_id} ({mode or 'bus'}) — drag to reposition "
-                    "(others stay pinned)"
+                    "(others stay pinned)",
                 )
                 shape = "box"
             else:

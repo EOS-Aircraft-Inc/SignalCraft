@@ -45,7 +45,7 @@ from icd_sheets import (
     DOC_SHEETS,
     FUNCTIONAL_SYSTEM,
     INSTALLED_IN,
-    PHYSICAL_SYSTEM,
+    INTERFACING_EQUIPMENT,
     README_SHEET,
     RECEIVER,
     RECEIVER_LRUS,
@@ -77,7 +77,7 @@ ID_PREFIX: dict[str, str] = {
 # Semicolon-separated fields that may hold system UniqueIds / scope dims.
 ACRONYM_FIELDS: dict[str, list[str]] = {
     SYSTEMS_SHEET: [SYSTEM_UNIQUE_ID, INSTALLED_IN, FUNCTIONAL_SYSTEM],
-    SIGNALS_SHEET: [PHYSICAL_SYSTEM, SIGNAL_OWNER, REPEATED_PER],
+    SIGNALS_SHEET: [INTERFACING_EQUIPMENT, SIGNAL_OWNER, REPEATED_PER],
     DATABUSES_SHEET: [WRITER, RECEIVER, "master_lru", "equipment_connected"],
 }
 
@@ -686,7 +686,7 @@ class IcdEditor:
                                         "Instance Token"
                                     )
                 if sheet == SIGNALS_SHEET:
-                    for col in (PHYSICAL_SYSTEM, SIGNAL_OWNER, REPEATED_PER):
+                    for col in (INTERFACING_EQUIPMENT, SIGNAL_OWNER, REPEATED_PER):
                         if col not in item:
                             continue
                         for ref in split_refs(str(item.get(col) or "")):
@@ -719,7 +719,7 @@ class IcdEditor:
                                 f"{sheet}: {col} '{ref}' is not a known bus or family"
                             )
                 for col in (
-                    PHYSICAL_SYSTEM,
+                    INTERFACING_EQUIPMENT,
                     SIGNAL_OWNER,
                     REPEATED_PER,
                     WRITER_LRU,

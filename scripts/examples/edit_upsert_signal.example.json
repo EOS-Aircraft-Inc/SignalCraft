@@ -5,9 +5,8 @@
         "Signal Name": "Example cabin pressure",
         "Signal Role": "Measurement",
         "Abbreviation": "CAB_P",
-        "Physical System": "ADC",
+        "Interfacing Equipment": "ADC",
         "Signal Owner": "ADC",
-        "Endpoint Name": "Cabin pressure",
         "Notes": "Example upsert only — dry-run before apply."
       }
     ]

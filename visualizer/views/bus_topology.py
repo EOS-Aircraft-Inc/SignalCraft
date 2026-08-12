@@ -248,21 +248,21 @@ def render(bundle: IcdBundle) -> None:
             "Analog",
             value=False,
             key="topo_show_analog",
-            help="Show direct Analog links from 1_Signals (Physical ≠ Owner).",
+            help="Show direct Analog links from 1_Signals (Interfacing Equipment ≠ Owner).",
         )
     with c_d:
         show_discrete = st.checkbox(
             "Discrete",
             value=False,
             key="topo_show_discrete",
-            help="Show direct Discrete links from 1_Signals (Physical ≠ Owner).",
+            help="Show direct Discrete links from 1_Signals (Interfacing Equipment ≠ Owner).",
         )
     with c_p:
         show_power = st.checkbox(
             "Power",
             value=False,
             key="topo_show_power",
-            help="Show direct Power links from 1_Signals (Physical ≠ Owner).",
+            help="Show direct Power links from 1_Signals (Interfacing Equipment ≠ Owner).",
         )
 
     families = _bus_families(bundle.buses)
@@ -372,6 +372,9 @@ def render(bundle: IcdBundle) -> None:
         title=title,
         group_by_function=group_by_function,
         systems=bundle.systems,
+        buses=bundle.buses,
+        bus_payload=bundle.bus_payload,
+        signals=bundle.signals,
     )
 
     if generic:

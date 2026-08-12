@@ -351,10 +351,10 @@ def _add_interface_links_from_signals(
     instantiate: bool,
     systems: pd.DataFrame | None = None,
 ) -> None:
-    """Add Analog / Discrete / Power links when Physical System ≠ Signal Owner."""
+    """Add Analog / Discrete / Power links when Interfacing Equipment ≠ Signal Owner."""
     if signals.empty:
         return
-    for col in ("Physical System", "Signal Owner", "Interface Type"):
+    for col in ("Interfacing Equipment", "Signal Owner", "Interface Type"):
         if col not in signals.columns:
             return
 
@@ -416,7 +416,7 @@ def _add_interface_links_from_signals(
         iface = normalize_bus_topology(row.get("Interface Type"))
         if iface not in {TOPOLOGY_ANALOG, TOPOLOGY_DISCRETE, TOPOLOGY_POWER}:
             continue
-        physical = str(row.get("Physical System") or "").strip()
+        physical = str(row.get("Interfacing Equipment") or "").strip()
         owner = str(row.get("Signal Owner") or "").strip()
         if not physical or not owner or physical == owner:
             continue

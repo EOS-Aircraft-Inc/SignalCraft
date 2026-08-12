@@ -17,7 +17,7 @@ def render(bundle: IcdBundle) -> None:
         f"Browse `{bundle.signals_sheet}` — one row per logical signal. "
         "Bus allocations are linked by canonical `signal_id`. "
         "`Repeated Per` adds dimensions beyond those implied by Signal Owner / "
-        "Physical System; empty means every instance of the base system."
+        "Interfacing Equipment; empty means every instance of the base system."
     )
 
     query = st.text_input("Search", key="explorer_search")
@@ -43,7 +43,7 @@ def render(bundle: IcdBundle) -> None:
             "Signal Name",
             "Abbreviation",
             "Physical Id",
-            "Physical System",
+            "Interfacing Equipment",
             "Signal Owner",
             "Signal Role",
             "Notes",
@@ -62,7 +62,7 @@ def render(bundle: IcdBundle) -> None:
                         "Signal Name",
                         "Signal Role",
                         "Physical Id",
-                        "Physical System",
+                        "Interfacing Equipment",
                         "Signal Owner",
                         "Repeated Per",
                         "Abbreviation",
@@ -93,7 +93,7 @@ def render(bundle: IcdBundle) -> None:
         st.write(row.get("Signal Name", ""))
         st.caption(
             f"{row.get('Signal Role', '')} · Physical `{row.get('Physical Id', '')}` · "
-            f"{row.get('Physical System', '')} ↔ {row.get('Signal Owner', '')}"
+            f"{row.get('Interfacing Equipment', '')} ↔ {row.get('Signal Owner', '')}"
         )
         if str(row.get("Related to") or "").strip():
             st.write(f"Related to: `{row.get('Related to')}`")

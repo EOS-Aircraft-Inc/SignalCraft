@@ -21,7 +21,7 @@ from icd_sheets import (
     INSTALLED_IN,
     INTERFACE_TYPE,
     INTERFACE_TYPES,
-    PHYSICAL_SYSTEM,
+    INTERFACING_EQUIPMENT,
     RECEIVER,
     RECEIVER_LRUS,
     RELATED_TO,
@@ -174,7 +174,7 @@ def check_system_references(csv_dir: Path) -> list[str]:
         (
             signals_sheet,
             SIGNAL_ID,
-            [PHYSICAL_SYSTEM, SIGNAL_OWNER, REPEATED_PER],
+            [INTERFACING_EQUIPMENT, SIGNAL_OWNER, REPEATED_PER],
         ),
         (
             DATABUSES_SHEET,

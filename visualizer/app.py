@@ -24,7 +24,13 @@ from visualizer.data.workbook_io import (  # noqa: E402
     export_csv_to_excel,
     import_excel_to_csv,
 )
-from visualizer.views import bus_topology, edit_data, explorer, signal_trace  # noqa: E402
+from visualizer.views import (  # noqa: E402
+    bus_explorer,
+    bus_topology,
+    edit_data,
+    explorer,
+    signal_trace,
+)
 
 st.set_page_config(
     page_title="SignalCraft",
@@ -146,7 +152,13 @@ def main() -> None:
 
     page = st.sidebar.radio(
         "Page",
-        ["Bus Topology", "Explorer", "Signal Trace", "Edit data"],
+        [
+            "Bus Topology",
+            "Bus Explorer",
+            "Signal Explorer",
+            "Signal Trace",
+            "Edit data",
+        ],
         index=0,
         key="nav_page",
     )
@@ -155,7 +167,9 @@ def main() -> None:
 
     if page == "Bus Topology":
         bus_topology.render(bundle)
-    elif page == "Explorer":
+    elif page == "Bus Explorer":
+        bus_explorer.render(bundle)
+    elif page == "Signal Explorer":
         explorer.render(bundle)
     elif page == "Signal Trace":
         signal_trace.render(bundle)

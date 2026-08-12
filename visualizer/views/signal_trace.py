@@ -63,7 +63,7 @@ def render(bundle: IcdBundle) -> None:
     st.write(
         f"**{signal_id}** — {row.get('Signal Name', '')} — "
         f"**{row.get('Signal Role', '')}** — "
-        f"{row.get('Physical System', '')} / {row.get('Signal Owner', '')}"
+        f"{row.get('Interfacing Equipment', '')} / {row.get('Signal Owner', '')}"
     )
     if str(row.get("Repeated Per") or "").strip():
         st.caption(f"Repeated Per: `{row.get('Repeated Per')}`")

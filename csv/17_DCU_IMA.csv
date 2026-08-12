@@ -1,3 +1,3 @@
-Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
-DBUS-DISP-001,Weather environmental conditions,DCU,IMA,,SIG-173,,TBD,,,TBD,,,,,,,TBD,Relayed by the DCU from the weather radar (inbound leg WXR_TX DBUS-WXR-001).,Yes,TBD,TBD
-DBUS-DISP-002,Total fuel available,IMA,DCU,,SIG-128,,TBD,,,TBD,,,,,,,TBD,"Totalised by the IMA and passed to the DCU, which relays it to the FMS on AVIO_HS (BSIG-AC-005).",Yes,TBD,TBD
+﻿Allocation Id,data_name,writer_lru,receiver_lrus,instance_dimension,signal_id,Message ID,message_or_label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,update_period_ms,validity,notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-DISP-001,Weather environmental conditions,DCU,IMA,,SIG-173,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Sequence number and CRC, plus receiver freshness timeout",Relayed by the DCU from the weather radar.,Yes,TBD,TBD
+DBUS-DISP-002,Total fuel available,IMA,DCU,,SIG-128,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Sequence number and CRC, plus receiver freshness timeout","Totalised by the IMA and passed to the DCU, which relays it to the FMS on the avionics backbone.",Yes,TBD,TBD

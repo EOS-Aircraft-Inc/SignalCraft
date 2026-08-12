@@ -16,8 +16,9 @@ Sidebar: **Reload database**, **Export to Excel**, **Import Excel → CSV & relo
 
 | Page | Purpose |
 |---|---|
-| Bus Topology | Full network or Generic (by `Bus Definition`); layer filters for digital / Analog / Discrete / Power |
-| Explorer | Browse `1_Signals`; related allocations via `signal_id` |
+| Bus Topology | Full network or Generic (by `Bus Definition`); layer filters for digital / Analog / Discrete / Power; hover a bus for summary + first allocations |
+| Bus Explorer | Browse generic bus definitions; physical instances and allocated data for the selected definition |
+| Signal Explorer | Browse `1_Signals`; related allocations via `signal_id` |
 | Signal Trace | All hops for one `SIG-*` |
 | Edit data | Guided upsert/delete/rewrite (same engine as `icd_edit.py`) — Dry-run then Apply |
 

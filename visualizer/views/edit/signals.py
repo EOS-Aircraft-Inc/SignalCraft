@@ -27,17 +27,15 @@ EDITABLE_FIELDS = [
     "Signal Name",
     "Signal Role",
     "Abbreviation",
-    "Physical System",
+    "Interfacing Equipment",
     "Signal Owner",
     "Repeated Per",
     "Related to",
-    "Endpoint Name",
     "Connection Type",
     "Interface Type",
-    "Data Type",
     "Unit",
-    "Minimum",
-    "Maximum",
+    "Functional Minimum",
+    "Functional Maximum",
     "Derivation",
     "Notes",
     "On aircraft ?",
@@ -78,7 +76,8 @@ def render(bundle: IcdBundle) -> None:
     st.subheader(f"Signals (`{sheet}`)")
     st.caption(
         "Canonical signal catalog. Bus allocations reference these rows via "
-        "`signal_id`. `Physical Id` is an opaque grouping label — not a foreign key."
+        "`signal_id`. `Physical Id` is optional: use it only when two or more "
+        "signals share the same physical meaning; leave blank otherwise."
     )
     signals = bundle.signals
     q = st.text_input("Search signals", key="edit_sig_q")
@@ -90,7 +89,7 @@ def render(bundle: IcdBundle) -> None:
             "Signal Name",
             "Abbreviation",
             "Physical Id",
-            "Physical System",
+            "Interfacing Equipment",
             "Signal Owner",
             "Signal Role",
             "Notes",
@@ -148,7 +147,7 @@ def render(bundle: IcdBundle) -> None:
         )
         acr_to_lab = {acr: lab for lab, acr in sys_map.items()}
         owner = str(original.get("Signal Owner") or "").strip()
-        phys = str(original.get("Physical System") or "").strip()
+        phys = str(original.get("Interfacing Equipment") or "").strip()
         repeated = _split_refs(original.get("Repeated Per", ""))
         known_signal_ids = set(sig_map.values())
         current_related = [
@@ -173,13 +172,11 @@ def render(bundle: IcdBundle) -> None:
                 "edit_sig_psys_label": acr_to_lab.get(phys, ""),
                 "edit_sig_rep": [acr_to_lab[a] for a in repeated if a in acr_to_lab],
                 "edit_sig_related": related_labels,
-                "edit_sig_endpoint": original.get("Endpoint Name", ""),
                 "edit_sig_conn": original.get("Connection Type", ""),
                 "edit_sig_iface": original.get("Interface Type", ""),
-                "edit_sig_dtype": original.get("Data Type", ""),
                 "edit_sig_unit": original.get("Unit", ""),
-                "edit_sig_min": original.get("Minimum", ""),
-                "edit_sig_max": original.get("Maximum", ""),
+                "edit_sig_min": original.get("Functional Minimum", ""),
+                "edit_sig_max": original.get("Functional Maximum", ""),
                 "edit_sig_deriv": original.get("Derivation", ""),
                 "edit_sig_notes": original.get("Notes", ""),
                 "edit_sig_ac": original.get("On aircraft ?", ""),
@@ -201,10 +198,8 @@ def render(bundle: IcdBundle) -> None:
                 "edit_sig_psys_label": "",
                 "edit_sig_rep": [],
                 "edit_sig_related": [],
-                "edit_sig_endpoint": "",
                 "edit_sig_conn": "",
                 "edit_sig_iface": "",
-                "edit_sig_dtype": "",
                 "edit_sig_unit": "",
                 "edit_sig_min": "",
                 "edit_sig_max": "",
@@ -232,7 +227,7 @@ def render(bundle: IcdBundle) -> None:
         abbr = st.text_input("Abbreviation", key="edit_sig_abbr")
     with pid_col:
         phys_id = labeled_select(
-            "Physical Id (grouping label)",
+            "Physical Id (only if shared)",
             phys_labels,
             phys_map,
             key="edit_sig_phys",
@@ -254,11 +249,11 @@ def render(bundle: IcdBundle) -> None:
         )
     with psys_col:
         phys_sys = labeled_acronym_select(
-            "Physical System",
+            "Interfacing Equipment",
             sys_labels,
             sys_map,
             key="edit_sig_psys",
-            current=str(original.get("Physical System") or "")
+            current=str(original.get("Interfacing Equipment") or "")
             if mode == "Edit existing" and original
             else "",
         )
@@ -290,9 +285,7 @@ def render(bundle: IcdBundle) -> None:
     )
     related = ";".join(related_ids)
 
-    ep_col, conn_col, iface_col = st.columns(3)
-    with ep_col:
-        endpoint = st.text_input("Endpoint Name", key="edit_sig_endpoint")
+    conn_col, iface_col = st.columns(2)
     with conn_col:
         conn = st.text_input("Connection Type", key="edit_sig_conn")
     with iface_col:
@@ -310,16 +303,12 @@ def render(bundle: IcdBundle) -> None:
             key="edit_sig_iface",
         )
 
-    dt_col, unit_col = st.columns(2)
-    with dt_col:
-        dtype = st.text_input("Data Type", key="edit_sig_dtype")
-    with unit_col:
-        unit = st.text_input("Unit", key="edit_sig_unit")
+    unit = st.text_input("Unit", key="edit_sig_unit")
     min_col, max_col = st.columns(2)
     with min_col:
-        minimum = st.text_input("Minimum", key="edit_sig_min")
+        minimum = st.text_input("Functional Minimum", key="edit_sig_min")
     with max_col:
-        maximum = st.text_input("Maximum", key="edit_sig_max")
+        maximum = st.text_input("Functional Maximum", key="edit_sig_max")
     derivation = st.text_input("Derivation", key="edit_sig_deriv")
     notes = st.text_area("Notes", key="edit_sig_notes")
     ac_col, fnd_col, sim_col = st.columns(3)
@@ -335,17 +324,15 @@ def render(bundle: IcdBundle) -> None:
         "Signal Name": name,
         "Signal Role": role,
         "Abbreviation": abbr,
-        "Physical System": phys_sys,
+        "Interfacing Equipment": phys_sys,
         "Signal Owner": owner,
         "Repeated Per": ";".join(repeated),
         "Related to": related,
-        "Endpoint Name": endpoint,
         "Connection Type": conn,
         "Interface Type": iface,
-        "Data Type": dtype,
         "Unit": unit,
-        "Minimum": minimum,
-        "Maximum": maximum,
+        "Functional Minimum": minimum,
+        "Functional Maximum": maximum,
         "Derivation": derivation,
         "Notes": notes,
         "On aircraft ?": on_ac,

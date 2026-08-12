@@ -1,224 +1,225 @@
-Signal Id,Physical Id,Signal Name,Signal Role,Abbreviation,Physical System,Signal Owner,Repeated Per,Related to,Endpoint Name,Connection Type,Interface Type,Data Type,Unit,Minimum,Maximum,Derivation,Notes,On aircraft ?,On FND ?,On Sim ?
-SIG-001,PHYS-020,Electric Motor Torque,Measurement,EM_Tq,EM,HICU,,,Electric Motor Torque,Torque sensor at gearbox,Analog,,,,,,,Yes,TBD,TBD
-SIG-002,PHYS-022,Electric Motor Current,Measurement,EM_I,EMC,EMC,,,Electric Motor Current,Current sensor,Analog,,,,,,Not part of Evolito CON/MON CAN payload; removed from NAC_CTRL. OEM reports HVDC I/V instead.,Yes,TBD,TBD
-SIG-003,PHYS-023,Electric Motor Voltage,Measurement,EM_V,EMC,EMC,,,Electric Motor Voltage,Voltage sensor,Analog,,,,,,Not part of Evolito CON/MON CAN payload; removed from NAC_CTRL. OEM reports HVDC I/V instead.,Yes,TBD,TBD
-SIG-004,PHYS-024,Electric Motor Speed (CON),Measurement,EM_RPM,EMC,EMC,,,Electric Motor Speed (CON),CAN CON motor status (SP000630),Digital,,RPM,-16384,16383.5,,CON-lane speed from EMC (con_speed_measured). MON lane is a separate Signal Id.,Yes,TBD,TBD
-SIG-005,PHYS-025,Electric Motor Coolant Delta Pressure,Measurement,EM_dP,IPTMS,IPTMS,NAC;EM,,Electric Motor Coolant Delta Pressure,Differential pressure sensor,Analog,,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
-SIG-006,PHYS-026,Electric Motor Coolant Outlet Temperature,Measurement,EM_Tout,IPTMS,IPTMS,NAC;EM,,Electric Motor Coolant Outlet Temperature,Temperature sensor,Analog,,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
-SIG-007,PHYS-001,Power Lever Position,Measurement,PLA,CKPT,ICM,,,Power Lever RVDT,RVDT,Analog,,,-1,1,,,Yes,No,Yes
-SIG-010,PHYS-001,Power Lever Position,Measurement,PLA,CKPT,BPM,,,Power Lever Potentiometer,Potentiometer,Analog,,,,,,,Yes,TBD,TBD
-SIG-011,PHYS-001,Power Lever Position,Measurement,PLA,CKPT,ICM,,,Power Lever Idle Proximity,Proximity switch,Discrete,,,,,,,Yes,TBD,TBD
-SIG-012,PHYS-002,Flap Lever Position,Measurement,FLAP_LEVER,CKPT,ICM,,,Flap Lever position RVDT,RVDT,Analog,,,,,,,Yes,TBD,TBD
-SIG-014,PHYS-006,Turbine Operational Mode Selector,Measurement,TURB_MODE,CKPT,ICM,NAC,,Turbine Operational Mode Selector Acquisition,Multiposition selector,Discrete,,,,,,,Yes,TBD,TBD
-SIG-015,PHYS-030,Propeller Blade Angle,Measurement,Beta,PROPELLER,PCU,,,Propeller Blade Angle Control Path,Beta probes / ring,Analog,,,,,,,Yes,TBD,TBD
-SIG-016,PHYS-030,Propeller Blade Angle,Measurement,Beta,PROPELLER,PCU,,,Propeller Blade Angle Protection Path,Beta probes / ring,Analog,,,,,,,Yes,TBD,TBD
-SIG-017,PHYS-031,Propeller Speed,Measurement,Np,PROPELLER,EPECS,,,Propeller Speed,Beta probes / ring,Analog,,,,,,,Yes,TBD,TBD
-SIG-018,PHYS-032,Fuel Temperature,Measurement,TF,FCU,EPECS,,,Fuel Temperature,RTD / TBD,Analog,,,,,,,Yes,TBD,TBD
-SIG-019,PHYS-050,Fuel Inlet Pressure,Measurement,FIP,FCU,EPECS,,,Fuel Inlet Pressure,Pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-020,PHYS-051,Metered Fuel Flow,Measurement,FFM,FCU,EPECS,,,Fuel Flow Meter,Flow meter,Analog,,,,,,,Yes,TBD,TBD
-SIG-021,PHYS-052,Fuel Filter Differential Pressure,Measurement,dP_fuel,FCU,EPECS,,,Fuel Filter Differential Pressure,Differential pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-022,PHYS-040,Turbine Torque,Measurement,Q_TE,TURB,HICU,,,Turbine Torque,Torque sensor at gearbox,Analog,,,,,,,Yes,TBD,TBD
-SIG-023,PHYS-041,Gas Generator Speed,Measurement,Ng,TURB,EPECS,,,Gas Generator Speed,Speed pickup,Analog,,,,,,,Yes,TBD,TBD
-SIG-024,PHYS-042,Main Engine Oil Pressure,Measurement,MOP,TURB,EPECS,,,Main Engine Oil Pressure,Pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-025,PHYS-043,Compressor Output Pressure,Measurement,P3,TURB,EPECS,,,Compressor Output Pressure,Pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-026,PHYS-044,Engine Inlet Temperature,Measurement,T1,TURB,EPECS,,,Engine Inlet Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-027,PHYS-045,Inter-Turbine Temperature,Measurement,T5_ITT,TURB,EPECS,,,Inter-Turbine Temperature,Thermocouple,Analog,,,,,,,Yes,TBD,TBD
-SIG-028,PHYS-046,Main Engine Oil Temperature,Measurement,MOT,TURB,EPECS,,,Main Engine Oil Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-029,PHYS-047,AGB Chip Detection,Measurement,CHIP_AGB,TURB,EPECS,,,AGB Chip Detection,Magnetic detector,Discrete,,,,,,,Yes,TBD,TBD
-SIG-030,PHYS-048,Engine Oil Level,Measurement,OIL_LEVEL,TURB,EPECS,,,Engine Oil Level,Level detector,Discrete,,,,,,,Yes,TBD,TBD
-SIG-031,PHYS-060,Combining Gearbox Oil Pressure,Measurement,MOP_GBX,GBX,EPECS,,,Combining Gearbox Oil Pressure,Pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-032,PHYS-061,Combining Gearbox Oil Temperature,Measurement,MOT_GBX,GBX,EPECS,,,Combining Gearbox Oil Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-033,PHYS-062,Combining Gearbox Chip Detection,Measurement,CHIP_GBX,GBX,EPECS,,,Combining Gearbox Chip Detection,Magnetic detector,Discrete,,,,,,,Yes,TBD,TBD
-SIG-034,PHYS-063,Combining Gearbox Oil Filter Differential Pressure,Measurement,dP_GBX,GBX,EPECS,,,Combining Gearbox Oil Filter Differential Pressure,Differential pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-035,PHYS-070,HVPDU Bus Current,Measurement,I_HV,HVPDU,HVPDU,,,HVPDU Bus Current,Current sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-036,PHYS-071,HVPDU Bus Voltage,Measurement,V_HV,HVPDU,HVPDU,,,HVPDU Bus Voltage,Voltage sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-037,PHYS-072,HV Isolation Resistance,Measurement,R_ISO,HVPDU,IMD,,,HV Isolation Resistance,Insulation monitoring device,Discrete,,,,,,,Yes,TBD,TBD
-SIG-038,PHYS-080,Battery Pack Current,Measurement,I_PACK,PACK,BMU,,,Battery Pack Current - Nominal Path,Current sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-039,PHYS-081,Battery Pack Terminal Voltage,Measurement,V_PACK,PACK,BMU,,,Battery Pack Terminal Voltage,Voltage sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-040,PHYS-082,Battery Pack Mean Temperature,Measurement,T_PACK_MEAN,PACK,BMU,,SIG-153;SIG-154,Battery Pack Mean Temperature,Temperature sensor,Analog,,,,,,Cell-level acquisition is internal to the pack and is not modelled; the BMU aggregates and reports pack temperature on the nacelle battery bus. Maximum is SIG-153 and minimum is SIG-154.,Yes,TBD,TBD
-SIG-041,PHYS-086,Aircraft Pitch Angle,Measurement,PITCH,IRU,IRU,,,Aircraft Pitch Angle,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-042,PHYS-087,Aircraft Roll Angle,Measurement,ROLL,IRU,IRU,,,Aircraft Roll Angle,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-043,PHYS-088,Aircraft Heading Angle,Measurement,HDG,IRU,IRU,,,Aircraft Heading Angle,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-044,PHYS-089,Aircraft Longitudinal Acceleration,Measurement,Ax,IRU,IRU,,,Aircraft Longitudinal Acceleration,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-045,PHYS-090,Aircraft Lateral Acceleration,Measurement,Ay,IRU,IRU,,,Aircraft Lateral Acceleration,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-046,PHYS-091,Aircraft Normal Acceleration,Measurement,Az,IRU,IRU,,,Aircraft Normal Acceleration,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-047,PHYS-092,Aircraft Pitch Rate,Measurement,q,IRU,IRU,,,Aircraft Pitch Rate,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-048,PHYS-093,Aircraft Roll Rate,Measurement,p,IRU,IRU,,,Aircraft Roll Rate,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-049,PHYS-094,Aircraft Yaw Rate,Measurement,r,IRU,IRU,,,Aircraft Yaw Rate,IRU,Digital,,,,,,,TBD,TBD,TBD
-SIG-050,PHYS-103,IPTMS Loop 1 Pump Discharge Pressure,Measurement,IPTMS_L1_PUMP_P,IPTMS,IPTMS,,,IPTMS Loop 1 Pump Discharge Pressure,Pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-051,PHYS-104,IPTMS Loop 1 Coolant Supply Temperature,Measurement,IPTMS_L1_T_SUP,IPTMS,IPTMS,,,IPTMS Loop 1 Coolant Supply Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-052,PHYS-105,IPTMS Loop 1 Coolant Return Temperature,Measurement,IPTMS_L1_T_RET,IPTMS,IPTMS,,,IPTMS Loop 1 Coolant Return Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-053,PHYS-106,IPTMS Loop 1 TBV Position Feedback,Measurement,IPTMS_L1_TBV_POS,IPTMS,IPTMS,,,IPTMS Loop 1 TBV Position Feedback,Position sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-054,PHYS-107,IPTMS Loop 2 Pump Discharge Pressure,Measurement,IPTMS_L2_PUMP_P,IPTMS,IPTMS,,,IPTMS Loop 2 Pump Discharge Pressure,Pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-055,PHYS-108,IPTMS Loop 2 Coolant Supply Temperature,Measurement,IPTMS_L2_T_SUP,IPTMS,IPTMS,,,IPTMS Loop 2 Coolant Supply Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-056,PHYS-109,IPTMS Loop 2 Coolant Return Temperature,Measurement,IPTMS_L2_T_RET,IPTMS,IPTMS,,,IPTMS Loop 2 Coolant Return Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-057,PHYS-110,IPTMS Loop 2 TBV Position Feedback,Measurement,IPTMS_L2_TBV_POS,IPTMS,IPTMS,,,IPTMS Loop 2 TBV Position Feedback,Position sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-058,PHYS-111,IPTMS Cross-Loop TBV Position Feedback,Measurement,IPTMS_XLOOP_TBV_POS,IPTMS,IPTMS,,,IPTMS Cross-Loop TBV Position Feedback,Position sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-059,PHYS-112,EMC Status / Fault Word,Measurement,EMC_STAT,EMC,EMC,,,EMC Status / Fault Word,Digital status word,Digital,,,,,,"Generic EMC fault/status holder. Individual CON/MON status bits are explicit rows on NAC_CTRL (same signal_id, distinct Message ID / message_or_label / start bit / stop bit).",Yes,TBD,TBD
-SIG-060,PHYS-113,EMC Inverter Temperature,Measurement,EMC_T_INV,EMC,EMC,,,EMC Inverter Temperature,CAN CON vitals (SP000630),Digital,,deg C,-40,215,,Mapped to con_inverter_temp; encoding offset=-40 (in allocation notes).,Yes,TBD,TBD
-SIG-061,PHYS-114,Main Engine Oil Chip Detection,Measurement,CHIP_MEO,TURB,EPECS,,,Main Engine Oil Chip Detection,Magnetic detector,Discrete,,,,,,,Yes,TBD,TBD
-SIG-062,PHYS-115,Turbine Oil Chip Maintenance Flag,Measurement,CHIP_MX_FLAG,EPECS,EPECS,,,Turbine Oil Chip Maintenance Flag,Derived status word,Digital,,,,,,Direct path: EPECS publishes on NAC_CTRL. The HICU relay to FCC and DCU is allocated on FCS_PROP_CTRL under the same Signal Id.,Yes,TBD,TBD
-SIG-063,PHYS-117,FCU Metering Valve Differential Pressure,Measurement,dP_FCU,FCU,EPECS,,,FCU Metering Valve Differential Pressure,Differential pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-064,PHYS-121,EPECS Status / Fault Word,Measurement,EPECS_STAT,EPECS,EPECS,,,EPECS Status / Fault Word,Digital status word,Digital,,,,,,,Yes,TBD,TBD
-SIG-065,PHYS-124,Nacelle ON/OFF Switch,Measurement,NAC_ON_OFF,CKPT,ICM,NAC,,Nacelle ON/OFF Switch Acquisition,Discrete switch,Discrete,,,,,,Relayed by ICM to FCC and BPM alongside the turbine operational mode selector SIG-014.,Yes,TBD,TBD
-SIG-066,PHYS-014,Electric Motor Stop Pushbutton,Measurement,EM_STOP,CKPT,ICM,NAC;EM,,Electric Motor Stop Pushbutton,Discrete switch,Discrete,,,,,,"Crew stop pushbutton in the cockpit, acquired by the ICM and published on ICM_FCS to the FCC and BPM. The ICM does not drive any effector with it, so the role is Measurement.",Yes,TBD,TBD
-SIG-067,PHYS-013,Turbine Override Start Pushbutton,Measurement,TURB_OVRD_START,CKPT,ICM,NAC,,Turbine Override Start Pushbutton,Discrete switch,Discrete,,,,,,"Crew override start pushbutton in the cockpit, acquired by the ICM and published on ICM_FCS to the FCC and BPM. The ICM does not drive any effector with it, so the role is Measurement.",Yes,TBD,TBD
-SIG-068,PHYS-125,Battery Pack Contactor Status,Measurement,PACK_CONT_STAT,PACK,BMU,,,Battery Pack Contactor Status,Discrete / digital status,Digital,,,,,,Reported by the BMU on NAC_BAT; distinct from the contactor command path SIG-082.,Yes,TBD,TBD
-SIG-069,PHYS-126,True Airspeed,Measurement,TAS,ADC,ADC,,,Calibrated Airspeed,Pitot,Analog,,,,,,,TBD,TBD,TBD
-SIG-070,PHYS-021,Electric Motor Torque Command (FCC to HICU),Request,EM_TqCmd,HICU,FCC,NAC;EM,SIG-195;SIG-004;SIG-001,Electric Motor Torque Target (FCC to HICU),Digital setpoint command,Digital,,,,,,Aircraft-level torque/power target from FCC to HICU (FCS_PROP_CTRL). HICU derives HICU-to-EMC motor command SIG-195. Not the OEM fcc_cmd setpoint.,Yes,TBD,TBD
-SIG-071,PHYS-033,Aircraft Fuel Boost Pump Command,Command,FUEL_BOOST,F_B_PUMP,EPECS,,SIG-019,Aircraft Fuel Boost Pump Command,Discrete effector command,Discrete,,,,,,Automatic actuation uses fuel inlet pressure,Yes,TBD,TBD
-SIG-072,PHYS-034,PCU Metering Valve Command,Command,PCU_METER,PCU,EPECS,,SIG-015;SIG-016;SIG-017,PCU Metering Valve Command,Analog effector command,Discrete,,,,,,,Yes,TBD,TBD
-SIG-073,PHYS-035,PCU Feathering Valve Command,Command,PCU_FEATHER,PCU,EPECS,,SIG-015;SIG-016;SIG-017,PCU Feathering Valve Command,Effector command,Discrete,,,,,,,Yes,TBD,TBD
-SIG-074,PHYS-036,Auxiliary Feathering Pump Command,Command,AUX_FEATHER,PROPELLER,EPECS,,SIG-015;SIG-016,Auxiliary Feathering Pump Command,Discrete effector command,Discrete,,,,,,Independent feathering means,Yes,TBD,TBD
-SIG-075,PHYS-053,Turbine Starter Command,Command,STARTER_CMD,TURB,EPECS,,SIG-023,Turbine Starter Command,Discrete effector command,Discrete,,,,,,,Yes,TBD,TBD
-SIG-076,PHYS-054,Ignition Command,Command,IGN_CMD,TURB,EPECS,,,Ignition Command,Discrete effector command,Discrete,,,,,,,Yes,TBD,TBD
-SIG-077,PHYS-055,FCU Fuel Metering Command,Command,FCU_METER,FCU,EPECS,,SIG-022;SIG-023;SIG-025;SIG-027,FCU Fuel Metering Command,Analog effector command,Discrete,,,,,,,Yes,TBD,TBD
-SIG-078,PHYS-056,FCU Shutdown Command,Command,FCU_SD,FCU,EPECS,,,FCU Shutdown Command,Discrete effector command,Discrete,,,,,,,Yes,TBD,TBD
-SIG-079,PHYS-073,HVPDU Contactor Command,Request,HV_CONT_CMD,HVPDU,HICU,,SIG-035;SIG-036;SIG-037,HVPDU Contactor Command,Digital / discrete command,Digital,,,,,,Aircraft-level command relayed by HICU on the nacelle bus; local protection remains in the HVPDU.,Yes,TBD,TBD
-SIG-080,PHYS-074,HVPDU Pyrofuse Command,Command,HV_PYRO_CMD,HVPDU,HVPDU,,SIG-035;SIG-036;SIG-037,HVPDU Pyrofuse Command,Protection command,Discrete,,,,,,Confirmed HVPDU/cable protection layer,Yes,TBD,TBD
-SIG-081,PHYS-075,HVPDU Load / SSPC Command,Request,HV_LOAD_CMD,HVPDU,HICU,,SIG-035;SIG-036,HVPDU Load / SSPC Command,Digital / discrete command,Digital,,,,,,Aircraft-level command relayed by HICU on the nacelle bus; local protection remains in the HVPDU.,Yes,TBD,TBD
-SIG-082,PHYS-083,Battery Pack Contactor Command,Command,PACK_CONT_CMD,PACK,MBMS,,SIG-068;SIG-113;SIG-170;SIG-192,Battery Pack Contactor Command,Discrete effector command,Discrete,,,,,,"Hardwired discrete from the MBMS to the pack contactor drive. The MBMS fires it on its own authority, from its own monitoring and from the top-level requests it receives (SIG-170 assembly on, SIG-192 pack isolation). Independent of the pyrofuse command SIG-113: neither is a precondition for the other. Not carried on NAC_BAT.",Yes,TBD,TBD
-SIG-083,PHYS-098,IPTMS Loop 1 Coolant Pump Command,Command,IPTMS_L1_PUMP_CMD,IPTMS,IPTMS,,,IPTMS Loop 1 Coolant Pump Command,Analog effector command,Discrete,,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
-SIG-084,PHYS-099,IPTMS Loop 1 Thermal Balancing Valve Command,Command,IPTMS_L1_TBV_CMD,IPTMS,IPTMS,,,IPTMS Loop 1 Thermal Balancing Valve Command,Analog effector command,Discrete,,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
-SIG-085,PHYS-100,IPTMS Loop 2 Coolant Pump Command,Command,IPTMS_L2_PUMP_CMD,IPTMS,IPTMS,,,IPTMS Loop 2 Coolant Pump Command,Analog effector command,Discrete,,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
-SIG-086,PHYS-101,IPTMS Loop 2 Thermal Balancing Valve Command,Command,IPTMS_L2_TBV_CMD,IPTMS,IPTMS,,,IPTMS Loop 2 Thermal Balancing Valve Command,Analog effector command,Discrete,,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
-SIG-087,PHYS-102,IPTMS Cross-Loop Thermal Balancing Valve Command,Command,IPTMS_XLOOP_TBV_CMD,IPTMS,IPTMS,,,IPTMS Cross-Loop Thermal Balancing Valve Command,Analog effector command,Discrete,,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
-SIG-088,PHYS-116,Propeller Heating Command,Request,PROP_HEAT_CMD,PCU,HICU,,,Propeller Heating Command,Discrete effector command,Digital,,,,,,"Propeller / spinner anti-ice request relayed by HICU from the aircraft-level ice-protection system; bypasses EPECS, unlike the PCU effector commands SIG-072 and SIG-073.",Yes,TBD,TBD
-SIG-089,PHYS-119,Backup turbine torque command,Request,BKUP_Tq_Cmd,HICU,BPM,,,Backup Turbine Torque Command,Analog / Digital,Digital,,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
-SIG-090,PHYS-120,Backup Propeller Speed Command,Request,BKUP_Np_Cmd,HICU,BPM,,,Backup Propeller Speed Command,Analog / Digital,Digital,,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
-SIG-091,PHYS-122,Backup electric motor 1 torque command,Request,BKUP_Tq_Cmd,HICU,BPM,,,Backup Electric Engine 1 Torque Command,Analog / Digital,Digital,,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
-SIG-092,PHYS-123,Backup electric motor 2 torque command,Request,BKUP_Tq_Cmd,HICU,BPM,,,Backup Electric Engine 2 Torque Command,Analog / Digital,Digital,,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
-SIG-093,PHYS-095,Turbine Torque Command,Request,TE_TqCmd,EPECS,FCC,,SIG-022,Turbine Torque Target (FCC to HICU),Digital setpoint command,Digital,,,,,,"Logical turbine torque command from FCC to EPECS, and the first hop of the FCC power-management path. HICU relay hops are allocated only in the bus-definition tabs.",Yes,TBD,TBD
-SIG-097,PHYS-118,Propeller Speed Command,Request,Np_Cmd,EPECS,FCC,,SIG-017,Propeller Speed Target (HICU to EPECS),Digital setpoint command,Digital,,,,,,Logical propeller speed command from FCC to EPECS. EPECS drives the PCU metering valve SIG-072 to meet the target. HICU relay hops are allocated only in the bus-definition tabs.,Yes,TBD,TBD
-SIG-098,PHYS-010,Turbine Run Discrete,Request,TURB_RUN_CMD,EPECS,FCC,,SIG-023,Turbine Run Enable (FCC to HICU),Digital discrete command,Digital,,,,,,"Logical turbine run command from FCC to EPECS, computed from the mode selector SIG-014 and the nacelle ON/OFF switch SIG-065. HICU relay hops are allocated only in the bus-definition tabs.",Yes,TBD,TBD
-SIG-100,PHYS-011,Turbine Shutdown Discrete,Request,TURB_SHUTDOWN_CMD,EPECS,FCC,,SIG-023,Turbine Shutdown Enable (FCC to HICU),Digital discrete command,Digital,,,,,,"Logical turbine shutdown command from FCC to EPECS, computed from the mode selector SIG-014 and the nacelle ON/OFF switch SIG-065. HICU relay hops are allocated only in the bus-definition tabs.",Yes,TBD,TBD
-SIG-102,PHYS-096,IPTMS Coolant Target Temperature,Request,IPTMS_TGT_T,IPTMS,HICU,,SIG-051;SIG-052;SIG-055;SIG-056,IPTMS Coolant Target Temperature Command,Digital setpoint command,Digital,,,,,,HICU-issued setpoint; IPTMS closes the loop on its own pump and valve effectors SIG-083 to SIG-087.,Yes,TBD,TBD
-SIG-103,PHYS-097,IPTMS Pre-conditioning Command,Request,IPTMS_PRECOND,IPTMS,HICU,,,IPTMS Pre-conditioning Command,Digital discrete command,Digital,,,,,,Ground and pre-flight thermal pre-conditioning request issued by HICU.,Yes,TBD,TBD
-SIG-104,PHYS-003,Landing Gear Deploy Handle,Measurement,LDG_HANDLE,CKPT,ICM,,,Landing Gear Deploy Handle,,Discrete,,,,,,Single lever with discrete position,Yes,TBD,TBD
-SIG-105,PHYS-004,Landing Gear Alternate Deploy Handle,Measurement,LDG_ALT,CKPT,ICM,,,Landing Gear Alternate Deploy Handle,,Discrete,,,,,,Alternate lever to deploy the landing gear,Yes,TBD,TBD
-SIG-106,PHYS-005,Landing Gear Steering Handle,Measurement,STEER,CKPT,ICM,,,Landing Gear Steering Handle,,Analog,,,,,,Tiler,Yes,TBD,TBD
-SIG-107,PHYS-007,Turbine Maintenance Mode Request,Measurement,MAINT_MODE,CKPT,EPECS,NAC,,Turbine Maintenance Mode Request,,Discrete,,,,,,Cockpit or GSE origin TBD,Yes,TBD,TBD
-SIG-108,PHYS-008,Maintenance Feather Request,Measurement,MAINT_FEATHER,CKPT,EPECS,NAC,,Maintenance Feather Request,Discrete switch,Discrete,,,,,,"Crew maintenance feather pushbutton in the cockpit, acquired by the EPECS. The EPECS decides what to drive from it; the feathering valve drive is the separate command SIG-073.",Yes,TBD,TBD
-SIG-109,PHYS-009,Turbine Start Switch,Measurement,START_SW,CKPT,EPECS,NAC,,Turbine Start Switch,Discrete switch,Discrete,,,,,,"Crew start switch in the cockpit, acquired by the EPECS. The starter drive is the separate command SIG-075.",Yes,TBD,TBD
-SIG-110,PHYS-012,Turbine Continuous Ignition,Measurement,CONT_IGN,CKPT,EPECS,NAC,,Turbine Continuous Ignition,Discrete switch,Discrete,,,,,,"Crew continuous ignition switch in the cockpit, acquired by the EPECS. The igniter drive is the separate command SIG-076.",Yes,TBD,TBD
-SIG-111,PHYS-027,Electric Motor Controller 28VDC Supply,Power,28V_EMC,EMC,LVPDU,,,Electric Motor Controller 28VDC Supply,28V,Power,,,,,,,Yes,TBD,TBD
-SIG-112,PHYS-057,EPECS 28VDC Supply,Power,28V_EPECS,EPECS,LVPDU,,,EPECS 28VDC Supply,28V,Power,,,,,,,Yes,TBD,TBD
-SIG-113,PHYS-084,Battery Pack Pyrofuse Command,Command,PACK_PYRO_CMD,PACK,MBMS,,SIG-080;SIG-082;SIG-192,Battery Pack Pyrofuse Command,,Discrete,,,,,,"Hardwired discrete from the MBMS to the pack pyrofuse triggering hardware. The MBMS fires it on its own authority, from its own monitoring and from the top-level isolation request SIG-192. Independent of the contactor command SIG-082: neither is a precondition for the other. Separate from the HVPDU / cable pyrofuse SIG-080. Not carried on NAC_BAT.",Yes,TBD,TBD
-SIG-114,PHYS-085,Battery Charging Inhibit,Measurement,CHG_INHIBIT,PACK,BMU,,SIG-153;SIG-156;SIG-157,Battery Charging Inhibit,,Discrete,,,,,,Reported on NAC_BAT to the MBMS and to the charge controller. Command authority for an independent critical protection path is open.,Yes,TBD,TBD
-SIG-115,PHYS-127,Calibrated Airspeed,Measurement,CAS,ADC,ADC,,,Calibrated Airspeed,,Analog,,,,,,,TBD,TBD,TBD
-SIG-116,,Per-nacelle Power Allocation,Computed,,,FCC,NAC,SIG-126;SIG-118,,,Digital,,,,,"Power-management split of the total demand across the four nacelles, from the energy strategy and the reported nacelle capability.",,Yes,TBD,TBD
-SIG-117,,TOGA Activation,Computed,,,FCC,,SIG-007;SIG-010,,,Digital,,,,,Take-off / go-around detection from the consolidated power lever position.,,Yes,TBD,TBD
-SIG-118,,Nacelle Status and Available Power,Computed,,,HICU,,SIG-059;SIG-064;SIG-163,,,Digital,,,,,"Nacelle capability and health consolidated from the EMC, EPECS and ESS reports arriving on the nacelle bus.","Reported on FCS_PROP_CTRL to the FCC and DCU, and again on AVIO_HS; both bus rows carry this same identifier.",Yes,TBD,TBD
-SIG-119,,Active Rating Reference,Computed,,,HICU,,SIG-014,,,Digital,,,,,"Rating selected for the current phase, derived from the turbine mode selector and the FCC power-management state.",,Yes,TBD,TBD
-SIG-120,,Propulsion Operating Mode,Computed,,,HICU,,SIG-014,,,Digital,,,,,"Hybrid operating mode issued to EPECS, derived from the mode selector and the FCC energy strategy.",,Yes,TBD,TBD
-SIG-121,,Synchrophasing Command,Computed,,,HICU,,SIG-017,,,Digital,,,,,Propeller phase alignment request computed from the propeller speed and phase feedback of the nacelles.,,Yes,TBD,TBD
-SIG-124,,IPTMS Status and Operating Limits,Computed,,,IPTMS,,SIG-050;SIG-051;SIG-052;SIG-053;SIG-054;SIG-055;SIG-056;SIG-057;SIG-058,,,Digital,,,,,Cooling capability and health consolidated from both loop sensor sets.,,Yes,TBD,TBD
-SIG-125,,Mission Definition and Constraints,Computed,,,FMS,,,,,Digital,,,,,"Flight plan, phase and performance constraints computed by the FMS.",,Yes,TBD,TBD
-SIG-126,,Energy and Hybridization Strategy,Computed,,,MMS,,SIG-125;SIG-163;SIG-128,,,Digital,,,,,"Operating mode and hybridization profile computed by the MMS from the mission, the stored energy state and the fuel available.",,Yes,TBD,TBD
-SIG-127,,Air Data Environmental Conditions,Computed,,,ADC,,SIG-069;SIG-115;SIG-173,,,Digital,,,,,"Air data and weather picture computed by the ADC from their own probes, which are not modelled in this ICD.","Air data part of the environmental picture, sent by ADC to the FCC on the dedicated ADC bus. The weather part is the separate signal SIG-173, owned by WXR.",Yes,TBD,TBD
-SIG-128,,Total Fuel Available,Computed,,,IMA,,,,,Digital,,,,,Totalised by the IMA. The inputs to this computation are not yet defined.,"Sent by the IMA to the DCU on the display link, then relayed by the DCU to the FMS on AVIO_HS.",Yes,TBD,TBD
-SIG-130,,HVPDU Actual Power,Computed,,,HVPDU,,SIG-035;SIG-036,,,Digital,,,,,Delivered power computed by the HVPDU from its own bus current and voltage measurements.,,Yes,TBD,TBD
-SIG-131,,BTMS Temperature Target,Computed,,,FCC,,SIG-126,,,Digital,,,,,Battery thermal target issued from the mission and energy strategy.,"Aircraft-level counterpart of the nacelle setpoint SIG-102; written by FMS and FCC to the HICU, which relays it to BTMS and IPTMS.",Yes,TBD,TBD
-SIG-132,,TMS Coolant Status,Computed,,,BTMS;IPTMS,,SIG-124,,,Digital,,,,,Combined thermal-management capability and health reported to the FCC.,,Yes,TBD,TBD
-SIG-133,,Total Energy Available and Hybridization Mode,Computed,,,FCC,,SIG-126;SIG-163;SIG-128,,,Digital,,,,,Energy summary the FCC broadcasts to avionics for display and mission re-planning.,"Low-integrity, informational only.",Yes,TBD,TBD
-SIG-134,,FCC Status,Computed,,,FCC,,,,,Digital,,,,,FCC health and mode word broadcast to avionics.,,Yes,TBD,TBD
-SIG-135,,Autothrust Command,Computed,,,FCC,,SIG-117,,,Digital,,,,,Autothrust engagement and target exchanged between FCC channels.,,Yes,TBD,TBD
-SIG-136,PHYS-128,Fuel level on the reserve,Measurement,MIN_FUEL,FTANK,HICU,,,,,Discrete,,,,,,,TBD,TBD,TBD
-SIG-137,PHYS-129,LVPDU Power,Power,LVPDU_POWER,LVPDU,DCDC,,,,28V,Power,,,,,,,TBD,TBD,TBD
-SIG-138,PHYS-130,LV Battery Power,Power,LVBAT_POWER,LVPDU,LVBAT,,,,28V,Power,,,,,,"28 V link between the LV battery and the LVPDU. A power link is bidirectional by nature and is modelled as a single row; the nominal direction recorded here is the battery feeding the LVPDU, and charging uses the same physical link.",TBD,TBD,TBD
-SIG-139,PHYS-131,DCDC High Voltage Power,Power,HVPDU_POWER,DCDC,HVPDU,,,,800V,Power,,,,,,"800 V feed from the nacelle HVPDU into the step-down converter, which supplies the LVPDU at 28 V through SIG-137. Completes the chain PACK to HVPDU to DCDC to LVPDU.",TBD,TBD,TBD
-SIG-140,PHYS-132,Electric Motor Controller High Voltage Power,Power,EMC_POWER,EMC,HVPDU,,,,800V,Power,,,,,,"800 V feed from the nacelle HVPDU to the motor controller. Owner is the source and Physical System the load, per the Power role convention in README. The feed current measured at the HVPDU end is SIG-143.",TBD,TBD,TBD
-SIG-141,PHYS-133,IPTMS Power,Power,IPTMS_POWER,IPTMS,HVPDU,,,,800V,Power,,,,,,800 V feed from the nacelle HVPDU to the IPTMS. Owner is the source and Physical System the load. Included in the auxiliary feed current SIG-144.,TBD,TBD,TBD
-SIG-142,PHYS-134,HVBAT Power,Power,BAT_POWER,HVPDU,PACK,,,,800V,Power,,,,,,,TBD,TBD,TBD
-SIG-143,PHYS-135,HVPDU EMC Feed Current,Measurement,I_EMC_FEED,HVPDU,HVPDU,EM,SIG-140,HVPDU EMC Feed Current,Current sensor,Analog,,,,,,DC feed current to each motor controller measured at the HVPDU; distinct from the motor phase current SIG-002 measured by the EMC. Repeated Per = EM because the HVPDU feeds the two motors of its nacelle.,Yes,TBD,TBD
-SIG-144,PHYS-136,HVPDU Auxiliary Feed Current,Measurement,I_AUX,HVPDU,HVPDU,,SIG-141,HVPDU Auxiliary Feed Current,Current sensor,Analog,,,,,,Aggregate feed current to the non-propulsion nacelle loads (IPTMS and other auxiliaries).,Yes,TBD,TBD
-SIG-145,PHYS-137,HVPDU Temperature,Measurement,T_HVPDU,HVPDU,HVPDU,,,HVPDU Temperature,Temperature sensor,Analog,,,,,,HVPDU internal / busbar temperature reported for monitoring and derating.,Yes,TBD,TBD
-SIG-146,PHYS-138,BTMS Loop 1 Coolant Inlet Temperature,Measurement,BTMS_L1_T_IN,BTMS,BTMS,,SIG-131;SIG-132,BTMS Loop 1 Coolant Inlet Temperature,Temperature sensor,Analog,,,,,,Inlet/outlet naming follows the BTMS request; the IPTMS equivalents (SIG-051/052) use Supply/Return for the same physical positions.,Yes,TBD,TBD
-SIG-147,PHYS-139,BTMS Loop 1 Coolant Outlet Temperature,Measurement,BTMS_L1_T_OUT,BTMS,BTMS,,SIG-131;SIG-132,BTMS Loop 1 Coolant Outlet Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-148,PHYS-140,BTMS Loop 1 Coolant Differential Pressure,Measurement,BTMS_L1_dP,BTMS,BTMS,,SIG-132,BTMS Loop 1 Coolant Differential Pressure,Differential pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-149,PHYS-141,BTMS Loop 2 Coolant Inlet Temperature,Measurement,BTMS_L2_T_IN,BTMS,BTMS,,SIG-131;SIG-132,BTMS Loop 2 Coolant Inlet Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-150,PHYS-142,BTMS Loop 2 Coolant Outlet Temperature,Measurement,BTMS_L2_T_OUT,BTMS,BTMS,,SIG-131;SIG-132,BTMS Loop 2 Coolant Outlet Temperature,Temperature sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-151,PHYS-143,BTMS Loop 2 Coolant Differential Pressure,Measurement,BTMS_L2_dP,BTMS,BTMS,,SIG-132,BTMS Loop 2 Coolant Differential Pressure,Differential pressure sensor,Analog,,,,,,,Yes,TBD,TBD
-SIG-152,PHYS-144,Battery Pack Open Circuit Voltage,Measurement,V_OCV,PACK,BMU,,SIG-039,Battery Pack Open Circuit Voltage,Voltage sensor,Analog,,,,,,Rest / no-load terminal voltage used for state-of-charge estimation; distinct from the loaded terminal voltage SIG-039.,Yes,TBD,TBD
-SIG-153,PHYS-145,Battery Pack Maximum Temperature,Measurement,T_PACK_MAX,PACK,BMU,,SIG-040;SIG-154,Battery Pack Maximum Temperature,Temperature sensor,Analog,,,,,,Hottest measurement point in the pack. Cell-level acquisition stays internal to the pack; the BMU reports the extremum only.,Yes,TBD,TBD
-SIG-154,PHYS-146,Battery Pack Minimum Temperature,Measurement,T_PACK_MIN,PACK,BMU,,SIG-040;SIG-153,Battery Pack Minimum Temperature,Temperature sensor,Analog,,,,,,Coldest measurement point in the pack; drives cold-soak charge limiting and BTMS pre-conditioning.,Yes,TBD,TBD
-SIG-155,PHYS-147,Battery Pack Minimum Cell Voltage,Measurement,V_CELL_MIN,PACK,BMU,,SIG-156,Battery Pack Minimum Cell Voltage,Voltage sensor,Analog,,,,,,Lowest cell voltage in the pack. Individual cell voltages are not modelled in this ICD; only the extremum crosses the interface.,Yes,TBD,TBD
-SIG-156,PHYS-148,Battery Pack Maximum Cell Voltage,Measurement,V_CELL_MAX,PACK,BMU,,SIG-155,Battery Pack Maximum Cell Voltage,Voltage sensor,Analog,,,,,,Highest cell voltage in the pack; drives end-of-charge limiting.,Yes,TBD,TBD
-SIG-157,,Battery Pack State of Charge,Computed,SOC_PACK,,BMU,,SIG-038;SIG-152;SIG-155;SIG-156,,,Digital,,,,,"Estimated by the BMU from pack current integration, open circuit voltage and cell voltage extrema.",Consolidated at assembly level by the MBMS into SIG-163.,Yes,TBD,TBD
-SIG-158,,Battery Pack State of Health,Computed,SOH_PACK,,BMU,,SIG-157;SIG-162,,,Digital,,,,,Capacity and impedance degradation estimated by the BMU over the life of the pack.,,Yes,TBD,TBD
-SIG-159,,Battery Pack State of Power - Charge,Computed,SOP_PACK_CHG,,BMU,,SIG-157;SIG-153;SIG-154;SIG-156,,,Digital,,,,,"Instantaneous charge power the pack can accept, limited by state of charge, temperature extrema and maximum cell voltage.",,Yes,TBD,TBD
-SIG-160,,Battery Pack State of Power - Discharge,Computed,SOP_PACK_DIS,,BMU,,SIG-157;SIG-153;SIG-154;SIG-155,,,Digital,,,,,"Instantaneous discharge power the pack can deliver, limited by state of charge, temperature extrema and minimum cell voltage.",,Yes,TBD,TBD
-SIG-161,,Battery Pack Failure Flag,Computed,PACK_FAIL,,BMU,,,,,Digital,,,,,Pack fault summary raised by the BMU from its own monitoring; consolidated at assembly level into SIG-169.,,Yes,TBD,TBD
-SIG-162,,Battery Pack Cumulative Energy Output,Computed,E_PACK_CUM,,BMU,,SIG-038;SIG-039,,,Digital,,,,,"Energy delivered by the pack, integrated by the BMU from pack current and terminal voltage; non-volatile life counter.",,Yes,TBD,TBD
-SIG-163,,HVDC Assembly State of Charge,Computed,SOC_HVDC,,MBMS,,SIG-157,,,Digital,,,,,"Assembly state of charge consolidated by the MBMS from the twelve pack values, weighted by the packs actually connected.",,Yes,TBD,TBD
-SIG-164,,HVDC Assembly State of Power - Charge,Computed,SOP_HVDC_CHG,,MBMS,,SIG-159;SIG-166,,,Digital,,,,,"Charge power the assembly can accept, consolidated from the connected packs.",,Yes,TBD,TBD
-SIG-165,,HVDC Assembly State of Power - Discharge,Computed,SOP_HVDC_DIS,,MBMS,,SIG-160;SIG-166,,,Digital,,,,,"Discharge power the assembly can deliver, consolidated from the connected packs. Primary energy input to the FCC power-management function.",,Yes,TBD,TBD
-SIG-166,,HVDC Assembly Number of Packs Connected,Computed,N_PACK_CONN,,MBMS,,SIG-068,,,Digital,,,,,"Count of packs whose contactor is closed, from the twelve pack contactor status reports. Range 0 to 12.",,Yes,TBD,TBD
-SIG-167,,HVDC Assembly Maximum Pack Temperature,Computed,T_HVDC_MAX,,MBMS,,SIG-153;SIG-131,,,Digital,,,,,"Hottest pack in the assembly, from the twelve pack maximum temperatures; drives BTMS demand and discharge derating.",,Yes,TBD,TBD
-SIG-168,,HVDC Assembly Minimum Pack Temperature,Computed,T_HVDC_MIN,,MBMS,,SIG-154;SIG-131,,,Digital,,,,,"Coldest pack in the assembly, from the twelve pack minimum temperatures; drives pre-conditioning and charge limiting.",,Yes,TBD,TBD
-SIG-169,,HVDC Assembly Failure / Fault Word,Computed,HVDC_FAULT,,MBMS,,SIG-161,,,Digital,,,,,"Assembly fault summary consolidated by the MBMS from the twelve pack failure flags and its own monitoring, so that a pack failure is visible to HICU and avionics without carrying the twelve individual flags.",,Yes,TBD,TBD
-SIG-170,PHYS-149,HVDC Assembly On Command,Request,HVDC_ON_CMD,MBMS,HICU,,SIG-082;SIG-166,HVDC Assembly On Command,Digital command,Digital,,,,,,Assembly-level connect / disconnect request from HICU to the MBMS. The MBMS holds authority over which packs are connected and issues the individual pack contactor commands SIG-082 on NAC_BAT.,Yes,TBD,TBD
-SIG-171,,Total Propulsion Power Command,Computed,P_PROP_CMD_TOT,,FCC,,SIG-116;SIG-172,,,Digital,,,,,Sum of the per-nacelle power allocations SIG-116 across the four nacelles.,Aircraft-level commanded figure for crew display and maintenance recording.,Yes,TBD,TBD
-SIG-172,,Total Propulsion Power Actual,Computed,P_PROP_ACT_TOT,,FCC,,SIG-118;SIG-171,,,Digital,,,,,Sum of the achieved nacelle power reported through SIG-118 across the four nacelles.,"Aircraft-level achieved figure, displayed against the commanded value SIG-171.",Yes,TBD,TBD
-SIG-173,,Weather Environmental Conditions,Computed,WX_ENV,,WXR,,SIG-127,,,Digital,,,,,Weather picture produced by the weather radar.,"Sent to the DCU on the dedicated WXR link, then to IMA on the display link and to FCC on AVIO_HS. The air data part of the environmental picture is the separate signal SIG-127, owned by ADC.",Yes,TBD,TBD
-SIG-174,,FMS Present Position Latitude,Computed,FMS_LAT,,FMS,,SIG-175,,,Digital,,deg,,,Blended navigation position computed by the FMS from the inertial and air data sources.,,Yes,TBD,TBD
-SIG-175,,FMS Present Position Longitude,Computed,FMS_LON,,FMS,,SIG-174,,,Digital,,deg,,,Blended navigation position computed by the FMS from the inertial and air data sources.,,Yes,TBD,TBD
-SIG-176,,FMS Ground Speed,Computed,FMS_GS,,FMS,,SIG-069,,,Digital,,kt,,,Ground speed of the blended navigation solution.,,Yes,TBD,TBD
-SIG-177,,FMS Track Angle True,Computed,FMS_TK,,FMS,,SIG-180,,,Digital,,deg,,,True track angle of the blended navigation solution.,,Yes,TBD,TBD
-SIG-178,,FMS Wind Speed,Computed,FMS_WS,,FMS,,SIG-179;SIG-127,,,Digital,,kt,,,Wind solution derived by the FMS from the air data and inertial velocity difference.,,Yes,TBD,TBD
-SIG-179,,FMS Wind Direction,Computed,FMS_WD,,FMS,,SIG-178;SIG-127,,,Digital,,deg,,,Wind solution derived by the FMS from the air data and inertial velocity difference.,,Yes,TBD,TBD
-SIG-180,,FMS Desired Track,Computed,FMS_DTK,,FMS,,SIG-177;SIG-181,,,Digital,,deg,,,Track the aircraft should follow on the active flight plan leg.,,Yes,TBD,TBD
-SIG-181,,FMS Cross Track Distance,Computed,FMS_XTK,,FMS,,SIG-180,,,Digital,,NM,,,Lateral deviation of the aircraft from the active leg; sign convention to be defined.,,Yes,TBD,TBD
-SIG-182,,FMS Vertical Deviation,Computed,FMS_VDEV,,FMS,,SIG-189,,,Digital,,ft,,,Deviation of the aircraft from the vertical profile; sign convention to be defined.,,Yes,TBD,TBD
-SIG-183,,FMS Roll Steering Command,Computed,FMS_ROLL_CMD,,FMS,,SIG-180;SIG-181,,,Digital,,deg,,,Lateral steering command generated by the FMS to capture and hold the active leg.,Consumed by the FCC for lateral guidance. Integrity and authority of this path are to be defined.,Yes,TBD,TBD
-SIG-184,,FMS Active Waypoint Bearing,Computed,FMS_WPT_BRG,,FMS,,SIG-187;SIG-185,,,Digital,,deg,,,Great-circle bearing from present position to the active waypoint.,,Yes,TBD,TBD
-SIG-185,,FMS Distance to Go,Computed,FMS_DTG,,FMS,,SIG-186;SIG-187,,,Digital,,NM,,,Distance from present position to the active waypoint.,,Yes,TBD,TBD
-SIG-186,,FMS Time to Go,Computed,FMS_TTG,,FMS,,SIG-185,,,Digital,,min,,,Estimated time from present position to the active waypoint.,,Yes,TBD,TBD
-SIG-187,,FMS Active Waypoint Identifier,Computed,FMS_WPT_ID,,FMS,,SIG-184;SIG-185,,,Digital,,,,,"Identifier of the waypoint the aircraft is currently navigating to. Character data, not a numeric value.",,Yes,TBD,TBD
-SIG-188,,FMS UTC,Computed,FMS_UTC,,FMS,,,,,Digital,,hh:mm:ss,,,Coordinated universal time maintained by the FMS and used as the common time reference for the avionics.,,Yes,TBD,TBD
-SIG-189,,FMS Target Altitude,Computed,FMS_ALT_TGT,,FMS,,SIG-182,,,Digital,,ft,,,Altitude target of the active vertical flight plan segment.,,Yes,TBD,TBD
-SIG-190,,FMS Target Airspeed,Computed,FMS_SPD_TGT,,FMS,,SIG-115,,,Digital,,kt,,,Airspeed target of the active flight plan segment.,,Yes,TBD,TBD
-SIG-191,,FMS Status and Fault Word,Computed,FMS_STATUS,,FMS,,,,,Digital,,,,,"FMS operating mode, navigation validity and internal fault summary.",,Yes,TBD,TBD
-SIG-192,PHYS-150,Pack Isolation Request,Request,PACK_ISOL_REQ,MBMS,HICU,,SIG-082;SIG-113;SIG-170,Pack Isolation Request,Digital command,Digital,,,,,,"Top-level request from HICU to the MBMS to isolate a pack, carrying the target pack in the payload. The MBMS retains authority over the means and fires the hardwired discretes SIG-082 and SIG-113 itself; it may also fire them on its own monitoring without this request. Distinct from the assembly connect / disconnect request SIG-170.",Yes,TBD,TBD
-SIG-193,,Step-up Converter Low Voltage Power,Power,DCDC_UP_LV_POWER,DCDC_UP,LVPDU,,SIG-194;SIG-138,,28V,Power,,,,,,28 V feed from the LV network into the step-up converter. Mirrors SIG-139 on the step-down side.,Yes,TBD,TBD
-SIG-194,,HVPDU Step-up Power,Power,HVPDU_STEPUP_POWER,HVPDU,DCDC_UP,,SIG-193;SIG-142,,800V,Power,,,,,,"800 V output of the step-up converter into the nacelle HVPDU, providing a path to energise the HV network from the LV side. Name is qualified by the source because the HVPDU is also fed by the packs through SIG-142.",Yes,TBD,TBD
-SIG-195,PHYS-151,Electric Motor Command (HICU to EMC),Request,EM_Cmd,EMC,HICU,NAC;EM,SIG-070;SIG-202;SIG-203,Electric Motor Command (HICU to EMC),Digital setpoint command (mode-dependent),Digital,,,,,Computed by HICU from FCC motor target (SIG-070).,Final HICU-to-EMC command on fcc_cmd.command (DOC 1Y1). Distinct from SIG-070.,Yes,TBD,TBD
-SIG-196,PHYS-152,Electric Motor Speed (MON),Measurement,EM_RPM_MON,EMC,EMC,NAC;EM,SIG-004,Electric Motor Speed (MON),CAN MON motor status,Digital,,RPM,-16384,16383.5,,MON-lane counterpart of SIG-004.,Yes,TBD,TBD
-SIG-197,PHYS-153,EMC CON HVDC Voltage,Measurement,EMC_HV_V_CON,EMC,EMC,NAC;EM,SIG-036,EMC CON HVDC Voltage,CAN CON inverter status,Digital,,Vdc,-1638.4,1638.35,,EPU-channel HVDC voltage (con_hvdc_volt). Distinct from HVPDU bus voltage.,Yes,TBD,TBD
-SIG-198,PHYS-154,EMC CON HVDC Current,Measurement,EMC_HV_I_CON,EMC,EMC,NAC;EM,SIG-035,EMC CON HVDC Current,CAN CON inverter status,Digital,,A,-32768,32767,,EPU-channel HVDC current (con_hvdc_curr). Distinct from HVPDU bus current.,Yes,TBD,TBD
-SIG-199,PHYS-155,EMC MON HVDC Voltage,Measurement,EMC_HV_V_MON,EMC,EMC,NAC;EM,,EMC MON HVDC Voltage,CAN MON inverter status,Digital,,Vdc,-1638.4,1638.35,,MON-lane HVDC voltage (mon_hvdc_volt).,Yes,TBD,TBD
-SIG-200,PHYS-156,EMC MON HVDC Current,Measurement,EMC_HV_I_MON,EMC,EMC,NAC;EM,,EMC MON HVDC Current,CAN MON inverter status,Digital,,Adc,-655.36,655.34,,"MON-lane HVDC current (mon_hvdc_curr, res 0.02).",Yes,TBD,TBD
-SIG-201,PHYS-157,EMC CON Torque Estimate,Measurement,EM_TqEst_CON,EMC,EMC,NAC;EM,SIG-001,EMC CON Torque Estimate,CAN CON motor status,Digital,,Nm,-1638.4,1638.35,,con_torque_est. Distinct from gearbox torque probe SIG-001.,Yes,TBD,TBD
-SIG-202,,EMC CON Setpoint Echo,Measurement,EM_CmdEcho_CON,EMC,EMC,NAC;EM,SIG-195,EMC CON Setpoint Echo,CAN CON motor status,Digital,,,,,,con_setpoint echo of SIG motor command; mode-dependent scale (Table 7).,Yes,TBD,TBD
-SIG-203,,EMC MON Setpoint Echo,Measurement,EM_CmdEcho_MON,EMC,EMC,NAC;EM,SIG-195,EMC MON Setpoint Echo,CAN MON motor status,Digital,,,,,,mon_setpoint echo.,Yes,TBD,TBD
-SIG-204,PHYS-158,EMC MON Stator Temperature,Measurement,EM_T_STATOR_MON,EMC,EMC,NAC;EM,,EMC MON Stator Temperature,CAN MON vitals,Digital,,deg C,-40,215,,mon_stator_temp; offset=-40 in allocation notes.,Yes,TBD,TBD
-SIG-205,PHYS-159,EMC MON Coolant Inlet Temperature,Measurement,EM_T_COOL_MON,EMC,EMC,NAC;EM,SIG-006,EMC MON Coolant Inlet Temperature,CAN MON vitals,Digital,,deg C,-40,215,,mon_coolant_temp. Distinct from IPTMS EM outlet SIG-006.,Yes,TBD,TBD
-SIG-206,PHYS-160,EMC MON Board Temperature,Measurement,EMC_T_CMB_MON,EMC,EMC,NAC;EM,,EMC MON Board Temperature,CAN MON vitals,Digital,,deg C,-40,215,,mon_cmb_temp included for full CAN map.,TBD,TBD,TBD
-SIG-207,,EMC CON MCU State,Measurement,EMC_MCU_STATE,EMC,EMC,NAC;EM,,EMC CON MCU State,CAN CON inverter status,Digital,,,,,,con_mcu_state enum.,Yes,TBD,TBD
-SIG-208,,EMC CON Control Mode Feedback,Measurement,EMC_CTRL_MODE_FB,EMC,EMC,NAC;EM,SIG-195,EMC CON Control Mode Feedback,CAN CON inverter status,Digital,,,,,,con_ctrl_mode feedback.,Yes,TBD,TBD
-SIG-209,,EMC CON Control Level Feedback,Measurement,EMC_CTRL_LVL_FB,EMC,EMC,NAC;EM,SIG-195,EMC CON Control Level Feedback,CAN CON inverter status,Digital,,,,,,con_ctrl_level_cmd feedback.,Yes,TBD,TBD
-SIG-210,,EMC CON Discrete Disable Status,Computed,EMC_DIS_DIS_CON,EMC,EMC,NAC;EM,,EMC CON Discrete Disable Status,CAN CON vitals,Digital,,,,,,con_discrete_disable.,Yes,TBD,TBD
-SIG-211,,EMC CON Freshness Counter,Measurement,EMC_FRESH_CON,EMC,EMC,NAC;EM,,EMC CON Freshness Counter,CAN protocol,Digital,,,,,,Mirrors HICU fcc_freshness on CON frames.,Yes,TBD,TBD
-SIG-212,,EMC MON Freshness Counter,Measurement,EMC_FRESH_MON,EMC,EMC,NAC;EM,,EMC MON Freshness Counter,CAN protocol,Digital,,,,,,Mirrors HICU fcc_freshness on MON frames.,Yes,TBD,TBD
-SIG-213,,EMC CON Message CRC,Measurement,EMC_CRC_CON,EMC,EMC,NAC;EM,,EMC CON Message CRC,CAN protocol,Digital,,,,,,CON frame CRC.,Yes,TBD,TBD
-SIG-214,,EMC MON Message CRC,Measurement,EMC_CRC_MON,EMC,EMC,NAC;EM,,EMC MON Message CRC,CAN protocol,Digital,,,,,,MON frame CRC.,Yes,TBD,TBD
-SIG-215,,EMC CON EPU Location ID,Measurement,EMC_EPU_ID_CON,EMC,EMC,NAC;EM,,EMC CON EPU Location ID,CAN CON config,Digital,,,,,,con_epu_location_id.,Yes,TBD,TBD
-SIG-216,,EMC CON Software Version,Measurement,EMC_SW_CON,EMC,EMC,NAC;EM,,EMC CON Software Version,CAN CON config,Digital,,,,,,con_sw_ver.,Yes,TBD,TBD
-SIG-217,,EMC MON EPU Location ID,Measurement,EMC_EPU_ID_MON,EMC,EMC,NAC;EM,,EMC MON EPU Location ID,CAN MON config,Digital,,,,,,mon_epu_location_id.,Yes,TBD,TBD
-SIG-218,,EMC MON Software Version,Measurement,EMC_SW_MON,EMC,EMC,NAC;EM,,EMC MON Software Version,CAN MON config,Digital,,,,,,mon_sw_ver.,Yes,TBD,TBD
-SIG-219,,EMC CON Inverter Retry Count,Measurement,EMC_INV_RETRY,EMC,EMC,NAC;EM,,EMC CON Inverter Retry Count,CAN CON vitals,Digital,,,,,,con_inverter_retry_cnt.,Yes,TBD,TBD
-SIG-220,,EMC CAN Spare Field,Measurement,EMC_CAN_SPARE,EMC,EMC,NAC;EM,,EMC CAN Spare Field,CAN protocol,Digital,,,,,,Placeholder for OEM spare bit fields.,No,TBD,TBD
-SIG-221,,HICU Freshness Counter to EMC,Request,HICU_FRESH_EMC,EMC,HICU,NAC;EM,,HICU Freshness Counter to EMC,CAN protocol,Digital,,,,,,OEM fcc_freshness on fcc_cmd (1Y1).,Yes,TBD,TBD
-SIG-222,,EPU Enable Command,Computed,EPU_EN,EMC,HICU,NAC;EM,SIG-195,EPU Enable Command,CAN command,Digital,,,,,Motor/EPU engagement enable computed by HICU.,OEM epu_en on fcc_cmd.,Yes,TBD,TBD
-SIG-223,,HVDC Ready Set Command,Computed,HV_SET,EMC,HICU,NAC;EM,,HVDC Ready Set Command,CAN command,Digital,,,,,HICU indicates HVDC ready for subsequent EMC states.,OEM hv_set on fcc_cmd.,Yes,TBD,TBD
-SIG-224,,EMC Fault Reset Command,Computed,EMC_FLT_RST,EMC,HICU,NAC;EM,,EMC Fault Reset Command,CAN command,Digital,,,,,HICU request to reset latched EMC faults.,OEM fault_reset_cmd.,Yes,TBD,TBD
-SIG-225,,EMC Critical Monitor Override,Computed,EMC_OVRD,EMC,HICU,NAC;EM,,EMC Critical Monitor Override,CAN command,Digital,,,,,HICU request to override critical EMC monitors.,OEM override.,Yes,TBD,TBD
-SIG-226,PHYS-161,Weight on Wheels,Computed,WOW,HICU,FCC,,,Weight on Wheels,Digital status,Digital,,,,,Weight-on-wheels state computed by FCC.,FCC->HICU on FCS_PROP_CTRL; HICU->EMC/EPECS on NAC_CTRL (wow_status).,Yes,TBD,TBD
-SIG-227,,EMC Control Mode Command,Computed,EMC_CTRL_MODE,EMC,HICU,NAC;EM,SIG-195,EMC Control Mode Command,CAN command,Digital,,,,,Control mode selected by HICU for EMC.,OEM ctrl_mode on fcc_cmd.,Yes,TBD,TBD
-SIG-228,,EMC Control Level Command,Computed,EMC_CTRL_LVL,EMC,HICU,NAC;EM,SIG-195,EMC Control Level Command,CAN command,Digital,,,,,MCU vs EPU level selected by HICU.,OEM ctrl_level_cmd.,Yes,TBD,TBD
-SIG-229,PHYS-162,Charging Current Limit to EMC,Computed,CHG_I_LIM_EMC,EMC,HICU,NAC;EM,SIG-232,Charging Current Limit to EMC,CAN command,Digital,,A,-1000,638.3,HICU forwards MBMS charging limit onto fcc_cmd.,fcc_cmd charging_curr_lim; source MBMS_1 message. offset=-180.8.,Yes,TBD,TBD
-SIG-230,PHYS-163,EMC Voltage / Current Command,Computed,EMC_VI_CMD,EMC,HICU,NAC;EM,SIG-233;SIG-195;SIG-227,EMC Voltage / Current Command,CAN command,Digital,,,,,HICU applies MBMS V/I setpoint on fcc_cmd when ctrl_mode is V or I.,fcc_cmd volt_curr_command; source MBMS_1. offset=0 (V); current offset=-400.,Yes,TBD,TBD
-SIG-231,,HICU Message CRC to EMC,Request,HICU_CRC_EMC,EMC,HICU,NAC;EM,,HICU Message CRC to EMC,CAN protocol,Digital,,,,,,OEM fcc_crc.,Yes,TBD,TBD
-SIG-232,PHYS-164,Charging Current Limit (MBMS to HICU),Computed,CHG_I_LIM_MBMS,HICU,MBMS,NAC,SIG-229,Charging Current Limit (MBMS to HICU),CAN MBMS limits message,Digital,,A,-1000,638.3,Charging current limit computed by MBMS.,Message ID MBMS_1 / mbms_ess_lim. Same encoding as fcc_cmd field. Distinct from HICU->EMC signal.,Yes,TBD,TBD
-SIG-233,PHYS-165,Voltage / Current Setpoint (MBMS to HICU),Computed,VI_SET_MBMS,HICU,MBMS,NAC;EM,SIG-230,Voltage / Current Setpoint (MBMS to HICU),CAN MBMS limits message,Digital,,,,,V/I setpoint from MBMS to HICU.,Message ID MBMS_1. Distinct from HICU->EMC V/I command.,Yes,TBD,TBD
-SIG-234,,MBMS Limits Message CRC,Measurement,MBMS_LIM_CRC,HICU,MBMS,NAC,,MBMS Limits Message CRC,CAN protocol,Digital,,,,,,CRC on MBMS_1; DLC=4 bandwidth model.,Yes,TBD,TBD
+﻿Signal Id,Physical Id,Signal Name,Signal Role,Abbreviation,Interfacing Equipment,Signal Owner,Repeated Per,Related to,Connection Type,Interface Type,Unit,Functional Minimum,Functional Maximum,Derivation,Notes,On aircraft ?,On FND ?,On Sim ?
+SIG-001,,Electric Motor Torque,Measurement,EM_Tq,EM,HICU,,,Torque sensor at gearbox,Analog,,,,,,Yes,TBD,TBD
+SIG-002,,Electric Motor Current,Measurement,EM_I,EMC,EMC,,,Current sensor,Analog,,,,,Not part of the OEM CON/MON payload; the OEM reports HVDC current and voltage instead.,Yes,TBD,TBD
+SIG-003,PHYS-010,Electric Motor Voltage,Measurement,EM_V,EMC,EMC,,,Voltage sensor,Analog,,,,,Not part of the OEM CON/MON payload; the OEM reports HVDC current and voltage instead.,Yes,TBD,TBD
+SIG-004,,Electric Motor Speed (CON),Measurement,EM_RPM,EMC,EMC,,,CAN CON motor status (SP000630),Digital,RPM,-16384,16383.5,,CON-lane speed from the EMC. OEM label con_speed_measured. The MON lane is a separate signal.,Yes,TBD,TBD
+SIG-005,,Electric Motor Coolant Delta Pressure,Measurement,EM_dP,IPTMS,IPTMS,NAC;EM,,Differential pressure sensor,Analog,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
+SIG-006,,Electric Motor Coolant Outlet Temperature,Measurement,EM_Tout,IPTMS,IPTMS,NAC;EM,,Temperature sensor,Analog,,,,,Per-motor detail within IPTMS Loop 1; acquired and reported by IPTMS.,Yes,TBD,TBD
+SIG-007,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,ICM,,,RVDT,Analog,Normalized,-1,1,,,Yes,No,Yes
+SIG-010,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,BPM,,,Potentiometer,Analog,Normalized,-1,1,,,Yes,TBD,TBD
+SIG-011,PHYS-001,Power Lever Position,Measurement,PLA,THROTTLE,ICM,,,Proximity switch,Discrete,,,,,,Yes,TBD,TBD
+SIG-012,,Flap Lever Position,Measurement,FLAP_LEVER,FLAP_LEVER,ICM,,,RVDT,Analog,Normalized,-1,1,,,Yes,TBD,TBD
+SIG-014,,Turbine Operational Mode Selector,Measurement,TURB_MODE,CONTROL_PANELS,ICM,NAC,,Multiposition selector,Discrete,,,,,,Yes,TBD,TBD
+SIG-015,PHYS-002,Propeller Blade Angle,Measurement,Beta,PROPELLER,EPECS,,,"Beta probes / ring, control path",Analog,,,,,,Yes,TBD,TBD
+SIG-016,PHYS-002,Propeller Blade Angle,Measurement,Beta,PROPELLER,EPECS,,,"Beta probes / ring, protection path",Analog,,,,,,Yes,TBD,TBD
+SIG-017,,Propeller Speed,Measurement,Np,PROPELLER,EPECS,,,Beta probes / ring,Analog,,,,,,Yes,TBD,TBD
+SIG-018,,Fuel Temperature,Measurement,TF,FCU,EPECS,,,RTD / TBD,Analog,,,,,,Yes,TBD,TBD
+SIG-019,,Fuel Inlet Pressure,Measurement,FIP,FCU,EPECS,,,Pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-020,,Metered Fuel Flow,Measurement,FFM,FCU,EPECS,,,Flow meter,Analog,,,,,,Yes,TBD,TBD
+SIG-021,,Fuel Filter Differential Pressure,Measurement,dP_fuel,FCU,EPECS,,,Differential pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-022,,Turbine Torque,Measurement,Q_TE,TURB,HICU,,,Torque sensor at gearbox,Analog,,,,,,Yes,TBD,TBD
+SIG-023,,Gas Generator Speed,Measurement,Ng,TURB,EPECS,,,Speed pickup,Analog,,,,,,Yes,TBD,TBD
+SIG-024,,Main Engine Oil Pressure,Measurement,MOP,TURB,EPECS,,,Pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-025,,Compressor Output Pressure,Measurement,P3,TURB,EPECS,,,Pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-026,,Engine Inlet Temperature,Measurement,T1,TURB,EPECS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-027,,Inter-Turbine Temperature,Measurement,T5_ITT,TURB,EPECS,,,Thermocouple,Analog,,,,,,Yes,TBD,TBD
+SIG-028,,Main Engine Oil Temperature,Measurement,MOT,TURB,EPECS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-029,,AGB Chip Detection,Measurement,CHIP_AGB,TURB,EPECS,,,Magnetic detector,Discrete,,,,,,Yes,TBD,TBD
+SIG-030,,Engine Oil Level,Measurement,OIL_LEVEL,TURB,EPECS,,,Level detector,Discrete,,,,,,Yes,TBD,TBD
+SIG-031,,Combining Gearbox Oil Pressure,Measurement,MOP_GBX,GBX,EPECS,,,Pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-032,,Combining Gearbox Oil Temperature,Measurement,MOT_GBX,GBX,EPECS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-033,,Combining Gearbox Chip Detection,Measurement,CHIP_GBX,GBX,EPECS,,,Magnetic detector,Discrete,,,,,,Yes,TBD,TBD
+SIG-034,,Combining Gearbox Oil Filter Differential Pressure,Measurement,dP_GBX,GBX,EPECS,,,Differential pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-035,,HVPDU Bus Current,Measurement,I_HV,HVPDU,HVPDU,,,Current sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-036,PHYS-010,HVPDU Bus Voltage,Measurement,V_HV,HVPDU,HVPDU,,,Voltage sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-037,,HV Isolation Resistance,Measurement,R_ISO,HVPDU,IMD,,,Insulation monitoring device,Discrete,,,,,,Yes,TBD,TBD
+SIG-038,,Battery Pack Current,Measurement,I_PACK,PACK,BMU,,,"Current sensor, nominal path",Analog,,,,,,Yes,TBD,TBD
+SIG-039,,Battery Pack Terminal Voltage,Measurement,V_PACK,PACK,BMU,,,Voltage sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-040,,Battery Pack Mean Temperature,Measurement,T_PACK_MEAN,PACK,BMU,,SIG-153;SIG-154,Temperature sensor,Analog,,,,,Cell-level acquisition is internal to the pack and is not modelled; the BMU reports the pack aggregate. The hottest and coldest measurement points are separate signals.,Yes,TBD,TBD
+SIG-041,,Aircraft Pitch Angle,Measurement,PITCH,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-042,,Aircraft Roll Angle,Measurement,ROLL,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-043,,Aircraft Heading Angle,Measurement,HDG,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-044,,Aircraft Longitudinal Acceleration,Measurement,Ax,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-045,,Aircraft Lateral Acceleration,Measurement,Ay,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-046,,Aircraft Normal Acceleration,Measurement,Az,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-047,,Aircraft Pitch Rate,Measurement,q,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-048,,Aircraft Roll Rate,Measurement,p,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-049,,Aircraft Yaw Rate,Measurement,r,IRU,IRU,,,IRU,Digital,,,,,,TBD,TBD,TBD
+SIG-050,,IPTMS Loop 1 Pump Discharge Pressure,Measurement,IPTMS_L1_PUMP_P,IPTMS,IPTMS,,,Pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-051,,IPTMS Loop 1 Coolant Supply Temperature,Measurement,IPTMS_L1_T_SUP,IPTMS,IPTMS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-052,,IPTMS Loop 1 Coolant Return Temperature,Measurement,IPTMS_L1_T_RET,IPTMS,IPTMS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-053,,IPTMS Loop 1 TBV Position Feedback,Measurement,IPTMS_L1_TBV_POS,IPTMS,IPTMS,,,Position sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-054,,IPTMS Loop 2 Pump Discharge Pressure,Measurement,IPTMS_L2_PUMP_P,IPTMS,IPTMS,,,Pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-055,,IPTMS Loop 2 Coolant Supply Temperature,Measurement,IPTMS_L2_T_SUP,IPTMS,IPTMS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-056,,IPTMS Loop 2 Coolant Return Temperature,Measurement,IPTMS_L2_T_RET,IPTMS,IPTMS,,,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-057,,IPTMS Loop 2 TBV Position Feedback,Measurement,IPTMS_L2_TBV_POS,IPTMS,IPTMS,,,Position sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-058,,IPTMS Cross-Loop TBV Position Feedback,Measurement,IPTMS_XLOOP_TBV_POS,IPTMS,IPTMS,,,Position sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-059,,EMC Status / Fault Word,Computed,EMC_STAT,EMC,EMC,,,Digital status word,Digital,,,,,Generic EMC fault / status holder; the individual CON/MON status bits are explicit allocation rows on the nacelle bus.,Yes,TBD,TBD
+SIG-060,,EMC Inverter Temperature,Measurement,EMC_T_INV,EMC,EMC,,,CAN CON vitals (SP000630),Digital,deg C,-40,215,,OEM label con_inverter_temp.,Yes,TBD,TBD
+SIG-061,,Main Engine Oil Chip Detection,Measurement,CHIP_MEO,TURB,EPECS,,,Magnetic detector,Discrete,,,,,,Yes,TBD,TBD
+SIG-062,,Turbine Oil Chip Maintenance Flag,Measurement,CHIP_MX_FLAG,EPECS,EPECS,,,Derived status word,Digital,,,,,Published by the EPECS on the nacelle bus and relayed by the HICU to the FCC.,Yes,TBD,TBD
+SIG-063,,FCU Metering Valve Differential Pressure,Measurement,dP_FCU,FCU,EPECS,,,Differential pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-064,,EPECS Status / Fault Word,Measurement,EPECS_STAT,EPECS,EPECS,,,Digital status word,Digital,,,,,,Yes,TBD,TBD
+SIG-065,,Nacelle ON/OFF Switch,Measurement,NAC_ON_OFF,CONTROL_PANELS,ICM,NAC,,Discrete switch,Discrete,,,,,"Crew nacelle ON/OFF switch, acquired by the ICM and published to the FCC and BPM alongside the turbine operational mode selector.",Yes,TBD,TBD
+SIG-066,,Electric Motor Stop Pushbutton,Measurement,EM_STOP,CONTROL_PANELS,ICM,NAC;EM,,Discrete switch,Discrete,,,,,"Crew stop pushbutton in the cockpit, acquired by the ICM and published to the FCC and BPM.",Yes,TBD,TBD
+SIG-067,,Turbine Override Start Pushbutton,Measurement,TURB_OVRD_START,CONTROL_PANELS,ICM,NAC,,Discrete switch,Discrete,,,,,"Crew override start pushbutton in the cockpit, acquired by the ICM and published to the FCC and BPM.",Yes,TBD,TBD
+SIG-068,,Battery Pack Contactor Status,Measurement,PACK_CONT_STAT,PACK,BMU,,,Discrete / digital status,Digital,,,,,"Status of the pack contactor, not the command that drives it; the command is a separate hardwired discrete.",Yes,TBD,TBD
+SIG-069,,True Airspeed,Measurement,TAS,ADC,ADC,,,Pitot,Analog,,,,,,TBD,TBD,TBD
+SIG-070,,Electric Motor Torque Command (FCC to HICU),Request,EM_TqCmd,HICU,FCC,NAC;EM,SIG-195;SIG-004;SIG-001,Digital setpoint command,Digital,,,,,Aircraft-level torque / power target from the FCC to the HICU. The HICU derives the motor command it sends to the EMC; this is not the OEM setpoint field.,Yes,TBD,TBD
+SIG-071,,Aircraft Fuel Boost Pump Command,Command,FUEL_BOOST,F_B_PUMP,EPECS,,SIG-019,Discrete effector command,Discrete,,,,,Automatic actuation uses fuel inlet pressure,Yes,TBD,TBD
+SIG-072,,PCU Metering Valve Command,Command,PCU_METER,PCU,EPECS,,SIG-015;SIG-016;SIG-017,Analog effector command,Discrete,,,,,,Yes,TBD,TBD
+SIG-073,,PCU Feathering Valve Command,Command,PCU_FEATHER,PCU,EPECS,,SIG-015;SIG-016;SIG-017,Effector command,Discrete,,,,,,Yes,TBD,TBD
+SIG-074,,Auxiliary Feathering Pump Command,Command,AUX_FEATHER,PROPELLER,EPECS,,SIG-015;SIG-016,Discrete effector command,Discrete,,,,,Independent feathering means,Yes,TBD,TBD
+SIG-075,,Turbine Starter Command,Command,STARTER_CMD,TURB,EPECS,,SIG-023,Discrete effector command,Discrete,,,,,,Yes,TBD,TBD
+SIG-076,,Ignition Command,Command,IGN_CMD,TURB,EPECS,,,Discrete effector command,Discrete,,,,,,Yes,TBD,TBD
+SIG-077,,FCU Fuel Metering Command,Command,FCU_METER,FCU,EPECS,,SIG-022;SIG-023;SIG-025;SIG-027,Analog effector command,Discrete,,,,,,Yes,TBD,TBD
+SIG-078,,FCU Shutdown Command,Command,FCU_SD,FCU,EPECS,,,Discrete effector command,Discrete,,,,,,Yes,TBD,TBD
+SIG-079,,HVPDU Contactor Command,Request,HV_CONT_CMD,HVPDU,HICU,,SIG-035;SIG-036;SIG-037,Digital / discrete command,Digital,,,,,Aircraft-level command relayed by HICU on the nacelle bus; local protection remains in the HVPDU.,Yes,TBD,TBD
+SIG-080,,HVPDU Pyrofuse Command,Command,HV_PYRO_CMD,HVPDU,HVPDU,,SIG-035;SIG-036;SIG-037,Protection command,Discrete,,,,,HVPDU / cable protection layer.,Yes,TBD,TBD
+SIG-081,,HVPDU Load / SSPC Command,Request,HV_LOAD_CMD,HVPDU,HICU,,SIG-035;SIG-036,Digital / discrete command,Digital,,,,,Aircraft-level command relayed by HICU on the nacelle bus; local protection remains in the HVPDU.,Yes,TBD,TBD
+SIG-082,,Battery Pack Contactor Command,Command,PACK_CONT_CMD,PACK,MBMS,,SIG-068;SIG-113;SIG-170;SIG-192,Discrete effector command,Discrete,,,,,"Hardwired discrete from the MBMS to the pack contactor drive. The MBMS fires it on its own authority, from its own monitoring and from the top-level assembly-on and pack-isolation requests. Independent of the pyrofuse command: neither is a precondition for the other. Not carried on the battery bus.",Yes,TBD,TBD
+SIG-083,,IPTMS Loop 1 Coolant Pump Command,Command,IPTMS_L1_PUMP_CMD,IPTMS,IPTMS,,,Analog effector command,Discrete,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
+SIG-084,,IPTMS Loop 1 Thermal Balancing Valve Command,Command,IPTMS_L1_TBV_CMD,IPTMS,IPTMS,,,Analog effector command,Discrete,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
+SIG-085,,IPTMS Loop 2 Coolant Pump Command,Command,IPTMS_L2_PUMP_CMD,IPTMS,IPTMS,,,Analog effector command,Discrete,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
+SIG-086,,IPTMS Loop 2 Thermal Balancing Valve Command,Command,IPTMS_L2_TBV_CMD,IPTMS,IPTMS,,,Analog effector command,Discrete,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
+SIG-087,,IPTMS Cross-Loop Thermal Balancing Valve Command,Command,IPTMS_XLOOP_TBV_CMD,IPTMS,IPTMS,,,Analog effector command,Discrete,,,,,Local IPTMS closed-loop effector command; not on a shared digital bus.,Yes,TBD,TBD
+SIG-088,,Propeller Heating Command,Command,PROP_HEAT_CMD,PCU,EPECS,,,Discrete effector command,Discrete,,,,,Hardwired discrete from the EPECS to the propeller heating element. The EPECS drives it on receipt of the aircraft-level anti-ice request and retains authority over the means.,Yes,TBD,TBD
+SIG-089,,Backup turbine torque command,Request,BKUP_Tq_Cmd,HICU,BPM,,,Analog / Digital,Digital,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
+SIG-090,,Backup Propeller Speed Command,Request,BKUP_Np_Cmd,HICU,BPM,,,Analog / Digital,Digital,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
+SIG-091,,Backup electric motor 1 torque command,Request,BKUP_Tq_Cmd,HICU,BPM,,,Analog / Digital,Digital,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
+SIG-092,,Backup electric motor 2 torque command,Request,BKUP_Tq_Cmd,HICU,BPM,,,Analog / Digital,Digital,,,,,"Independent backup path from PLA, bypassing FCC/MMS.",Yes,TBD,TBD
+SIG-093,,Turbine Torque Command,Request,TE_TqCmd,EPECS,FCC,,SIG-022,Digital setpoint command,Digital,,,,,"Logical turbine torque command from the FCC to the EPECS, and the first hop of the FCC power-management path.",Yes,TBD,TBD
+SIG-097,,Propeller Speed Command,Request,Np_Cmd,EPECS,FCC,,SIG-017,Digital setpoint command,Digital,,,,,Logical propeller speed command from the FCC to the EPECS; the EPECS drives the metering valve to meet the target.,Yes,TBD,TBD
+SIG-098,,Turbine Run Discrete,Request,TURB_RUN_CMD,EPECS,FCC,,SIG-023,Digital discrete command,Digital,,,,,"Logical turbine run command from the FCC to the EPECS, computed from the mode selector and the nacelle ON/OFF switch.",Yes,TBD,TBD
+SIG-100,,Turbine Shutdown Discrete,Request,TURB_SHUTDOWN_CMD,EPECS,FCC,,SIG-023,Digital discrete command,Digital,,,,,"Logical turbine shutdown command from the FCC to the EPECS, computed from the mode selector and the nacelle ON/OFF switch.",Yes,TBD,TBD
+SIG-102,,IPTMS Coolant Target Temperature,Request,IPTMS_TGT_T,IPTMS,HICU,,SIG-051;SIG-052;SIG-055;SIG-056,Digital setpoint command,Digital,,,,,HICU-issued setpoint; the IPTMS closes the loop on its own pump and valve effectors.,Yes,TBD,TBD
+SIG-103,,IPTMS Pre-conditioning Command,Request,IPTMS_PRECOND,IPTMS,HICU,,,Digital discrete command,Digital,,,,,Ground and pre-flight thermal pre-conditioning request issued by HICU.,Yes,TBD,TBD
+SIG-104,,Landing Gear Deploy Handle,Measurement,LDG_HANDLE,CONTROL_PANELS,ICM,,,,Discrete,,,,,Single lever with discrete position,Yes,TBD,TBD
+SIG-105,,Landing Gear Alternate Deploy Handle,Measurement,LDG_ALT,CONTROL_PANELS,ICM,,,,Discrete,,,,,Alternate lever to deploy the landing gear,Yes,TBD,TBD
+SIG-106,,Landing Gear Steering Handle,Measurement,STEER,CONTROL_PANELS,ICM,,,,Analog,,,,,Tiler,Yes,TBD,TBD
+SIG-107,,Turbine Maintenance Mode Request,Measurement,MAINT_MODE,CONTROL_PANELS,EPECS,NAC,,,Discrete,,,,,Cockpit or GSE origin TBD,Yes,TBD,TBD
+SIG-108,,Maintenance Feather Request,Measurement,MAINT_FEATHER,CONTROL_PANELS,EPECS,NAC,,Discrete switch,Discrete,,,,,"Crew maintenance feather pushbutton, acquired by the EPECS. The feathering valve drive is a separate command.",Yes,TBD,TBD
+SIG-109,,Turbine Start Switch,Measurement,START_SW,CONTROL_PANELS,EPECS,NAC,,Discrete switch,Discrete,,,,,"Crew start switch, acquired by the EPECS. The starter drive is a separate command.",Yes,TBD,TBD
+SIG-110,,Turbine Continuous Ignition,Measurement,CONT_IGN,CONTROL_PANELS,EPECS,NAC,,Discrete switch,Discrete,,,,,"Crew continuous ignition switch, acquired by the EPECS. The igniter drive is a separate command.",Yes,TBD,TBD
+SIG-111,,Electric Motor Controller 28VDC Supply,Power,28V_EMC,EMC,LVPDU,,,28V,Power,,,,,,Yes,TBD,TBD
+SIG-112,,EPECS 28VDC Supply,Power,28V_EPECS,EPECS,LVPDU,,,28V,Power,,,,,,Yes,TBD,TBD
+SIG-113,,Battery Pack Pyrofuse Command,Command,PACK_PYRO_CMD,PACK,MBMS,,SIG-080;SIG-082;SIG-192,,Discrete,,,,,"Hardwired discrete from the MBMS to the pack pyrofuse triggering hardware. The MBMS fires it on its own authority, from its own monitoring and from the top-level isolation request. Independent of the contactor command, and separate from the HVPDU / cable pyrofuse. Not carried on the battery bus.",Yes,TBD,TBD
+SIG-114,,Battery Charging Inhibit,Measurement,CHG_INHIBIT,PACK,BMU,,SIG-153;SIG-156;SIG-157,,Discrete,,,,,Command authority for an independent critical protection path is open.,Yes,TBD,TBD
+SIG-115,,Calibrated Airspeed,Measurement,CAS,ADC,ADC,,,,Analog,,,,,,TBD,TBD,TBD
+SIG-116,,Per-nacelle Power Allocation,Computed,,,FCC,NAC,SIG-126;SIG-118,,Digital,,,,"Power-management split of the total demand across the four nacelles, from the energy strategy and the reported nacelle capability.",,Yes,TBD,TBD
+SIG-117,,TOGA Activation,Computed,,,FCC,,SIG-007;SIG-010,,Digital,,,,Take-off / go-around detection from the consolidated power lever position.,,Yes,TBD,TBD
+SIG-118,,Nacelle Status and Available Power,Computed,,,HICU,,SIG-059;SIG-064;SIG-163,,Digital,,,,"Nacelle capability and health consolidated from the EMC, EPECS and ESS reports arriving on the nacelle bus.",,Yes,TBD,TBD
+SIG-119,,Active Rating Reference,Computed,,,HICU,,SIG-014,,Digital,,,,"Rating selected for the current phase, derived from the turbine mode selector and the FCC power-management state.",,Yes,TBD,TBD
+SIG-120,,Propulsion Operating Mode,Computed,,,HICU,,SIG-014,,Digital,,,,"Hybrid operating mode issued to EPECS, derived from the mode selector and the FCC energy strategy.",,Yes,TBD,TBD
+SIG-121,,Synchrophasing Command,Computed,,,HICU,,SIG-017,,Digital,,,,Propeller phase alignment request computed from the propeller speed and phase feedback of the nacelles.,,Yes,TBD,TBD
+SIG-124,,IPTMS Status and Operating Limits,Computed,,,IPTMS,,SIG-050;SIG-051;SIG-052;SIG-053;SIG-054;SIG-055;SIG-056;SIG-057;SIG-058,,Digital,,,,Cooling capability and health consolidated from both loop sensor sets.,,Yes,TBD,TBD
+SIG-125,,Mission Definition and Constraints,Computed,,,FMS,,,,Digital,,,,"Flight plan, phase and performance constraints computed by the FMS.",,Yes,TBD,TBD
+SIG-126,,Energy and Hybridization Strategy,Computed,,,MMS,,SIG-125;SIG-163;SIG-128,,Digital,,,,"Operating mode and hybridization profile computed by the MMS from the mission, the stored energy state and the fuel available.",,Yes,TBD,TBD
+SIG-127,,Air Data Environmental Conditions,Computed,,,ADC,,SIG-069;SIG-115;SIG-173,,Digital,,,,"Air data and weather picture computed by the ADC from their own probes, which are not modelled in this ICD.",Air data part of the environmental picture only; the weather part is a separate signal owned by the WXR.,Yes,TBD,TBD
+SIG-128,,Total Fuel Available,Computed,,,IMA,,,,Digital,,,,Totalised by the IMA. The inputs to this computation are not yet defined.,,Yes,TBD,TBD
+SIG-130,,HVPDU Actual Power,Computed,,,HVPDU,,SIG-035;SIG-036,,Digital,,,,Delivered power computed by the HVPDU from its own bus current and voltage measurements.,,Yes,TBD,TBD
+SIG-131,,BTMS Temperature Target,Computed,,,FCC,,SIG-126,,Digital,,,,Battery thermal target issued from the mission and energy strategy.,"Aircraft-level battery thermal target written by the FMS and FCC to the HICU, which relays it to the BTMS. The IPTMS coolant target is a separate signal.",Yes,TBD,TBD
+SIG-132,,BTMS Coolant Status,Computed,,,BTMS,,SIG-146;SIG-147;SIG-148;SIG-149;SIG-150;SIG-151,,Digital,,,,Cooling capability and health consolidated by the BTMS from its two loop sensor sets.,"BTMS thermal status only; the IPTMS status is computed and reported independently, and the two are never combined into one word.",Yes,TBD,TBD
+SIG-133,,Total Energy Available and Hybridization Mode,Computed,,,FCC,,SIG-126;SIG-163;SIG-128,,Digital,,,,Energy summary the FCC broadcasts to avionics for display and mission re-planning.,"Low-integrity, informational only.",Yes,TBD,TBD
+SIG-134,,FCC Status,Computed,,,FCC,,,,Digital,,,,FCC health and mode word broadcast to avionics.,,Yes,TBD,TBD
+SIG-135,,Autothrust Command,Computed,,,FCC,,SIG-117,,Digital,,,,Autothrust engagement and target exchanged between FCC channels.,,Yes,TBD,TBD
+SIG-136,,Fuel level on the reserve,Measurement,MIN_FUEL,FTANK,HICU,,,,Discrete,,,,,,TBD,TBD,TBD
+SIG-137,,LVPDU Power,Power,LVPDU_POWER,LVPDU,DCDC,,,28V,Power,,,,,,TBD,TBD,TBD
+SIG-138,,LV Battery Power,Power,LVBAT_POWER,LVPDU,LVBAT,,,28V,Power,,,,,28 V link between the LV battery and the LVPDU. The nominal direction recorded is the battery feeding the LVPDU; charging uses the same physical link.,TBD,TBD,TBD
+SIG-139,,DCDC High Voltage Power,Power,HVPDU_POWER,DCDC,HVPDU,,,800V,Power,,,,,"800 V feed from the nacelle HVPDU into the step-down converter, which supplies the LVPDU at 28 V, completing the chain from the packs to the LV network.",TBD,TBD,TBD
+SIG-140,,Electric Motor Controller High Voltage Power,Power,EMC_POWER,EMC,HVPDU,,,800V,Power,,,,,800 V feed from the nacelle HVPDU to the motor controller. The feed current is measured at the HVPDU end.,TBD,TBD,TBD
+SIG-141,,IPTMS Power,Power,IPTMS_POWER,IPTMS,HVPDU,,,800V,Power,,,,,800 V feed from the nacelle HVPDU to the IPTMS; included in the auxiliary feed current.,TBD,TBD,TBD
+SIG-142,,HVBAT Power,Power,BAT_POWER,HVPDU,PACK,,,800V,Power,,,,,,TBD,TBD,TBD
+SIG-143,,HVPDU EMC Feed Current,Measurement,I_EMC_FEED,HVPDU,HVPDU,EM,SIG-140,Current sensor,Analog,,,,,DC feed current to each motor controller measured at the HVPDU; distinct from the motor phase current measured by the EMC. Repeated per motor because the HVPDU feeds the two motors of its nacelle.,Yes,TBD,TBD
+SIG-144,,HVPDU Auxiliary Feed Current,Measurement,I_AUX,HVPDU,HVPDU,,SIG-141,Current sensor,Analog,,,,,Aggregate feed current to the non-propulsion nacelle loads (IPTMS and other auxiliaries).,Yes,TBD,TBD
+SIG-145,,HVPDU Temperature,Measurement,T_HVPDU,HVPDU,HVPDU,,,Temperature sensor,Analog,,,,,HVPDU internal / busbar temperature reported for monitoring and derating.,Yes,TBD,TBD
+SIG-146,,BTMS Loop 1 Coolant Inlet Temperature,Measurement,BTMS_L1_T_IN,BTMS,BTMS,,SIG-131;SIG-132,Temperature sensor,Analog,,,,,Inlet / outlet naming follows the BTMS request; the IPTMS equivalents use Supply / Return for the same physical positions.,Yes,TBD,TBD
+SIG-147,,BTMS Loop 1 Coolant Outlet Temperature,Measurement,BTMS_L1_T_OUT,BTMS,BTMS,,SIG-131;SIG-132,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-148,,BTMS Loop 1 Coolant Differential Pressure,Measurement,BTMS_L1_dP,BTMS,BTMS,,SIG-132,Differential pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-149,,BTMS Loop 2 Coolant Inlet Temperature,Measurement,BTMS_L2_T_IN,BTMS,BTMS,,SIG-131;SIG-132,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-150,,BTMS Loop 2 Coolant Outlet Temperature,Measurement,BTMS_L2_T_OUT,BTMS,BTMS,,SIG-131;SIG-132,Temperature sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-151,,BTMS Loop 2 Coolant Differential Pressure,Measurement,BTMS_L2_dP,BTMS,BTMS,,SIG-132,Differential pressure sensor,Analog,,,,,,Yes,TBD,TBD
+SIG-152,,Battery Pack Open Circuit Voltage,Measurement,V_OCV,PACK,BMU,,SIG-039,Voltage sensor,Analog,,,,,Rest / no-load terminal voltage used for state-of-charge estimation; distinct from the loaded terminal voltage.,Yes,TBD,TBD
+SIG-153,,Battery Pack Maximum Temperature,Measurement,T_PACK_MAX,PACK,BMU,,SIG-040;SIG-154,Temperature sensor,Analog,,,,,Hottest measurement point in the pack. Cell-level acquisition stays internal to the pack; the BMU reports the extremum only.,Yes,TBD,TBD
+SIG-154,,Battery Pack Minimum Temperature,Measurement,T_PACK_MIN,PACK,BMU,,SIG-040;SIG-153,Temperature sensor,Analog,,,,,Coldest measurement point in the pack; drives cold-soak charge limiting and BTMS pre-conditioning.,Yes,TBD,TBD
+SIG-155,,Battery Pack Minimum Cell Voltage,Measurement,V_CELL_MIN,PACK,BMU,,SIG-156,Voltage sensor,Analog,,,,,Lowest cell voltage in the pack. Individual cell voltages are not modelled in this ICD; only the extremum crosses the interface.,Yes,TBD,TBD
+SIG-156,,Battery Pack Maximum Cell Voltage,Measurement,V_CELL_MAX,PACK,BMU,,SIG-155,Voltage sensor,Analog,,,,,Highest cell voltage in the pack; drives end-of-charge limiting.,Yes,TBD,TBD
+SIG-157,,Battery Pack State of Charge,Computed,SOC_PACK,,BMU,,SIG-038;SIG-152;SIG-155;SIG-156,,Digital,,,,"Estimated by the BMU from pack current integration, open circuit voltage and cell voltage extrema.",Consolidated at assembly level by the MBMS.,Yes,TBD,TBD
+SIG-158,,Battery Pack State of Health,Computed,SOH_PACK,,BMU,,SIG-157;SIG-162,,Digital,,,,Capacity and impedance degradation estimated by the BMU over the life of the pack.,,Yes,TBD,TBD
+SIG-159,,Battery Pack State of Power - Charge,Computed,SOP_PACK_CHG,,BMU,,SIG-157;SIG-153;SIG-154;SIG-156,,Digital,,,,"Instantaneous charge power the pack can accept, limited by state of charge, temperature extrema and maximum cell voltage.",,Yes,TBD,TBD
+SIG-160,,Battery Pack State of Power - Discharge,Computed,SOP_PACK_DIS,,BMU,,SIG-157;SIG-153;SIG-154;SIG-155,,Digital,,,,"Instantaneous discharge power the pack can deliver, limited by state of charge, temperature extrema and minimum cell voltage.",,Yes,TBD,TBD
+SIG-161,,Battery Pack Failure Flag,Computed,PACK_FAIL,,BMU,,,,Digital,,,,Pack fault summary raised by the BMU from its own monitoring; consolidated at assembly level into SIG-169.,,Yes,TBD,TBD
+SIG-162,,Battery Pack Cumulative Energy Output,Computed,E_PACK_CUM,,BMU,,SIG-038;SIG-039,,Digital,,,,"Energy delivered by the pack, integrated by the BMU from pack current and terminal voltage; non-volatile life counter.",,Yes,TBD,TBD
+SIG-163,,HVDC Assembly State of Charge,Computed,SOC_HVDC,,MBMS,,SIG-157,,Digital,,,,"Assembly state of charge consolidated by the MBMS from the twelve pack values, weighted by the packs actually connected.",,Yes,TBD,TBD
+SIG-164,,HVDC Assembly State of Power - Charge,Computed,SOP_HVDC_CHG,,MBMS,,SIG-159;SIG-166,,Digital,,,,"Charge power the assembly can accept, consolidated from the connected packs.",,Yes,TBD,TBD
+SIG-165,,HVDC Assembly State of Power - Discharge,Computed,SOP_HVDC_DIS,,MBMS,,SIG-160;SIG-166,,Digital,,,,"Discharge power the assembly can deliver, consolidated from the connected packs. Primary energy input to the FCC power-management function.",,Yes,TBD,TBD
+SIG-166,,HVDC Assembly Number of Packs Connected,Computed,N_PACK_CONN,,MBMS,,SIG-068,,Digital,,,,"Count of packs whose contactor is closed, from the twelve pack contactor status reports. Range 0 to 12.",,Yes,TBD,TBD
+SIG-167,,HVDC Assembly Maximum Pack Temperature,Computed,T_HVDC_MAX,,MBMS,,SIG-153;SIG-131,,Digital,,,,"Hottest pack in the assembly, from the twelve pack maximum temperatures; drives BTMS demand and discharge derating.",,Yes,TBD,TBD
+SIG-168,,HVDC Assembly Minimum Pack Temperature,Computed,T_HVDC_MIN,,MBMS,,SIG-154;SIG-131,,Digital,,,,"Coldest pack in the assembly, from the twelve pack minimum temperatures; drives pre-conditioning and charge limiting.",,Yes,TBD,TBD
+SIG-169,,HVDC Assembly Failure / Fault Word,Computed,HVDC_FAULT,,MBMS,,SIG-161,,Digital,,,,"Assembly fault summary consolidated by the MBMS from the twelve pack failure flags and its own monitoring, so that a pack failure is visible to HICU and avionics without carrying the twelve individual flags.",,Yes,TBD,TBD
+SIG-170,,HVDC Assembly On Command,Request,HVDC_ON_CMD,MBMS,HICU,,SIG-082;SIG-166,Digital command,Digital,,,,,Assembly-level connect / disconnect request from the HICU to the MBMS. The MBMS holds authority over which packs are connected and issues the individual pack contactor commands itself.,Yes,TBD,TBD
+SIG-171,,Total Propulsion Power Command,Computed,P_PROP_CMD_TOT,,FCC,,SIG-116;SIG-172,,Digital,,,,Sum of the per-nacelle power allocations SIG-116 across the four nacelles.,Aircraft-level commanded figure for crew display and maintenance recording.,Yes,TBD,TBD
+SIG-172,,Total Propulsion Power Actual,Computed,P_PROP_ACT_TOT,,FCC,,SIG-118;SIG-171,,Digital,,,,Sum of the achieved nacelle power reported through SIG-118 across the four nacelles.,"Aircraft-level achieved figure, displayed against the commanded value.",Yes,TBD,TBD
+SIG-173,,Weather Environmental Conditions,Computed,WX_ENV,,WXR,,SIG-127,,Digital,,,,Weather picture produced by the weather radar.,Weather part of the environmental picture only; the air data part is a separate signal owned by the ADC.,Yes,TBD,TBD
+SIG-174,,FMS Present Position Latitude,Computed,FMS_LAT,,FMS,,SIG-175,,Digital,deg,,,Blended navigation position computed by the FMS from the inertial and air data sources.,,Yes,TBD,TBD
+SIG-175,,FMS Present Position Longitude,Computed,FMS_LON,,FMS,,SIG-174,,Digital,deg,,,Blended navigation position computed by the FMS from the inertial and air data sources.,,Yes,TBD,TBD
+SIG-176,,FMS Ground Speed,Computed,FMS_GS,,FMS,,SIG-069,,Digital,kt,,,Ground speed of the blended navigation solution.,,Yes,TBD,TBD
+SIG-177,,FMS Track Angle True,Computed,FMS_TK,,FMS,,SIG-180,,Digital,deg,,,True track angle of the blended navigation solution.,,Yes,TBD,TBD
+SIG-178,,FMS Wind Speed,Computed,FMS_WS,,FMS,,SIG-179;SIG-127,,Digital,kt,,,Wind solution derived by the FMS from the air data and inertial velocity difference.,,Yes,TBD,TBD
+SIG-179,,FMS Wind Direction,Computed,FMS_WD,,FMS,,SIG-178;SIG-127,,Digital,deg,,,Wind solution derived by the FMS from the air data and inertial velocity difference.,,Yes,TBD,TBD
+SIG-180,,FMS Desired Track,Computed,FMS_DTK,,FMS,,SIG-177;SIG-181,,Digital,deg,,,Track the aircraft should follow on the active flight plan leg.,,Yes,TBD,TBD
+SIG-181,,FMS Cross Track Distance,Computed,FMS_XTK,,FMS,,SIG-180,,Digital,NM,,,Lateral deviation of the aircraft from the active leg; sign convention to be defined.,,Yes,TBD,TBD
+SIG-182,,FMS Vertical Deviation,Computed,FMS_VDEV,,FMS,,SIG-189,,Digital,ft,,,Deviation of the aircraft from the vertical profile; sign convention to be defined.,,Yes,TBD,TBD
+SIG-183,,FMS Roll Steering Command,Computed,FMS_ROLL_CMD,,FMS,,SIG-180;SIG-181,,Digital,deg,,,Lateral steering command generated by the FMS to capture and hold the active leg.,Consumed by the FCC for lateral guidance. Integrity and authority of this path are to be defined.,Yes,TBD,TBD
+SIG-184,,FMS Active Waypoint Bearing,Computed,FMS_WPT_BRG,,FMS,,SIG-187;SIG-185,,Digital,deg,,,Great-circle bearing from present position to the active waypoint.,,Yes,TBD,TBD
+SIG-185,,FMS Distance to Go,Computed,FMS_DTG,,FMS,,SIG-186;SIG-187,,Digital,NM,,,Distance from present position to the active waypoint.,,Yes,TBD,TBD
+SIG-186,,FMS Time to Go,Computed,FMS_TTG,,FMS,,SIG-185,,Digital,min,,,Estimated time from present position to the active waypoint.,,Yes,TBD,TBD
+SIG-187,,FMS Active Waypoint Identifier,Computed,FMS_WPT_ID,,FMS,,SIG-184;SIG-185,,Digital,,,,"Identifier of the waypoint the aircraft is currently navigating to. Character data, not a numeric value.",,Yes,TBD,TBD
+SIG-188,,FMS UTC,Computed,FMS_UTC,,FMS,,,,Digital,hh:mm:ss,,,Coordinated universal time maintained by the FMS and used as the common time reference for the avionics.,,Yes,TBD,TBD
+SIG-189,,FMS Target Altitude,Computed,FMS_ALT_TGT,,FMS,,SIG-182,,Digital,ft,,,Altitude target of the active vertical flight plan segment.,,Yes,TBD,TBD
+SIG-190,,FMS Target Airspeed,Computed,FMS_SPD_TGT,,FMS,,SIG-115,,Digital,kt,,,Airspeed target of the active flight plan segment.,,Yes,TBD,TBD
+SIG-191,,FMS Status and Fault Word,Computed,FMS_STATUS,,FMS,,,,Digital,,,,"FMS operating mode, navigation validity and internal fault summary.",,Yes,TBD,TBD
+SIG-192,,Pack Isolation Request,Request,PACK_ISOL_REQ,MBMS,HICU,,SIG-082;SIG-113;SIG-170,Digital command,Digital,,,,,"Top-level request from the HICU to the MBMS to isolate a pack, carrying the target pack in the payload. The MBMS retains authority over the means and fires the hardwired contactor and pyrofuse discretes itself, with or without this request. Distinct from the assembly connect / disconnect request.",Yes,TBD,TBD
+SIG-193,,Step-up Converter Low Voltage Power,Power,DCDC_UP_LV_POWER,DCDC_UP,LVPDU,,SIG-194;SIG-138,28V,Power,,,,,28 V feed from the LV network into the step-up converter.,Yes,TBD,TBD
+SIG-194,,HVPDU Step-up Power,Power,HVPDU_STEPUP_POWER,HVPDU,DCDC_UP,,SIG-193;SIG-142,800V,Power,,,,,"800 V output of the step-up converter into the nacelle HVPDU, providing a path to energise the HV network from the LV side. The name is qualified by the source because the HVPDU is also fed by the packs.",Yes,TBD,TBD
+SIG-195,,Electric Motor Command (HICU to EMC),Request,EM_Cmd,EMC,HICU,NAC;EM,SIG-070;SIG-202;SIG-203,Digital setpoint command (mode-dependent),Digital,,,,Computed by HICU from FCC motor target (SIG-070).,Final HICU-to-EMC command. OEM field fcc_cmd.command. Distinct from the aircraft-level FCC target.,Yes,TBD,TBD
+SIG-196,,Electric Motor Speed (MON),Measurement,EM_RPM_MON,EMC,EMC,NAC;EM,SIG-004,CAN MON motor status,Digital,RPM,-16384,16383.5,,MON-lane counterpart of the CON-lane speed.,Yes,TBD,TBD
+SIG-197,PHYS-010,EMC CON HVDC Voltage,Measurement,EMC_HV_V_CON,EMC,EMC,NAC;EM,SIG-036,CAN CON inverter status,Digital,Vdc,-1638.4,1638.35,,EPU-channel HVDC voltage. OEM label con_hvdc_volt. Distinct from the HVPDU bus voltage.,Yes,TBD,TBD
+SIG-198,,EMC CON HVDC Current,Measurement,EMC_HV_I_CON,EMC,EMC,NAC;EM,SIG-035,CAN CON inverter status,Digital,A,-32768,32767,,EPU-channel HVDC current. OEM label con_hvdc_curr. Distinct from the HVPDU bus current.,Yes,TBD,TBD
+SIG-199,PHYS-010,EMC MON HVDC Voltage,Measurement,EMC_HV_V_MON,EMC,EMC,NAC;EM,,CAN MON inverter status,Digital,Vdc,-1638.4,1638.35,,MON-lane HVDC voltage. OEM label mon_hvdc_volt.,Yes,TBD,TBD
+SIG-200,,EMC MON HVDC Current,Measurement,EMC_HV_I_MON,EMC,EMC,NAC;EM,,CAN MON inverter status,Digital,Adc,-655.36,655.34,,MON-lane HVDC current. OEM label mon_hvdc_curr.,Yes,TBD,TBD
+SIG-201,,EMC CON Torque Estimate,Measurement,EM_TqEst_CON,EMC,EMC,NAC;EM,SIG-001,CAN CON motor status,Digital,Nm,-1638.4,1638.35,,OEM label con_torque_est. Distinct from the gearbox torque probe.,Yes,TBD,TBD
+SIG-202,,EMC CON Setpoint Echo,Measurement,EM_CmdEcho_CON,EMC,EMC,NAC;EM,SIG-195,CAN CON motor status,Digital,,,,,OEM label con_setpoint. Echo of the HICU motor command; scale is mode-dependent.,Yes,TBD,TBD
+SIG-203,,EMC MON Setpoint Echo,Measurement,EM_CmdEcho_MON,EMC,EMC,NAC;EM,SIG-195,CAN MON motor status,Digital,,,,,OEM label mon_setpoint. MON-lane echo.,Yes,TBD,TBD
+SIG-204,,EMC MON Stator Temperature,Measurement,EM_T_STATOR_MON,EMC,EMC,NAC;EM,,CAN MON vitals,Digital,deg C,-40,215,,OEM label mon_stator_temp.,Yes,TBD,TBD
+SIG-205,,EMC MON Coolant Inlet Temperature,Measurement,EM_T_COOL_MON,EMC,EMC,NAC;EM,SIG-006,CAN MON vitals,Digital,deg C,-40,215,,OEM label mon_coolant_temp. Distinct from the IPTMS motor outlet temperature.,Yes,TBD,TBD
+SIG-206,,EMC MON Board Temperature,Measurement,EMC_T_CMB_MON,EMC,EMC,NAC;EM,,CAN MON vitals,Digital,deg C,-40,215,,OEM label mon_cmb_temp.,TBD,TBD,TBD
+SIG-207,,EMC CON MCU State,Measurement,EMC_MCU_STATE,EMC,EMC,NAC;EM,,CAN CON inverter status,Digital,,,,,OEM label con_mcu_state.,Yes,TBD,TBD
+SIG-208,,EMC CON Control Mode Feedback,Measurement,EMC_CTRL_MODE_FB,EMC,EMC,NAC;EM,SIG-195,CAN CON inverter status,Digital,,,,,OEM label con_ctrl_mode.,Yes,TBD,TBD
+SIG-209,,EMC CON Control Level Feedback,Measurement,EMC_CTRL_LVL_FB,EMC,EMC,NAC;EM,SIG-195,CAN CON inverter status,Digital,,,,,OEM label con_ctrl_level_cmd.,Yes,TBD,TBD
+SIG-210,,EMC CON Discrete Disable Status,Measurement,EMC_DIS_DIS_CON,EMC,EMC,NAC;EM,,CAN CON vitals,Digital,,,,,OEM label con_discrete_disable.,Yes,TBD,TBD
+SIG-211,,EMC CON Freshness Counter,Measurement,EMC_FRESH_CON,EMC,EMC,NAC;EM,,CAN protocol,Digital,,,,,Mirrors the HICU freshness counter on the CON frames.,Yes,TBD,TBD
+SIG-212,,EMC MON Freshness Counter,Measurement,EMC_FRESH_MON,EMC,EMC,NAC;EM,,CAN protocol,Digital,,,,,Mirrors the HICU freshness counter on the MON frames.,Yes,TBD,TBD
+SIG-213,,EMC CON Message CRC,Measurement,EMC_CRC_CON,EMC,EMC,NAC;EM,,CAN protocol,Digital,,,,,CON frame CRC.,Yes,TBD,TBD
+SIG-214,,EMC MON Message CRC,Measurement,EMC_CRC_MON,EMC,EMC,NAC;EM,,CAN protocol,Digital,,,,,MON frame CRC.,Yes,TBD,TBD
+SIG-215,,EMC CON EPU Location ID,Measurement,EMC_EPU_ID_CON,EMC,EMC,NAC;EM,,CAN CON config,Digital,,,,,OEM label con_epu_location_id.,Yes,TBD,TBD
+SIG-216,,EMC CON Software Version,Measurement,EMC_SW_CON,EMC,EMC,NAC;EM,,CAN CON config,Digital,,,,,OEM label con_sw_ver.,Yes,TBD,TBD
+SIG-217,,EMC MON EPU Location ID,Measurement,EMC_EPU_ID_MON,EMC,EMC,NAC;EM,,CAN MON config,Digital,,,,,OEM label mon_epu_location_id.,Yes,TBD,TBD
+SIG-218,,EMC MON Software Version,Measurement,EMC_SW_MON,EMC,EMC,NAC;EM,,CAN MON config,Digital,,,,,OEM label mon_sw_ver.,Yes,TBD,TBD
+SIG-219,,EMC CON Inverter Retry Count,Measurement,EMC_INV_RETRY,EMC,EMC,NAC;EM,,CAN CON vitals,Digital,,,,,OEM label con_inverter_retry_cnt.,Yes,TBD,TBD
+SIG-220,,EMC CAN Spare Field,Measurement,EMC_CAN_SPARE,EMC,EMC,NAC;EM,,CAN protocol,Digital,,,,,Placeholder for OEM spare bit fields.,No,TBD,TBD
+SIG-221,,HICU Freshness Counter to EMC,Request,HICU_FRESH_EMC,EMC,HICU,NAC;EM,,CAN protocol,Digital,,,,,OEM label fcc_freshness on the fcc_cmd frame.,Yes,TBD,TBD
+SIG-222,,EPU Enable Command,Request,EPU_EN,EMC,HICU,NAC;EM,SIG-195,CAN command,Digital,,,,Motor/EPU engagement enable computed by HICU.,OEM label epu_en on the fcc_cmd frame.,Yes,TBD,TBD
+SIG-223,,HVDC Ready Set Command,Request,HV_SET,EMC,HICU,NAC;EM,,CAN command,Digital,,,,HICU indicates HVDC ready for subsequent EMC states.,OEM label hv_set on the fcc_cmd frame.,Yes,TBD,TBD
+SIG-224,,EMC Fault Reset Command,Request,EMC_FLT_RST,EMC,HICU,NAC;EM,,CAN command,Digital,,,,HICU request to reset latched EMC faults.,OEM label fault_reset_cmd.,Yes,TBD,TBD
+SIG-225,,EMC Critical Monitor Override,Request,EMC_OVRD,EMC,HICU,NAC;EM,,CAN command,Digital,,,,HICU request to override critical EMC monitors.,OEM label override.,Yes,TBD,TBD
+SIG-226,,Weight on Wheels,Computed,WOW,HICU,FCC,,,Digital status,Digital,,,,Weight-on-wheels state computed by FCC.,OEM label wow_status.,Yes,TBD,TBD
+SIG-227,,EMC Control Mode Command,Request,EMC_CTRL_MODE,EMC,HICU,NAC;EM,SIG-195,CAN command,Digital,,,,Control mode selected by HICU for EMC.,OEM label ctrl_mode on the fcc_cmd frame.,Yes,TBD,TBD
+SIG-228,,EMC Control Level Command,Request,EMC_CTRL_LVL,EMC,HICU,NAC;EM,SIG-195,CAN command,Digital,,,,MCU vs EPU level selected by HICU.,OEM label ctrl_level_cmd.,Yes,TBD,TBD
+SIG-229,,Charging Current Limit to EMC,Request,CHG_I_LIM_EMC,EMC,HICU,NAC;EM,SIG-232,CAN command,Digital,A,-1000,638.3,HICU forwards MBMS charging limit onto fcc_cmd.,OEM label charging_curr_lim on the fcc_cmd frame; sourced from the MBMS limits message.,Yes,TBD,TBD
+SIG-230,,EMC Voltage / Current Command,Request,EMC_VI_CMD,EMC,HICU,NAC;EM,SIG-233;SIG-195;SIG-227,CAN command,Digital,,,,HICU applies MBMS V/I setpoint on fcc_cmd when ctrl_mode is V or I.,OEM label volt_curr_command on the fcc_cmd frame; sourced from the MBMS limits message.,Yes,TBD,TBD
+SIG-231,,HICU Message CRC to EMC,Request,HICU_CRC_EMC,EMC,HICU,NAC;EM,,CAN protocol,Digital,,,,,OEM label fcc_crc.,Yes,TBD,TBD
+SIG-232,,Charging Current Limit (MBMS to HICU),Request,CHG_I_LIM_MBMS,HICU,MBMS,NAC,SIG-229,CAN MBMS limits message,Digital,A,-1000,638.3,Charging current limit computed by MBMS.,"OEM label mbms_ess_lim, same encoding as the fcc_cmd field. Distinct from the HICU-to-EMC command.",Yes,TBD,TBD
+SIG-233,,Voltage / Current Setpoint (MBMS to HICU),Request,VI_SET_MBMS,HICU,MBMS,NAC;EM,SIG-230,CAN MBMS limits message,Digital,,,,V/I setpoint from MBMS to HICU.,Distinct from the HICU-to-EMC voltage / current command.,Yes,TBD,TBD
+SIG-234,,MBMS Limits Message CRC,Measurement,MBMS_LIM_CRC,HICU,MBMS,NAC,,CAN protocol,Digital,,,,,CRC on the MBMS limits message.,Yes,TBD,TBD
+SIG-235,,Propeller Heating Request,Request,PROP_HEAT_REQ,EPECS,HICU,,SIG-088,Digital discrete command,Digital,,,,,Aircraft-level propeller / spinner anti-ice request relayed by the HICU to the EPECS. The EPECS keeps authority and drives the heating element with its own hardwired command.,Yes,TBD,TBD
