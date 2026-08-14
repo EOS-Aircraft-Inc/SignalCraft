@@ -26,12 +26,20 @@ DOMAIN = "Domain"
 INTERFACING_EQUIPMENT = "Interfacing Equipment"
 SIGNAL_OWNER = "Signal Owner"
 REPEATED_PER = "Repeated Per"
-RELATED_TO = "Related to"
+# Signal-to-signal links on 1_Signals, both holding Signal Ids. COMPUTED_FROM
+# names the signals this value is produced from; SAME_QUANTITY_AS declares
+# that the rows observe one and the same real-world quantity. Anything a
+# reader could derive from the allocations, the messages or the topology map
+# is not recorded here.
+COMPUTED_FROM = "Computed from"
+SAME_QUANTITY_AS = "Same quantity as"
 INTERFACE_TYPE = "Interface Type"
 BUS_DEFINITION = "Bus Definition"
-BUS_NAME = "name"
+BUS_NAME = "Bus name"
 BUS_DESCRIPTION = "Bus description"
-TOPOLOGY = "topology"
+PROTOCOL = "Protocol"
+SPEED = "Speed"
+TOPOLOGY = "Topology"
 
 # Endpoint columns. 10_Databuses names bus-instance nodes, the bus-definition
 # tabs name the endpoints of one allocation; both use the same column names.
@@ -40,8 +48,24 @@ RECEIVER = "Receiver"
 
 # Bus-definition tab columns.
 DATA_NAME = "Data name"
+INSTANCE_DIMENSION = "Instance dimension"
+MESSAGE_ID = "Message ID"
 LABEL = "Label"
-REFRESH_RATE = "Refresh rate"
+START_BIT = "Start bit"
+STOP_BIT = "Stop bit"
+ENCODING = "Encoding"
+SCALE = "Scale"
+RESOLUTION = "Resolution"
+MINIMUM = "Minimum"
+MAXIMUM = "Maximum"
+# Named for the quantity it holds: a period in milliseconds, not a frequency.
+REFRESH_PERIOD_MS = "Refresh period (ms)"
+VALIDITY = "Validity"
+
+# Shared by several sheets.
+UNIT = "Unit"
+NOTES = "Notes"
+DESCRIPTION = "Description"
 
 # Non-data workbook tabs (docs / guides). Excluded from edit engine and payloads.
 DOC_SHEETS = frozenset({README_SHEET, COLUMN_HELP_SHEET})
@@ -72,15 +96,14 @@ SYSTEM_TYPES = (
     "Domain",
     "Zone",
     "Component",
-    "Controller",
 )
 
 # Aircraft / Domain rows are hierarchy or functional labels, never instantiated:
 # Multiplicity stays empty (a literal "1" is tolerated) and there is no token.
 NO_INSTANCE_SYSTEM_TYPES = frozenset({"Aircraft", "Domain"})
 
-# Zone / Component / Controller are real equipment and are counted per parent.
-INSTANTIATED_SYSTEM_TYPES = frozenset({"Zone", "Component", "Controller"})
+# Zone / Component are real equipment and are counted per parent.
+INSTANTIATED_SYSTEM_TYPES = frozenset({"Zone", "Component"})
 
 
 def normalize_system_type(value: object) -> str:
@@ -95,42 +118,33 @@ def normalize_system_type(value: object) -> str:
 def system_multiplicity_error(
     system_type: object,
     multiplicity: object,
-    instance_token: object = "",
 ) -> str | None:
-    """Explain why Multiplicity / Instance Token do not suit this Type, else None.
+    """Explain why Multiplicity does not suit this Type, else None.
 
     One rule shared by the integrity check, the edit engine preflight and the
     System list editor, so all three agree:
 
-    - Aircraft / Domain: Multiplicity empty or "1", and no Instance Token.
-    - Zone / Component / Controller: Multiplicity is a positive integer, and
-      anything above 1 needs an Instance Token to name its instances.
+    - Aircraft / Domain: Multiplicity empty or "1".
+    - Zone / Component: Multiplicity is a positive integer, the count per
+      parent instance. Instance names follow from it (``UniqueId-1..N``).
     - Any other (or empty) Type is not judged here.
     """
     typ = normalize_system_type(system_type)
     mult = str(multiplicity or "").strip()
-    token = str(instance_token or "").strip()
 
     if typ in NO_INSTANCE_SYSTEM_TYPES:
-        if token or (mult and mult != "1"):
+        if mult and mult != "1":
             return (
                 f"Type '{typ}' is a label, not equipment: Multiplicity must be "
-                f"empty or '1' (got {mult or 'empty'!r}) and Instance Token must "
-                "be empty."
+                f"empty or '1' (got {mult or 'empty'!r})."
             )
         return None
 
-    if typ in INSTANTIATED_SYSTEM_TYPES:
-        if not mult.isdigit() or int(mult) < 1:
-            return (
-                f"Type '{typ}' requires Multiplicity as a positive integer, the "
-                f"count per parent instance (got {mult or 'empty'!r})."
-            )
-        if int(mult) > 1 and not token:
-            return (
-                f"Type '{typ}' with Multiplicity {mult} requires a non-empty "
-                "Instance Token to name the instances."
-            )
+    if typ in INSTANTIATED_SYSTEM_TYPES and (not mult.isdigit() or int(mult) < 1):
+        return (
+            f"Type '{typ}' requires Multiplicity as a positive integer, the "
+            f"count per parent instance (got {mult or 'empty'!r})."
+        )
     return None
 
 
@@ -154,12 +168,15 @@ ROLES_FROM_OWNER = frozenset({"Command", "Power"})
 BUS_ROLES_FROM_OWNER = frozenset({"Command", "Request", "Power"})
 
 
-# Formal Interface Type values on 1_Signals.
+# Formal Interface Type values on 1_Signals. Power is split by network: the
+# low-voltage supply (28 V) and the high-voltage traction network (800 V) are
+# separate physical networks and are filtered separately on the topology map.
 INTERFACE_TYPES = (
     "Digital",
     "Analog",
     "Discrete",
-    "Power",
+    "Low Power",
+    "High Power",
 )
 
 # Formal Topology values on 10_Databuses (digital + non-digital link kinds).
@@ -168,7 +185,8 @@ BUS_TOPOLOGIES = (
     "Shared",
     "Analog",
     "Discrete",
-    "Power",
+    "Low Power",
+    "High Power",
 )
 
 # Normalized topology keys used by the topology diagram.
@@ -176,10 +194,25 @@ TOPOLOGY_UNIDIRECTIONAL = "unidirectional"
 TOPOLOGY_SHARED = "shared"
 TOPOLOGY_ANALOG = "analog"
 TOPOLOGY_DISCRETE = "discrete"
-TOPOLOGY_POWER = "power"
+TOPOLOGY_LOW_POWER = "low_power"
+TOPOLOGY_HIGH_POWER = "high_power"
+
+# Callers re-normalize values that are already keys, so a key must map to
+# itself. Single-word keys did so by accident; low_power / high_power do not.
+TOPOLOGY_KEYS = frozenset(
+    {
+        TOPOLOGY_UNIDIRECTIONAL,
+        TOPOLOGY_SHARED,
+        TOPOLOGY_ANALOG,
+        TOPOLOGY_DISCRETE,
+        TOPOLOGY_LOW_POWER,
+        TOPOLOGY_HIGH_POWER,
+    }
+)
 
 TOPOLOGY_COLORS = {
-    TOPOLOGY_POWER: "#c0392b",  # red — power supply
+    TOPOLOGY_LOW_POWER: "#e74c3c",  # light red — 28 V supply network
+    TOPOLOGY_HIGH_POWER: "#922b21",  # dark red — 800 V traction network
     TOPOLOGY_ANALOG: "#8B4513",  # brown — analog
     TOPOLOGY_DISCRETE: "#e67e22",  # orange — discrete
     TOPOLOGY_UNIDIRECTIONAL: "#2980b9",  # blue — mono digital
@@ -198,8 +231,12 @@ _TOPOLOGY_ALIASES = {
     "bidirectional": TOPOLOGY_SHARED,
     "analog": TOPOLOGY_ANALOG,
     "discrete": TOPOLOGY_DISCRETE,
-    "power": TOPOLOGY_POWER,
-    "power supply": TOPOLOGY_POWER,
+    # No bare "power" alias: it would swallow "low power" / "high power" in the
+    # substring pass, and a stale "Power" is better reported than guessed.
+    "low power": TOPOLOGY_LOW_POWER,
+    "low voltage": TOPOLOGY_LOW_POWER,
+    "high power": TOPOLOGY_HIGH_POWER,
+    "high voltage": TOPOLOGY_HIGH_POWER,
 }
 
 
@@ -208,11 +245,14 @@ def normalize_bus_topology(value: object) -> str:
     text = str(value or "").strip().lower()
     if not text:
         return ""
+    if text in TOPOLOGY_KEYS:
+        return text
     if text in _TOPOLOGY_ALIASES:
         return _TOPOLOGY_ALIASES[text]
-    for alias, key in _TOPOLOGY_ALIASES.items():
+    # Longest alias first, so "high power bus" cannot match a shorter alias.
+    for alias in sorted(_TOPOLOGY_ALIASES, key=len, reverse=True):
         if alias in text:
-            return key
+            return _TOPOLOGY_ALIASES[alias]
     return ""
 
 
@@ -230,6 +270,7 @@ def formal_topology_label(value: object) -> str:
         TOPOLOGY_SHARED: "Shared",
         TOPOLOGY_ANALOG: "Analog",
         TOPOLOGY_DISCRETE: "Discrete",
-        TOPOLOGY_POWER: "Power",
+        TOPOLOGY_LOW_POWER: "Low Power",
+        TOPOLOGY_HIGH_POWER: "High Power",
     }
     return mapping.get(key, str(value or "").strip())

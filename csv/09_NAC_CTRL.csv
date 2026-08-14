@@ -1,164 +1,164 @@
-﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
-DBUS-200,HICU freshness to EMC,HICU,EMC,EM-{n},SIG-221,1Y1,fcc_cmd,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",DOC=1Y1 DLC8; OEM fcc_freshness,Yes,TBD,TBD
-DBUS-201,EPU enable command,HICU,EMC,EM-{n},SIG-222,1Y1,fcc_cmd,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM epu_en,Yes,TBD,TBD
-DBUS-202,HVDC ready set,HICU,EMC,EM-{n},SIG-223,1Y1,fcc_cmd,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM hv_set,Yes,TBD,TBD
-DBUS-203,EMC fault reset command,HICU,EMC,EM-{n},SIG-224,1Y1,fcc_cmd,57,57,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM fault_reset_cmd,Yes,TBD,TBD
-DBUS-204,EMC critical monitor override,HICU,EMC,EM-{n},SIG-225,1Y1,fcc_cmd,56,56,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM override,Yes,TBD,TBD
-DBUS-205,Electric motor command (HICU to EMC),HICU,EMC,EM-{n},SIG-195,1Y1,fcc_cmd,55,40,INT16,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM command; mode-dependent torque/speed scale,Yes,TBD,TBD
-DBUS-206,Weight on wheels to EMC,HICU,EMC,EM-{n},SIG-226,1Y1,fcc_cmd,39,39,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM wow_status; relayed from FCC,Yes,TBD,TBD
-DBUS-207,EMC control mode command,HICU,EMC,EM-{n},SIG-227,1Y1,fcc_cmd,38,37,Encoded,,,1,0,3,10,"Frame CRC, plus receiver freshness timeout",0 Torque;1 Speed;2 Voltage;3 Current,Yes,TBD,TBD
-DBUS-208,EMC control level command,HICU,EMC,EM-{n},SIG-228,1Y1,fcc_cmd,36,36,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",0 MCU;1 EPU,Yes,TBD,TBD
-DBUS-209,fcc_cmd spare,HICU,EMC,EM-{n},SIG-220,1Y1,fcc_cmd,35,32,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",spare,No,TBD,TBD
-DBUS-210,Charging current limit to EMC,HICU,EMC,EM-{n},SIG-229,1Y1,fcc_cmd,31,18,Encoded,A,,0.1,-1000,638.3,10,"Frame CRC, plus receiver freshness timeout",OEM charging_curr_lim; offset=-180.8; from MBMS_1,Yes,TBD,TBD
-DBUS-211,Voltage / current command to EMC,HICU,EMC,EM-{n},SIG-230,1Y1,fcc_cmd,17,8,Encoded,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM volt_curr_command; offset=0 (V); current offset=-400 res=0.782,Yes,TBD,TBD
-DBUS-212,HICU CRC to EMC,HICU,EMC,EM-{n},SIG-231,1Y1,fcc_cmd,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",OEM fcc_crc,Yes,TBD,TBD
-DBUS-213,Weight on wheels to EPECS,HICU,EPECS,,SIG-226,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",WOW relay HICU->EPECS,Yes,TBD,TBD
-DBUS-214,Charging current limit (MBMS to HICU),MBMS,HICU,,SIG-232,MBMS_1,mbms_ess_lim,31,18,Encoded,A,,0.1,-1000,638.3,10,"Frame CRC, plus receiver freshness timeout",ICD-assigned Message ID MBMS_1; DLC=4; same encoding as fcc_cmd; offset=-180.8; period 10 ms assumption,Yes,TBD,TBD
-DBUS-215,Voltage / current setpoint (MBMS to HICU),MBMS,HICU,EM-{n},SIG-233,MBMS_1,mbms_ess_lim,17,8,Encoded,,,,,,10,"Frame CRC, plus receiver freshness timeout",MBMS_1; offset=0 (V); current offset=-400,Yes,TBD,TBD
-DBUS-216,MBMS limits message CRC,MBMS,HICU,,SIG-234,MBMS_1,mbms_ess_lim,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",MBMS_1 CRC; DLC=4 model,Yes,TBD,TBD
-DBUS-220,CON freshness st1,EMC,HICU,EM-{n},SIG-211,9Y1,con_inverter_st1,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",DOC=9Y1 DLC7,Yes,TBD,TBD
-DBUS-221,CON MCU state,EMC,HICU,EM-{n},SIG-207,9Y1,con_inverter_st1,59,56,ENUM,,,,,,10,"Frame CRC, plus receiver freshness timeout",con_mcu_state,Yes,TBD,TBD
-DBUS-222,CON HVDC voltage,EMC,HICU,EM-{n},SIG-197,9Y1,con_inverter_st1,55,40,INT16,Vdc,,0.05,-1638.4,1638.35,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
-DBUS-223,CON HVDC current,EMC,HICU,EM-{n},SIG-198,9Y1,con_inverter_st1,39,24,INT16,Amps,,1,-32768,32767,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
-DBUS-224,CON control mode feedback,EMC,HICU,EM-{n},SIG-208,9Y1,con_inverter_st1,23,22,Encoded,,,,,,10,"Frame CRC, plus receiver freshness timeout",0 Torque;1 Speed;2 Voltage;3 Current,Yes,TBD,TBD
-DBUS-225,CON control level feedback,EMC,HICU,EM-{n},SIG-209,9Y1,con_inverter_st1,21,21,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",0 MCU;1 EPU,Yes,TBD,TBD
-DBUS-226,CON inverter st1 spare,EMC,HICU,EM-{n},SIG-220,9Y1,con_inverter_st1,20,16,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-227,CON CRC st1,EMC,HICU,EM-{n},SIG-213,9Y1,con_inverter_st1,15,8,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-228,CON freshness st2,EMC,HICU,EM-{n},SIG-211,9Y2,con_motor_st2,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-229,CON motor st2 spare,EMC,HICU,EM-{n},SIG-220,9Y2,con_motor_st2,59,56,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+﻿Allocation Id,Data name,Sender,Receiver,Instance dimension,Signal Id,Message ID,Label,Start bit,Stop bit,Encoding,Unit,Scale,Resolution,Minimum,Maximum,Refresh period (ms),Validity,Notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-200,HICU freshness to EMC,HICU,EMC,EM-{n},SIG-202,1Y1,fcc_cmd,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",DOC=1Y1 DLC8; OEM fcc_freshness,Yes,TBD,TBD
+DBUS-201,EPU enable command,HICU,EMC,EM-{n},SIG-203,1Y1,fcc_cmd,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM epu_en,Yes,TBD,TBD
+DBUS-202,HVDC ready set,HICU,EMC,EM-{n},SIG-204,1Y1,fcc_cmd,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM hv_set,Yes,TBD,TBD
+DBUS-203,EMC fault reset command,HICU,EMC,EM-{n},SIG-205,1Y1,fcc_cmd,57,57,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM fault_reset_cmd,Yes,TBD,TBD
+DBUS-204,EMC critical monitor override,HICU,EMC,EM-{n},SIG-206,1Y1,fcc_cmd,56,56,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM override,Yes,TBD,TBD
+DBUS-205,Electric motor command (HICU to EMC),HICU,EMC,EM-{n},SIG-176,1Y1,fcc_cmd,55,40,INT16,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM command; mode-dependent torque/speed scale,Yes,TBD,TBD
+DBUS-206,Weight on wheels to EMC,HICU,EMC,EM-{n},SIG-207,1Y1,fcc_cmd,39,39,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM wow_status; relayed from FCC,Yes,TBD,TBD
+DBUS-207,EMC control mode command,HICU,EMC,EM-{n},SIG-208,1Y1,fcc_cmd,38,37,Encoded,,,1,0,3,10,"Frame CRC, plus receiver freshness timeout",0 Torque;1 Speed;2 Voltage;3 Current,Yes,TBD,TBD
+DBUS-208,EMC control level command,HICU,EMC,EM-{n},SIG-209,1Y1,fcc_cmd,36,36,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",0 MCU;1 EPU,Yes,TBD,TBD
+DBUS-209,fcc_cmd spare,HICU,EMC,EM-{n},SIG-201,1Y1,fcc_cmd,35,32,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",spare,No,TBD,TBD
+DBUS-210,Charging current limit to EMC,HICU,EMC,EM-{n},SIG-210,1Y1,fcc_cmd,31,18,Encoded,A,,0.1,-1000,638.3,10,"Frame CRC, plus receiver freshness timeout",OEM charging_curr_lim; offset=-180.8; from MBMS_1,Yes,TBD,TBD
+DBUS-211,Voltage / current command to EMC,HICU,EMC,EM-{n},SIG-211,1Y1,fcc_cmd,17,8,Encoded,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM volt_curr_command; offset=0 (V); current offset=-400 res=0.782,Yes,TBD,TBD
+DBUS-212,HICU CRC to EMC,HICU,EMC,EM-{n},SIG-212,1Y1,fcc_cmd,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",OEM fcc_crc,Yes,TBD,TBD
+DBUS-213,Weight on wheels to EPECS,HICU,EPECS,,SIG-207,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",WOW relay HICU->EPECS,Yes,TBD,TBD
+DBUS-214,Charging current limit (MBMS to HICU),MBMS,HICU,,SIG-213,MBMS_1,mbms_ess_lim,31,18,Encoded,A,,0.1,-1000,638.3,10,"Frame CRC, plus receiver freshness timeout",ICD-assigned Message ID MBMS_1; DLC=4; same encoding as fcc_cmd; offset=-180.8; period 10 ms assumption,Yes,TBD,TBD
+DBUS-215,Voltage / current setpoint (MBMS to HICU),MBMS,HICU,EM-{n},SIG-214,MBMS_1,mbms_ess_lim,17,8,Encoded,,,,,,10,"Frame CRC, plus receiver freshness timeout",MBMS_1; offset=0 (V); current offset=-400,Yes,TBD,TBD
+DBUS-216,MBMS limits message CRC,MBMS,HICU,,SIG-215,MBMS_1,mbms_ess_lim,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",MBMS_1 CRC; DLC=4 model,Yes,TBD,TBD
+DBUS-220,CON freshness st1,EMC,HICU,EM-{n},SIG-192,9Y1,con_inverter_st1,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",DOC=9Y1 DLC7,Yes,TBD,TBD
+DBUS-221,CON MCU state,EMC,HICU,EM-{n},SIG-188,9Y1,con_inverter_st1,59,56,ENUM,,,,,,10,"Frame CRC, plus receiver freshness timeout",con_mcu_state,Yes,TBD,TBD
+DBUS-222,CON HVDC voltage,EMC,HICU,EM-{n},SIG-178,9Y1,con_inverter_st1,55,40,INT16,Vdc,,0.05,-1638.4,1638.35,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
+DBUS-223,CON HVDC current,EMC,HICU,EM-{n},SIG-179,9Y1,con_inverter_st1,39,24,INT16,Amps,,1,-32768,32767,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
+DBUS-224,CON control mode feedback,EMC,HICU,EM-{n},SIG-189,9Y1,con_inverter_st1,23,22,Encoded,,,,,,10,"Frame CRC, plus receiver freshness timeout",0 Torque;1 Speed;2 Voltage;3 Current,Yes,TBD,TBD
+DBUS-225,CON control level feedback,EMC,HICU,EM-{n},SIG-190,9Y1,con_inverter_st1,21,21,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",0 MCU;1 EPU,Yes,TBD,TBD
+DBUS-226,CON inverter st1 spare,EMC,HICU,EM-{n},SIG-201,9Y1,con_inverter_st1,20,16,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-227,CON CRC st1,EMC,HICU,EM-{n},SIG-194,9Y1,con_inverter_st1,15,8,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-228,CON freshness st2,EMC,HICU,EM-{n},SIG-192,9Y2,con_motor_st2,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-229,CON motor st2 spare,EMC,HICU,EM-{n},SIG-201,9Y2,con_motor_st2,59,56,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
 DBUS-230,CON speed measured,EMC,HICU,EM-{n},SIG-004,9Y2,con_motor_st2,55,40,INT16,RPM,,0.5,-16384,16383.5,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-231,CON torque estimate,EMC,HICU,EM-{n},SIG-201,9Y2,con_motor_st2,39,24,INT16,Nm,,0.05,-1638.4,1638.35,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-232,CON setpoint echo,EMC,HICU,EM-{n},SIG-202,9Y2,con_motor_st2,23,8,INT16,,,,,,10,"Frame CRC, plus receiver freshness timeout",mode-dependent scale,Yes,TBD,TBD
-DBUS-233,CON CRC st2,EMC,HICU,EM-{n},SIG-213,9Y2,con_motor_st2,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-234,CON freshness st3,EMC,HICU,EM-{n},SIG-211,9Y3,con_vitals_st3,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-235,CON HV undervoltage,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-236,CON HV overvoltage,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-237,CON vitals spare1,EMC,HICU,EM-{n},SIG-220,9Y3,con_vitals_st3,57,57,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-238,CON bus B selected,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,56,56,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-239,CON bus A selected,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,55,55,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-240,CON current sensor fault,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,54,54,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-241,CON bus B valid,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,53,53,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-242,CON bus A valid,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,52,52,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-243,CON inverter retry count,EMC,HICU,EM-{n},SIG-219,9Y3,con_vitals_st3,51,48,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-244,CON gate driver fault,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,47,47,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-245,CON vitals spare2,EMC,HICU,EM-{n},SIG-220,9Y3,con_vitals_st3,46,46,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-246,CON discrete disable status,EMC,HICU,EM-{n},SIG-210,9Y3,con_vitals_st3,45,45,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-247,CON RPS fail,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,44,44,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-248,CON MON fail,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,43,43,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM label mcu_mon_fail.,Yes,TBD,TBD
-DBUS-249,CON vitals spare3,EMC,HICU,EM-{n},SIG-220,9Y3,con_vitals_st3,42,42,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-250,CON NVM init check failed,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,41,41,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-251,CON CMB overtemperature,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,40,40,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-252,CON inverter temperature,EMC,HICU,EM-{n},SIG-060,9Y3,con_vitals_st3,39,32,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",offset=-40,Yes,TBD,TBD
-DBUS-253,CON inverter overtemperature,EMC,HICU,EM-{n},SIG-059,9Y3,con_vitals_st3,31,31,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-254,CON vitals spare4,EMC,HICU,EM-{n},SIG-220,9Y3,con_vitals_st3,30,24,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-255,CON CRC st3,EMC,HICU,EM-{n},SIG-213,9Y3,con_vitals_st3,23,16,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-256,CON freshness st4,EMC,HICU,EM-{n},SIG-211,9Y4,con_config_st4,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-257,CON EPU location ID,EMC,HICU,EM-{n},SIG-215,9Y4,con_config_st4,59,56,ENUM,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-258,CON software version,EMC,HICU,EM-{n},SIG-216,9Y4,con_config_st4,55,48,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-259,CON CRC st4,EMC,HICU,EM-{n},SIG-213,9Y4,con_config_st4,47,40,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-260,MON freshness st1,EMC,HICU,EM-{n},SIG-212,9Y5,mon_inverter_st1,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-261,MON inverter st1 spare,EMC,HICU,EM-{n},SIG-220,9Y5,mon_inverter_st1,59,56,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-262,MON HVDC current,EMC,HICU,EM-{n},SIG-200,9Y5,mon_inverter_st1,55,40,INT16,Adc,,0.02,-655.36,655.34,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
-DBUS-263,MON HVDC voltage,EMC,HICU,EM-{n},SIG-199,9Y5,mon_inverter_st1,39,24,INT16,Vdc,,0.05,-1638.4,1638.35,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
-DBUS-264,MON CRC st1,EMC,HICU,EM-{n},SIG-214,9Y5,mon_inverter_st1,23,16,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-265,MON freshness st2,EMC,HICU,EM-{n},SIG-212,9Y6,mon_motor_st2,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-266,MON motor st2 spare1,EMC,HICU,EM-{n},SIG-220,9Y6,mon_motor_st2,59,56,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-267,MON speed measured,EMC,HICU,EM-{n},SIG-196,9Y6,mon_motor_st2,55,40,INT16,RPM,,0.5,-16384,16383.5,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-268,MON motor st2 spare2,EMC,HICU,EM-{n},SIG-220,9Y6,mon_motor_st2,39,24,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-269,MON setpoint echo,EMC,HICU,EM-{n},SIG-203,9Y6,mon_motor_st2,23,8,INT16,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-270,MON CRC st2,EMC,HICU,EM-{n},SIG-214,9Y6,mon_motor_st2,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-271,MON freshness st3,EMC,HICU,EM-{n},SIG-212,9Y7,mon_vitals_st3,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-272,MON LVDC1 undervoltage,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-273,MON LVDC2 undervoltage,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-274,MON LVDC1 overvoltage,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,57,57,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-275,MON LVDC2 overvoltage,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,56,56,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-276,MON HV undervoltage,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,55,55,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-277,MON HV overvoltage,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,54,54,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-278,MON bus B selected,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,53,53,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-279,MON bus A selected,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,52,52,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-280,MON overspeed,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,51,51,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-281,MON bus B valid,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,50,50,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-282,MON bus A valid,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,49,49,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-283,MON reverse speed,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,48,48,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-284,MON stator temperature,EMC,HICU,EM-{n},SIG-204,9Y7,mon_vitals_st3,47,40,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-285,MON coolant inlet temperature,EMC,HICU,EM-{n},SIG-205,9Y7,mon_vitals_st3,39,32,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",offset=-40,Yes,TBD,TBD
-DBUS-286,MON board temperature,EMC,HICU,EM-{n},SIG-206,9Y7,mon_vitals_st3,31,24,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",offset=-40,TBD,TBD,TBD
-DBUS-287,MON CON fail,EMC,HICU,EM-{n},SIG-059,9Y7,mon_vitals_st3,23,23,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM label mcu_con_fail.,Yes,TBD,TBD
-DBUS-288,MON vitals spare,EMC,HICU,EM-{n},SIG-220,9Y7,mon_vitals_st3,22,16,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-289,MON CRC st3,EMC,HICU,EM-{n},SIG-214,9Y7,mon_vitals_st3,15,8,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-290,MON freshness st4,EMC,HICU,EM-{n},SIG-212,9Y8,mon_config_st4,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-291,MON EPU location ID,EMC,HICU,EM-{n},SIG-217,9Y8,mon_config_st4,59,56,ENUM,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-292,MON config spare,EMC,HICU,EM-{n},SIG-220,9Y8,mon_config_st4,55,48,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
-DBUS-293,MON software version,EMC,HICU,EM-{n},SIG-218,9Y8,mon_config_st4,47,40,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-294,MON CRC st4,EMC,HICU,EM-{n},SIG-214,9Y8,mon_config_st4,39,32,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-022,Turbine torque target,HICU,EPECS,,SIG-093,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-023,Propeller speed target,HICU,EPECS,,SIG-097,TBD,TBD,TBD,TBD,BNR,rpm,,,,,20,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-024,Turbine run command,HICU,EPECS,,SIG-098,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout","HICU to EPECS run enable, relayed from FCC.",TBD,TBD,TBD
-DBUS-025,Active rating reference,HICU,EPECS,,SIG-119,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-026,Propulsion operating mode,HICU,EPECS,,SIG-120,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-027,Synchrophasing command,HICU,EPECS,,SIG-121,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-028,Gas generator speed,EPECS,HICU,,SIG-023,TBD,TBD,TBD,TBD,BNR,rpm,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-029,Propeller speed,EPECS,HICU,,SIG-017,TBD,TBD,TBD,TBD,BNR,rpm,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-030,Main engine oil pressure,EPECS,HICU,,SIG-024,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-031,Main engine oil temperature,EPECS,HICU,,SIG-028,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-032,Fuel temperature,EPECS,HICU,,SIG-018,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-033,Propeller Blade Angle Control Path,EPECS,HICU,,SIG-015,TBD,TBD,TBD,TBD,BNR,deg,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-033-B,Propeller Blade Angle Protection Path,EPECS,HICU,,SIG-016,TBD,TBD,TBD,TBD,BNR,deg,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-034,Fuel inlet pressure,EPECS,HICU,,SIG-019,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-035,Fuel flow,EPECS,HICU,,SIG-020,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-036,Fuel filter differential pressure,EPECS,HICU,,SIG-021,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-037,Compressor output pressure,EPECS,HICU,,SIG-025,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-038,Engine inlet temperature,EPECS,HICU,,SIG-026,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-039,Inter-turbine temperature,EPECS,HICU,,SIG-027,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-040,Combining gearbox oil pressure,EPECS,HICU,,SIG-031,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-041,Combining gearbox oil temperature,EPECS,HICU,,SIG-032,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-042,Combining gearbox chip detection,EPECS,HICU,,SIG-033,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-043,Combining gearbox oil filter differential pressure,EPECS,HICU,,SIG-034,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-051,IPTMS coolant target temperature,HICU,IPTMS,,SIG-102,TBD,TBD,TBD,TBD,BNR,degC,,,,,20,"Frame CRC, plus receiver freshness timeout",HICU-commanded setpoint.,TBD,TBD,TBD
-DBUS-052,IPTMS pre-conditioning command,HICU,IPTMS,,SIG-103,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Ground/pre-flight thermal pre-conditioning request.,TBD,TBD,TBD
-DBUS-053,IPTMS status and operating limits,IPTMS,HICU,,SIG-124,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Aggregate status word; mirrors the Pack/ESS status pattern.,TBD,TBD,TBD
-DBUS-054,IPTMS loop 1 pump discharge pressure,IPTMS,HICU,,SIG-050,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-055,IPTMS loop 1 coolant supply temperature,IPTMS,HICU,,SIG-051,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-056,IPTMS loop 1 coolant return temperature,IPTMS,HICU,,SIG-052,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-057,IPTMS loop 1 TBV position feedback,IPTMS,HICU,,SIG-053,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-058,IPTMS loop 2 pump discharge pressure,IPTMS,HICU,,SIG-054,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-059,IPTMS loop 2 coolant supply temperature,IPTMS,HICU,,SIG-055,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-060,IPTMS loop 2 coolant return temperature,IPTMS,HICU,,SIG-056,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-061,IPTMS loop 2 TBV position feedback,IPTMS,HICU,,SIG-057,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-062,IPTMS cross-loop TBV position feedback,IPTMS,HICU,,SIG-058,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-070,Main engine oil chip detection,EPECS,HICU,,SIG-061,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-071,Turbine oil chip maintenance flag,EPECS,HICU,,SIG-062,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-072,FCU metering differential pressure,EPECS,HICU,,SIG-063,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-073,Propeller heating request,HICU,EPECS,,SIG-235,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout","Aircraft-level anti-ice request relayed by the HICU to the EPECS; the EPECS drives the heating element with its own hardwired command, which is not carried on any bus.",TBD,TBD,TBD
-DBUS-077,EPECS status / fault word,EPECS,HICU,,SIG-064,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-084,Turbine shutdown command,HICU,EPECS,,SIG-100,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Relayed from the FCC; the inbound leg is on the FCS propulsion control bus.,TBD,TBD,TBD
-DBUS-085,HVPDU contactor command,HICU,HVPDU,,SIG-079,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Aircraft-level contactor command relayed by HICU; local protection stays in the HVPDU.,Yes,TBD,TBD
-DBUS-086,HVPDU load / SSPC command,HICU,HVPDU,,SIG-081,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",High-voltage load and solid-state power controller command from HICU.,Yes,TBD,TBD
-DBUS-087,HV line current,HVPDU,HICU,,SIG-035,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound leg of the HVPDU reporting path; HICU relays it to the avionics on AVIO_HS.,Yes,TBD,TBD
-DBUS-088,HV line voltage,HVPDU,HICU,,SIG-036,TBD,TBD,TBD,TBD,BNR,V,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound leg of the HVPDU reporting path; HICU relays it to the avionics on AVIO_HS.,Yes,TBD,TBD
-DBUS-089,HVPDU EMC feed current,HVPDU,HICU,EM-{n},SIG-143,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",One feed current per motor controller; distinct from the EMC-measured phase current.,Yes,TBD,TBD
-DBUS-090,HVPDU auxiliary feed current,HVPDU,HICU,,SIG-144,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-091,HVPDU temperature,HVPDU,HICU,,SIG-145,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-092,HVPDU actual power,HVPDU,HICU,,SIG-130,TBD,TBD,TBD,TBD,BNR,kW,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound leg for the avionics backbone relay.,Yes,TBD,TBD
-DBUS-093,BTMS loop 1 coolant inlet temperature,BTMS,HICU,,SIG-146,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout","BTMS is per wing while NAC_CTRL is per nacelle: BTMS-1 reports on NAC_CTRL_1 and NAC_CTRL_2, BTMS-2 on NAC_CTRL_3 and NAC_CTRL_4, so each BTMS value reaches two HICUs. Confirm which HICU is the relaying master for AVIO_HS.",Yes,TBD,TBD
-DBUS-094,BTMS loop 1 coolant outlet temperature,BTMS,HICU,,SIG-147,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-095,BTMS loop 1 coolant differential pressure,BTMS,HICU,,SIG-148,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-096,BTMS loop 2 coolant inlet temperature,BTMS,HICU,,SIG-149,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-097,BTMS loop 2 coolant outlet temperature,BTMS,HICU,,SIG-150,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-098,BTMS loop 2 coolant differential pressure,BTMS,HICU,,SIG-151,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-099,BTMS coolant status,BTMS,HICU,,SIG-132,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound BTMS leg for the avionics backbone relay; the IPTMS status has its own separate path.,Yes,TBD,TBD
-DBUS-100,BTMS temperature target,HICU,BTMS,,SIG-131,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",Outbound leg of the avionics backbone command: the HICU relays the aircraft-level battery thermal target to the BTMS.,Yes,TBD,TBD
-DBUS-114,HVDC assembly state of charge,MBMS,HICU,,SIG-163,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",Consolidated battery reporting from the MBMS to the HICU. Only assembly-level values cross this interface; the twelve per-pack reports stay on NAC_BAT. Relayed on to the avionics on AVIO_HS.,Yes,TBD,TBD
-DBUS-115,HVDC assembly state of power - charge,MBMS,HICU,,SIG-164,TBD,TBD,TBD,TBD,BNR,kW,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-116,HVDC assembly state of power - discharge,MBMS,HICU,,SIG-165,TBD,TBD,TBD,TBD,BNR,kW,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-117,HVDC assembly number of packs connected,MBMS,HICU,,SIG-166,TBD,TBD,TBD,TBD,BNR,,,,0,12,100,"Frame CRC, plus receiver freshness timeout",HICU sees the pack connection state through this count; the per-pack contactor status stays on NAC_BAT.,Yes,TBD,TBD
-DBUS-118,HVDC assembly maximum pack temperature,MBMS,HICU,,SIG-167,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-119,HVDC assembly minimum pack temperature,MBMS,HICU,,SIG-168,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-120,HVDC assembly failure / fault word,MBMS,HICU,,SIG-169,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
-DBUS-121,HVDC assembly on command,HICU,MBMS,,SIG-170,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Assembly connect / disconnect request. The MBMS decides which packs to connect and issues the pack contactor commands itself on the battery bus.,Yes,TBD,TBD
-DBUS-122,Pack isolation request,HICU,MBMS,,SIG-192,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame CRC, plus receiver freshness timeout","Top-level request to isolate a pack, carrying the target pack in the payload. The MBMS chooses the means and fires the hardwired pack discretes itself; those discretes are not carried on any bus.",Yes,TBD,TBD
-DBUS-296,AGB chip detection,EPECS,HICU,,SIG-029,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Maintenance-relevant discrete acquired by the EPECS and reported for onward health reporting.,,,
-DBUS-297,Engine oil level,EPECS,HICU,,SIG-030,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,,,
-DBUS-298,HV isolation resistance status,HVPDU,HICU,,SIG-037,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout","Acquired by the insulation monitoring device and reported by the HVPDU, which is the bus node.",,,
+DBUS-231,CON torque estimate,EMC,HICU,EM-{n},SIG-182,9Y2,con_motor_st2,39,24,INT16,Nm,,0.05,-1638.4,1638.35,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-232,CON setpoint echo,EMC,HICU,EM-{n},SIG-183,9Y2,con_motor_st2,23,8,INT16,,,,,,10,"Frame CRC, plus receiver freshness timeout",mode-dependent scale,Yes,TBD,TBD
+DBUS-233,CON CRC st2,EMC,HICU,EM-{n},SIG-194,9Y2,con_motor_st2,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-234,CON freshness st3,EMC,HICU,EM-{n},SIG-192,9Y3,con_vitals_st3,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-235,CON HV undervoltage,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-236,CON HV overvoltage,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-237,CON vitals spare1,EMC,HICU,EM-{n},SIG-201,9Y3,con_vitals_st3,57,57,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-238,CON bus B selected,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,56,56,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-239,CON bus A selected,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,55,55,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-240,CON current sensor fault,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,54,54,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-241,CON bus B valid,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,53,53,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-242,CON bus A valid,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,52,52,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-243,CON inverter retry count,EMC,HICU,EM-{n},SIG-200,9Y3,con_vitals_st3,51,48,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-244,CON gate driver fault,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,47,47,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-245,CON vitals spare2,EMC,HICU,EM-{n},SIG-201,9Y3,con_vitals_st3,46,46,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-246,CON discrete disable status,EMC,HICU,EM-{n},SIG-191,9Y3,con_vitals_st3,45,45,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-247,CON RPS fail,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,44,44,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-248,CON MON fail,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,43,43,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM label mcu_mon_fail.,Yes,TBD,TBD
+DBUS-249,CON vitals spare3,EMC,HICU,EM-{n},SIG-201,9Y3,con_vitals_st3,42,42,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-250,CON NVM init check failed,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,41,41,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-251,CON CMB overtemperature,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,40,40,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-252,CON inverter temperature,EMC,HICU,EM-{n},SIG-057,9Y3,con_vitals_st3,39,32,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",offset=-40,Yes,TBD,TBD
+DBUS-253,CON inverter overtemperature,EMC,HICU,EM-{n},SIG-056,9Y3,con_vitals_st3,31,31,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-254,CON vitals spare4,EMC,HICU,EM-{n},SIG-201,9Y3,con_vitals_st3,30,24,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-255,CON CRC st3,EMC,HICU,EM-{n},SIG-194,9Y3,con_vitals_st3,23,16,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-256,CON freshness st4,EMC,HICU,EM-{n},SIG-192,9Y4,con_config_st4,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-257,CON EPU location ID,EMC,HICU,EM-{n},SIG-196,9Y4,con_config_st4,59,56,ENUM,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-258,CON software version,EMC,HICU,EM-{n},SIG-197,9Y4,con_config_st4,55,48,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-259,CON CRC st4,EMC,HICU,EM-{n},SIG-194,9Y4,con_config_st4,47,40,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-260,MON freshness st1,EMC,HICU,EM-{n},SIG-193,9Y5,mon_inverter_st1,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-261,MON inverter st1 spare,EMC,HICU,EM-{n},SIG-201,9Y5,mon_inverter_st1,59,56,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-262,MON HVDC current,EMC,HICU,EM-{n},SIG-181,9Y5,mon_inverter_st1,55,40,INT16,Adc,,0.02,-655.36,655.34,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
+DBUS-263,MON HVDC voltage,EMC,HICU,EM-{n},SIG-180,9Y5,mon_inverter_st1,39,24,INT16,Vdc,,0.05,-1638.4,1638.35,10,"Frame CRC, plus receiver freshness timeout",offset=0,Yes,TBD,TBD
+DBUS-264,MON CRC st1,EMC,HICU,EM-{n},SIG-195,9Y5,mon_inverter_st1,23,16,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-265,MON freshness st2,EMC,HICU,EM-{n},SIG-193,9Y6,mon_motor_st2,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-266,MON motor st2 spare1,EMC,HICU,EM-{n},SIG-201,9Y6,mon_motor_st2,59,56,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-267,MON speed measured,EMC,HICU,EM-{n},SIG-177,9Y6,mon_motor_st2,55,40,INT16,RPM,,0.5,-16384,16383.5,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-268,MON motor st2 spare2,EMC,HICU,EM-{n},SIG-201,9Y6,mon_motor_st2,39,24,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-269,MON setpoint echo,EMC,HICU,EM-{n},SIG-184,9Y6,mon_motor_st2,23,8,INT16,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-270,MON CRC st2,EMC,HICU,EM-{n},SIG-195,9Y6,mon_motor_st2,7,0,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-271,MON freshness st3,EMC,HICU,EM-{n},SIG-193,9Y7,mon_vitals_st3,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-272,MON LVDC1 undervoltage,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,59,59,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-273,MON LVDC2 undervoltage,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,58,58,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-274,MON LVDC1 overvoltage,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,57,57,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-275,MON LVDC2 overvoltage,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,56,56,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-276,MON HV undervoltage,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,55,55,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-277,MON HV overvoltage,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,54,54,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-278,MON bus B selected,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,53,53,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-279,MON bus A selected,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,52,52,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-280,MON overspeed,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,51,51,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-281,MON bus B valid,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,50,50,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-282,MON bus A valid,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,49,49,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-283,MON reverse speed,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,48,48,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-284,MON stator temperature,EMC,HICU,EM-{n},SIG-185,9Y7,mon_vitals_st3,47,40,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-285,MON coolant inlet temperature,EMC,HICU,EM-{n},SIG-186,9Y7,mon_vitals_st3,39,32,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",offset=-40,Yes,TBD,TBD
+DBUS-286,MON board temperature,EMC,HICU,EM-{n},SIG-187,9Y7,mon_vitals_st3,31,24,UINT8,deg C,,1,-40,215,10,"Frame CRC, plus receiver freshness timeout",offset=-40,TBD,TBD,TBD
+DBUS-287,MON CON fail,EMC,HICU,EM-{n},SIG-056,9Y7,mon_vitals_st3,23,23,BOOL,,,,,,10,"Frame CRC, plus receiver freshness timeout",OEM label mcu_con_fail.,Yes,TBD,TBD
+DBUS-288,MON vitals spare,EMC,HICU,EM-{n},SIG-201,9Y7,mon_vitals_st3,22,16,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-289,MON CRC st3,EMC,HICU,EM-{n},SIG-195,9Y7,mon_vitals_st3,15,8,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-290,MON freshness st4,EMC,HICU,EM-{n},SIG-193,9Y8,mon_config_st4,63,60,Encoded,,,1,0,15,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-291,MON EPU location ID,EMC,HICU,EM-{n},SIG-198,9Y8,mon_config_st4,59,56,ENUM,,,,,,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-292,MON config spare,EMC,HICU,EM-{n},SIG-201,9Y8,mon_config_st4,55,48,Spare,,,,,,10,"Frame CRC, plus receiver freshness timeout",,No,TBD,TBD
+DBUS-293,MON software version,EMC,HICU,EM-{n},SIG-199,9Y8,mon_config_st4,47,40,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-294,MON CRC st4,EMC,HICU,EM-{n},SIG-195,9Y8,mon_config_st4,39,32,UINT8,,,1,0,255,10,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-022,Turbine torque target,HICU,EPECS,,SIG-090,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-023,Propeller speed target,HICU,EPECS,,SIG-091,TBD,TBD,TBD,TBD,BNR,rpm,,,,,20,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-024,Turbine run command,HICU,EPECS,,SIG-092,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout","HICU to EPECS run enable, relayed from FCC.",TBD,TBD,TBD
+DBUS-025,Active rating reference,HICU,EPECS,,SIG-111,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-026,Propulsion operating mode,HICU,EPECS,,SIG-112,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-027,Synchrophasing command,HICU,EPECS,,SIG-113,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-028,Gas generator speed,EPECS,HICU,,SIG-020,TBD,TBD,TBD,TBD,BNR,rpm,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-029,Propeller speed,EPECS,HICU,,SIG-014,TBD,TBD,TBD,TBD,BNR,rpm,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-030,Main engine oil pressure,EPECS,HICU,,SIG-021,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-031,Main engine oil temperature,EPECS,HICU,,SIG-025,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-032,Fuel temperature,EPECS,HICU,,SIG-015,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-033,Propeller Blade Angle Control Path,EPECS,HICU,,SIG-012,TBD,TBD,TBD,TBD,BNR,deg,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-033-B,Propeller Blade Angle Protection Path,EPECS,HICU,,SIG-013,TBD,TBD,TBD,TBD,BNR,deg,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-034,Fuel inlet pressure,EPECS,HICU,,SIG-016,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-035,Fuel flow,EPECS,HICU,,SIG-017,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-036,Fuel filter differential pressure,EPECS,HICU,,SIG-018,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-037,Compressor output pressure,EPECS,HICU,,SIG-022,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-038,Engine inlet temperature,EPECS,HICU,,SIG-023,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-039,Inter-turbine temperature,EPECS,HICU,,SIG-024,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-040,Combining gearbox oil pressure,EPECS,HICU,,SIG-028,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-041,Combining gearbox oil temperature,EPECS,HICU,,SIG-029,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-042,Combining gearbox chip detection,EPECS,HICU,,SIG-030,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-043,Combining gearbox oil filter differential pressure,EPECS,HICU,,SIG-031,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-051,IPTMS coolant target temperature,HICU,IPTMS,,SIG-094,TBD,TBD,TBD,TBD,BNR,degC,,,,,20,"Frame CRC, plus receiver freshness timeout",HICU-commanded setpoint.,TBD,TBD,TBD
+DBUS-052,IPTMS pre-conditioning command,HICU,IPTMS,,SIG-095,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Ground/pre-flight thermal pre-conditioning request.,TBD,TBD,TBD
+DBUS-053,IPTMS status and operating limits,IPTMS,HICU,,SIG-114,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Aggregate status word; mirrors the Pack/ESS status pattern.,TBD,TBD,TBD
+DBUS-054,IPTMS loop 1 pump discharge pressure,IPTMS,HICU,,SIG-047,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-055,IPTMS loop 1 coolant supply temperature,IPTMS,HICU,,SIG-048,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-056,IPTMS loop 1 coolant return temperature,IPTMS,HICU,,SIG-049,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-057,IPTMS loop 1 TBV position feedback,IPTMS,HICU,,SIG-050,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-058,IPTMS loop 2 pump discharge pressure,IPTMS,HICU,,SIG-051,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-059,IPTMS loop 2 coolant supply temperature,IPTMS,HICU,,SIG-052,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-060,IPTMS loop 2 coolant return temperature,IPTMS,HICU,,SIG-053,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-061,IPTMS loop 2 TBV position feedback,IPTMS,HICU,,SIG-054,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-062,IPTMS cross-loop TBV position feedback,IPTMS,HICU,,SIG-055,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-070,Main engine oil chip detection,EPECS,HICU,,SIG-058,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-071,Turbine oil chip maintenance flag,EPECS,HICU,,SIG-059,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-072,FCU metering differential pressure,EPECS,HICU,,SIG-060,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-073,Propeller heating request,HICU,EPECS,,SIG-216,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout","Aircraft-level anti-ice request relayed by the HICU to the EPECS; the EPECS drives the heating element with its own hardwired command, which is not carried on any bus.",TBD,TBD,TBD
+DBUS-077,EPECS status / fault word,EPECS,HICU,,SIG-061,TBD,TBD,TBD,TBD,Discrete,,,,,,100,"Frame CRC, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-084,Turbine shutdown command,HICU,EPECS,,SIG-093,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Relayed from the FCC; the inbound leg is on the FCS propulsion control bus.,TBD,TBD,TBD
+DBUS-085,HVPDU contactor command,HICU,HVPDU,,SIG-076,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Aircraft-level contactor command relayed by HICU; local protection stays in the HVPDU.,Yes,TBD,TBD
+DBUS-086,HVPDU load / SSPC command,HICU,HVPDU,,SIG-078,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",High-voltage load and solid-state power controller command from HICU.,Yes,TBD,TBD
+DBUS-087,HV line current,HVPDU,HICU,,SIG-032,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound leg of the HVPDU reporting path; HICU relays it to the avionics on AVIO_HS.,Yes,TBD,TBD
+DBUS-088,HV line voltage,HVPDU,HICU,,SIG-033,TBD,TBD,TBD,TBD,BNR,V,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound leg of the HVPDU reporting path; HICU relays it to the avionics on AVIO_HS.,Yes,TBD,TBD
+DBUS-089,HVPDU EMC feed current,HVPDU,HICU,EM-{n},SIG-126,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",One feed current per motor controller; distinct from the EMC-measured phase current.,Yes,TBD,TBD
+DBUS-090,HVPDU auxiliary feed current,HVPDU,HICU,,SIG-127,TBD,TBD,TBD,TBD,BNR,A,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-091,HVPDU temperature,HVPDU,HICU,,SIG-128,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-092,HVPDU actual power,HVPDU,HICU,,SIG-119,TBD,TBD,TBD,TBD,BNR,kW,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound leg for the avionics backbone relay.,Yes,TBD,TBD
+DBUS-093,BTMS loop 1 coolant inlet temperature,BTMS,HICU,,SIG-129,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout","BTMS is per wing while NAC_CTRL is per nacelle: BTMS-1 reports on NAC_CTRL_1 and NAC_CTRL_2, BTMS-2 on NAC_CTRL_3 and NAC_CTRL_4, so each BTMS value reaches two HICUs. Confirm which HICU is the relaying master for AVIO_HS.",Yes,TBD,TBD
+DBUS-094,BTMS loop 1 coolant outlet temperature,BTMS,HICU,,SIG-130,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-095,BTMS loop 1 coolant differential pressure,BTMS,HICU,,SIG-131,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-096,BTMS loop 2 coolant inlet temperature,BTMS,HICU,,SIG-132,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-097,BTMS loop 2 coolant outlet temperature,BTMS,HICU,,SIG-133,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-098,BTMS loop 2 coolant differential pressure,BTMS,HICU,,SIG-134,TBD,TBD,TBD,TBD,BNR,,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-099,BTMS coolant status,BTMS,HICU,,SIG-121,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Inbound BTMS leg for the avionics backbone relay; the IPTMS status has its own separate path.,Yes,TBD,TBD
+DBUS-100,BTMS temperature target,HICU,BTMS,,SIG-120,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",Outbound leg of the avionics backbone command: the HICU relays the aircraft-level battery thermal target to the BTMS.,Yes,TBD,TBD
+DBUS-114,HVDC assembly state of charge,MBMS,HICU,,SIG-146,TBD,TBD,TBD,TBD,BNR,%,,,,,100,"Frame CRC, plus receiver freshness timeout",Consolidated battery reporting from the MBMS to the HICU. Only assembly-level values cross this interface; the twelve per-pack reports stay on NAC_BAT. Relayed on to the avionics on AVIO_HS.,Yes,TBD,TBD
+DBUS-115,HVDC assembly state of power - charge,MBMS,HICU,,SIG-147,TBD,TBD,TBD,TBD,BNR,kW,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-116,HVDC assembly state of power - discharge,MBMS,HICU,,SIG-148,TBD,TBD,TBD,TBD,BNR,kW,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-117,HVDC assembly number of packs connected,MBMS,HICU,,SIG-149,TBD,TBD,TBD,TBD,BNR,,,,0,12,100,"Frame CRC, plus receiver freshness timeout",HICU sees the pack connection state through this count; the per-pack contactor status stays on NAC_BAT.,Yes,TBD,TBD
+DBUS-118,HVDC assembly maximum pack temperature,MBMS,HICU,,SIG-150,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-119,HVDC assembly minimum pack temperature,MBMS,HICU,,SIG-151,TBD,TBD,TBD,TBD,BNR,degC,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-120,HVDC assembly failure / fault word,MBMS,HICU,,SIG-152,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,Yes,TBD,TBD
+DBUS-121,HVDC assembly on command,HICU,MBMS,,SIG-153,TBD,TBD,TBD,TBD,Discrete,,,,,,20,"Frame CRC, plus receiver freshness timeout",Assembly connect / disconnect request. The MBMS decides which packs to connect and issues the pack contactor commands itself on the battery bus.,Yes,TBD,TBD
+DBUS-122,Pack isolation request,HICU,MBMS,,SIG-175,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame CRC, plus receiver freshness timeout","Top-level request to isolate a pack, carrying the target pack in the payload. The MBMS chooses the means and fires the hardwired pack discretes itself; those discretes are not carried on any bus.",Yes,TBD,TBD
+DBUS-296,AGB chip detection,EPECS,HICU,,SIG-026,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Maintenance-relevant discrete acquired by the EPECS and reported for onward health reporting.,,,
+DBUS-297,Engine oil level,EPECS,HICU,,SIG-027,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,,,
+DBUS-298,HV isolation resistance status,HVPDU,HICU,,SIG-034,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout","Acquired by the insulation monitoring device and reported by the HVPDU, which is the bus node.",,,
 DBUS-299,Electric motor coolant delta pressure,IPTMS,HICU,EM-{n},SIG-005,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",,,,
 DBUS-300,Electric motor coolant outlet temperature,IPTMS,HICU,EM-{n},SIG-006,TBD,TBD,TBD,TBD,TBD,,,,,,100,"Frame CRC, plus receiver freshness timeout",Per-motor coolant measurement acquired by the IPTMS; one occurrence per motor.,,,

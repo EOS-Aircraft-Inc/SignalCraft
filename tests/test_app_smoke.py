@@ -27,6 +27,8 @@ from streamlit.testing.v1 import AppTest
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 APP = str(PROJECT_ROOT / "visualizer" / "app.py")
 
+SIGNAL_ID_COLUMN = "Signal Id"
+
 PAGES = ["Bus Topology", "Bus Explorer", "Signal Explorer", "Edit data"]
 EDITORS = ["System list", "Signals", "Databuses", "Bus definition"]
 
@@ -121,13 +123,13 @@ def test_bus_definition_editor_shows_the_transport_fields() -> None:
     expected = {
         "Message ID",
         "Label",
-        "start bit",
-        "stop bit",
-        "scale",
-        "resolution",
-        "minimum",
-        "maximum",
-        "validity",
+        "Start bit",
+        "Stop bit",
+        "Scale",
+        "Resolution",
+        "Minimum",
+        "Maximum",
+        "Validity",
         "On aircraft ?",
         "On FND ?",
         "On Sim ?",
@@ -150,13 +152,13 @@ def test_aircraft_multiplicity_of_one_is_preserved() -> None:
     )
 
     # The shared rule accepts it...
-    assert system_multiplicity_error("Aircraft", "1", "") is None
-    assert system_multiplicity_error("Domain", "", "") is None
+    assert system_multiplicity_error("Aircraft", "1") is None
+    assert system_multiplicity_error("Domain", "") is None
     # ...and the editor leaves it alone instead of rewriting it to "".
     assert "1" in _TOLERATED_NO_INSTANCE_MULTIPLICITY
     # A value left over from a different Type is still corrected.
     assert "3" not in _TOLERATED_NO_INSTANCE_MULTIPLICITY
-    assert system_multiplicity_error("Aircraft", "3", "") is not None
+    assert system_multiplicity_error("Aircraft", "3") is not None
 
     app = run_app(
         nav_page="Edit data",
@@ -166,6 +168,70 @@ def test_aircraft_multiplicity_of_one_is_preserved() -> None:
     )
     assert_no_exception(app, "System list on the aircraft row")
     assert [e.value for e in app.error] == []
+
+
+def test_power_networks_are_two_independent_topology_layers() -> None:
+    """Low Power (28 V) and High Power (800 V) must stay separate everywhere.
+
+    They were one ``Power`` value until the networks were split. The hazard is
+    a half-done split: an Interface Type that no longer resolves to a topology
+    key silently drops those links from the map instead of erroring, so this
+    pins the whole chain — vocabulary, colors, and both checkboxes.
+    """
+    from visualizer.data.models import (
+        INTERFACE_TYPES,
+        TOPOLOGY_COLORS,
+        TOPOLOGY_HIGH_POWER,
+        TOPOLOGY_KEYS,
+        TOPOLOGY_LOW_POWER,
+        normalize_bus_topology,
+    )
+
+    assert "Power" not in INTERFACE_TYPES
+    assert {"Low Power", "High Power"} <= set(INTERFACE_TYPES)
+
+    # Each Interface Type resolves to its own key: "low power" must not be
+    # swallowed by a bare "power" alias, which is what the split removed.
+    assert normalize_bus_topology("Low Power") == TOPOLOGY_LOW_POWER
+    assert normalize_bus_topology("High Power") == TOPOLOGY_HIGH_POWER
+    assert TOPOLOGY_LOW_POWER != TOPOLOGY_HIGH_POWER
+    assert TOPOLOGY_COLORS[TOPOLOGY_LOW_POWER] != TOPOLOGY_COLORS[TOPOLOGY_HIGH_POWER]
+
+    # Renderers re-normalize a value that is already a key, so every key must
+    # map to itself. When low_power did not, its links lost both their colour
+    # and their no-arrow styling and silently drew as default digital edges.
+    for key in TOPOLOGY_KEYS:
+        assert normalize_bus_topology(key) == key, key
+        assert TOPOLOGY_COLORS[key] == TOPOLOGY_COLORS[normalize_bus_topology(key)]
+
+    app = run_app(nav_page="Bus Topology")
+    assert_no_exception(app, "Bus Topology")
+    labels = {widget.label for widget in app.checkbox}
+    assert {"Low Power", "High Power"} <= labels, labels
+    assert "Power" not in labels
+
+
+def test_every_signal_produces_a_drawable_dataflow() -> None:
+    """No signal may build a graph the figure cannot draw.
+
+    A self-addressed allocation (Sender == Receiver) used to leave a node with
+    no edge attached. The empty edge frame has no columns, so the figure died
+    on ``groupby("interface")`` — for that one signal only, and only once its
+    ``Related to`` relatives stopped supplying edges. Cheap to pin, invisible
+    otherwise.
+    """
+    from visualizer.components.graphs import signal_dataflow_figure
+    from visualizer.data.dataflow import build_dataflow
+    from visualizer.data.loader import csv_mtime_key, load_icd
+
+    bundle = load_icd(csv_mtime_key())
+    orphaned: list[str] = []
+    for signal_id in bundle.signals[SIGNAL_ID_COLUMN]:
+        flow = build_dataflow(bundle, signal_id)
+        signal_dataflow_figure(flow)  # must not raise
+        if not flow.nodes.empty and flow.edges.empty:
+            orphaned.append(str(signal_id))
+    assert not orphaned, f"nodes with no edges for: {orphaned}"
 
 
 def test_signal_role_filter_narrows_the_table() -> None:
@@ -204,7 +270,8 @@ def assert_fields_editable(app: AppTest, fields: list[str]) -> None:
     """Every column in ``fields`` must have a widget on the page.
 
     Matched on the start of the label, because some widgets add a hint to the
-    column name — "Physical Id (only if shared)" edits ``Physical Id``.
+    column name — "Computed from (signals this value is produced from)"
+    edits ``Computed from``.
     """
     labels = _widget_labels(app)
     missing = [f for f in fields if not any(lab.startswith(f) for lab in labels)]
@@ -232,3 +299,54 @@ def _shown_count(app: AppTest) -> int:
         if match:
             return int(match.group(1))
     raise AssertionError("Signal Explorer did not render its row-count caption")
+
+
+def test_column_help_matches_the_real_columns() -> None:
+    """The workbook's own documentation must describe the sheets as they are.
+
+    ``Column_Help`` is what someone filling the database reads. It drifted once
+    already: the power split left ``topology`` documented as accepting ``Power``,
+    which the code no longer resolves — the link just turns grey on the map.
+    Renaming a column without updating this sheet has the same shape.
+    """
+    import csv
+    import json
+
+    csv_dir = PROJECT_ROOT / "csv"
+    manifest = json.loads((csv_dir / "_workbook_manifest.json").read_text(encoding="utf-8"))
+    files = {e["sheet_name"]: e["csv_file"] for e in manifest["sheets"]}
+
+    def columns(sheet: str) -> list[str]:
+        with (csv_dir / files[sheet]).open(encoding="utf-8-sig", newline="") as fh:
+            return [c for c in next(csv.reader(fh)) if c.strip()]
+
+    documented: dict[str, set[str]] = {}
+    allowed: dict[tuple[str, str], str] = {}
+    with (csv_dir / files["Column_Help"]).open(encoding="utf-8-sig", newline="") as fh:
+        for row in csv.DictReader(fh):
+            sheet, column = row["Sheet"].strip(), row["Column"].strip()
+            documented.setdefault(sheet, set()).add(column)
+            allowed[(sheet, column)] = row["Allowed values"].strip()
+
+    problems: list[str] = []
+    payload = [s for s in files if s not in set(documented) | {"README", "Column_Help"}]
+    pairs = [(s, s) for s in ("0_Systems", "1_Signals", "10_Databuses")]
+    pairs += [(s, "Bus-definition tabs") for s in payload[:1]]
+    for sheet, doc_key in pairs:
+        real, doc = set(columns(sheet)), documented.get(doc_key, set())
+        problems += [f"{sheet}: {c} undocumented" for c in sorted(real - doc)]
+        problems += [f"{doc_key}: {c} no longer exists" for c in sorted(doc - real)]
+    assert not problems, problems
+
+    # Allowed values must agree with the vocabulary the code enforces.
+    from visualizer.data.models import BUS_TOPOLOGIES, INTERFACE_TYPES
+
+    for (sheet, column), vocabulary in (
+        (("10_Databuses", "Topology"), BUS_TOPOLOGIES),
+        (("1_Signals", "Interface Type"), INTERFACE_TYPES),
+    ):
+        listed = {v.strip() for v in allowed[(sheet, column)].split(";") if v.strip()}
+        assert listed == set(vocabulary), (
+            f"{sheet}.{column}: Column_Help says {sorted(listed)}, "
+            f"code accepts {sorted(vocabulary)}"
+        )

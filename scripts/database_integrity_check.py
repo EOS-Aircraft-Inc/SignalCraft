@@ -21,16 +21,17 @@ from icd_sheets import (
     BUS_DEFINITION,
     BUS_ID,
     BUS_TOPOLOGIES,
+    COMPUTED_FROM,
     CONTROLLED_SHEETS,
     DATABUSES_SHEET,
     INSTALLED_IN,
+    INSTANCE_DIMENSION,
     INTERFACE_TYPE,
     INTERFACE_TYPES,
     INTERFACING_EQUIPMENT,
-    NO_INSTANCE_SYSTEM_TYPES,
     RECEIVER,
-    RELATED_TO,
     REPEATED_PER,
+    SAME_QUANTITY_AS,
     SENDER,
     SIGNAL_ID,
     SIGNAL_OWNER,
@@ -104,7 +105,6 @@ def check_system_hierarchy(csv_dir: Path) -> list[str]:
         parent = (row.get(INSTALLED_IN) or "").strip()
         typ = normalize_system_type(row.get("Type"))
         multiplicity = row.get("Multiplicity", "").strip()
-        token = row.get("Instance Token", "").strip()
         parent_of[unique_id] = parent
 
         if parent and parent not in unique_ids:
@@ -112,20 +112,9 @@ def check_system_hierarchy(csv_dir: Path) -> list[str]:
         if parent == unique_id:
             errors.append(f"System {unique_id}: Installed In refers to itself")
 
-        message = system_multiplicity_error(typ, multiplicity, token)
+        message = system_multiplicity_error(typ, multiplicity)
         if message:
             errors.append(f"System {unique_id}: {message}")
-            continue
-        if typ in NO_INSTANCE_SYSTEM_TYPES:
-            continue
-
-        # Remaining rules need the containment tree, so they stay here.
-        count = int(multiplicity) if multiplicity.isdigit() else 0
-        if count == 1 and token and parent:
-            errors.append(
-                f"System {unique_id}: singleton must not carry an Instance Token "
-                f"'{token}' (it adds nothing to the instance path)"
-            )
 
     for unique_id in parent_of:
         seen: set[str] = set()
@@ -209,15 +198,29 @@ def check_signal_and_payload_refs(csv_dir: Path) -> tuple[list[str], list[str]]:
                 f"{signals_sheet} {sid}: {INTERFACE_TYPE} '{iface}' is not one of "
                 f"{', '.join(INTERFACE_TYPES)}"
             )
-        for ref in split_refs(row.get(RELATED_TO, "")):
-            if ref not in signal_ids:
-                errors.append(
-                    f"{signals_sheet} {sid}: {RELATED_TO} '{ref}' is not a known "
-                    f"{SIGNAL_ID}"
-                )
-            elif ref == sid:
-                errors.append(
-                    f"{signals_sheet} {sid}: {RELATED_TO} must not reference itself"
+        for column in (COMPUTED_FROM, SAME_QUANTITY_AS):
+            for ref in split_refs(row.get(column, "")):
+                if ref not in signal_ids:
+                    errors.append(
+                        f"{signals_sheet} {sid}: {column} '{ref}' is not a known "
+                        f"{SIGNAL_ID}"
+                    )
+                elif ref == sid:
+                    errors.append(
+                        f"{signals_sheet} {sid}: {column} must not reference itself"
+                    )
+
+    same_quantity = {
+        row.get(SIGNAL_ID, "").strip(): set(split_refs(row.get(SAME_QUANTITY_AS, "")))
+        for row in signals
+    }
+    for sid, refs in same_quantity.items():
+        for ref in refs:
+            if ref in same_quantity and sid not in same_quantity[ref]:
+                warnings.append(
+                    f"{signals_sheet} {sid}: {SAME_QUANTITY_AS} names {ref}, but "
+                    f"{ref} does not name {sid} back - the group is declared as a "
+                    "mesh, so every member lists the others"
                 )
 
     _, buses = read_sheet(DATABUSES_SHEET, csv_dir, manifest)
@@ -235,10 +238,29 @@ def check_signal_and_payload_refs(csv_dir: Path) -> tuple[list[str], list[str]]:
                 f"formalized as '{formal_topology_label(topo)}'"
             )
 
+    tree = SystemTree.load(csv_dir, manifest)
     for sheet in payload_sheets(csv_dir, manifest):
         _, rows = read_sheet(sheet, csv_dir, manifest)
         for row in rows:
             row_id = row.get(ALLOCATION_ID, "").strip() or "?"
+
+            # "EM-{n}" says this allocation repeats once per EM. The part before
+            # the ordinal must be a real multiplied system, or the repeat is
+            # meaningless and nothing else would notice the typo.
+            dimension = row.get(INSTANCE_DIMENSION, "").strip()
+            if dimension:
+                base = dimension.split("-")[0].strip()
+                if base not in tree.acronyms:
+                    errors.append(
+                        f"{sheet} {row_id}: {INSTANCE_DIMENSION} '{dimension}' "
+                        f"names '{base}', which is not in {SYSTEMS_SHEET}"
+                    )
+                elif tree.multiplicity(base) <= 1:
+                    warnings.append(
+                        f"{sheet} {row_id}: {INSTANCE_DIMENSION} '{dimension}' "
+                        f"repeats per '{base}', but there is only one of those"
+                    )
+
             sid = row.get(SIGNAL_ID, "").strip()
             if not sid:
                 warnings.append(

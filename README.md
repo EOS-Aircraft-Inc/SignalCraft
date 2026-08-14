@@ -91,6 +91,10 @@ editing the diagram, running the checks before committing — is covered
 separately in [`DEVELOPERS.md`](DEVELOPERS.md). You do not need any of it to
 fill in the database.
 
+The rules a change has to respect — what belongs in the database, how signals
+link, and the invariants the code relies on — are in
+[`DECISIONS.md`](DECISIONS.md).
+
 ## Canonical model
 
 ```text
@@ -124,13 +128,12 @@ everywhere else.
 | `Textual Name` | Human-readable equipment or grouping name |
 | `Installed In/Part of` | Containment parent UniqueId (empty for aircraft root / functional-only rows) |
 | `Domain` | UniqueId of a `Type = Domain` row; review/display grouping only — **not** used for instances |
-| `Type` | `Aircraft` / `Domain` / `Zone` = hierarchy or labels; `Component` / `Controller` = real LRUs. A `Domain` row declares a domain that other rows reference from their `Domain` column |
-| `Multiplicity` | Count **per parent instance** (not aircraft total) |
-| `Instance Token` | What this level adds to the path when Mult > 1: `{n}`, or a fixed list. Empty if Mult = 1 |
+| `Type` | `Aircraft` / `Domain` / `Zone` = hierarchy or labels; `Component` = real LRUs. A `Domain` row declares a domain that other rows reference from their `Domain` column |
+| `Multiplicity` | Count **per parent instance** (not aircraft total). Instance names follow from it — no separate token column |
 | `Description` / `Notes` | Free text (notes describe current state, not change history) |
 
 Aircraft totals = product of multiplicities up the tree. A singleton under a
-multiplied parent (e.g. one GBX per nacelle) needs no token of its own; tools
+multiplied parent (e.g. one GBX per nacelle) adds no ordinal of its own; tools
 derive `GBX-1`…`GBX-4` from the parent.
 
 ### Instance naming (for `10_Databuses` Sender / Receiver)
@@ -140,8 +143,9 @@ name mechanically:
 
 **instance name = base UniqueId + one ordinal per multiplicative ancestor
 (including the row itself), outermost first, hyphen-separated.** Levels with
-Multiplicity 1 contribute nothing. Fixed-list tokens use list position as the
-ordinal (`LVPDU_AFT` → `LVPDU-1`).
+Multiplicity 1 contribute nothing. Ordinals are always numeric; where the
+physical positions have names, record them in `Description` (FTANK-1 left,
+FTANK-2 center, FTANK-3 right).
 
 Examples: `HICU-3`, `EMC-1-2`, `BMU-1-7`, `BTMS-2`, `FCC-2`, bare `IRU`. There
 is no aircraft-level index (never `EM-4` for “fourth motor on the aircraft”).
@@ -151,18 +155,35 @@ is no aircraft-level index (never `EM-4` for “fourth motor on the aircraft”)
 | Column | What to enter |
 |---|---|
 | `Signal Id` | Stable unique ID (never reuse) |
-| `Physical Id` | Optional; set **only** when 2+ signals share the same physical meaning (not a foreign key). Leave blank otherwise |
+| `Same quantity as` | Optional; the other `Signal Id`s observing the *same real-world quantity* (sensor + backup, CON + MON, measured + estimated). Test: one change in the world moves them all at once. Declared on every member, each listing the others |
 | `Signal Name` / `Abbreviation` | Human labels |
 | `Signal Role` | `Measurement` \| `Command` \| `Request` \| `Computed` \| `Power` |
 | `Interfacing Equipment` | Equipment the quantity belongs to (`0_Systems` UniqueId); empty for Computed |
 | `Signal Owner` | System that owns the path / computation |
 | `Repeated Per` | Extra dimensions not already implied by owner/interfacing equipment (bare UniqueIds like `NAC` or `EM`, **not** `NAC-1`) |
-| `Related to` | Optional `;`-separated related `Signal Id` |
 | `Connection Type` | Free-text sensing / connection note |
-| `Interface Type` | `Digital` \| `Analog` \| `Discrete` \| `Power` |
-| `Unit` / `Functional Minimum` / `Functional Maximum` | Engineering unit and **functional** range of the quantity in service (independent of bus encoding; allocation `minimum`/`maximum` hold the wire range) |
-| `Derivation` | How the owner produces the value (always for Computed; for Request when the sender computes it; empty when only relaying or for protocol fields) |
+| `Interface Type` | `Digital` \| `Analog` \| `Discrete` \| `Low Power` \| `High Power` |
+| `Unit` / `Functional Minimum` / `Functional Maximum` | Engineering unit and **functional** range of the quantity in service (independent of bus encoding; allocation `Minimum`/`Maximum` hold the wire range) |
+| `Computed from` | The `Signal Id`s this value is produced from — computation inputs, or the upstream signal when an owner re-emits an intent it received. Ids only; explain the calculation in `Notes` |
 | `Notes` / platform flags | Current-state notes; `On aircraft ?` / `On FND ?` / `On Sim ?` |
+
+#### Linking a signal to another
+
+Two columns, two questions. Apply in order — the first match wins, and if
+neither matches there is **no link**:
+
+| Question | Column |
+|---|---|
+| Are these rows the **same quantity**? | `Same quantity as` |
+| Is this value **produced from** other rows? | `Computed from` |
+
+This is an interface document, not an architecture one: record only links that
+describe the interface itself. Do **not** record engineering analysis — which
+measurement a command is tuned against, companion quantities such as latitude
+and longitude, or sibling protection commands. And do not restate what the
+database already holds: fields of one message are tied by `Message ID` +
+`Label`, a relay keeps one `Signal Id` across its allocations, and a power chain
+is visible on the topology map.
 
 #### Signal Role (direction)
 
@@ -172,7 +193,7 @@ is no aircraft-level index (never `EM-4` for “fourth motor on the aircraft”)
 | **Command** | Hardwired drive of an effector or safety device | Owner → Interfacing Equipment | Analog / Discrete |
 | **Request** | Setpoint / enable / mode asked of another controller over a bus | Owner → Interfacing Equipment | Digital |
 | **Computed** | Value derived by the owner | (no physical interface) | Digital |
-| **Power** | Electrical supply (one row, nominal energy direction) | Owner (source) → Interfacing Equipment (load) | Power |
+| **Power** | Electrical supply (one row, nominal energy direction) | Owner (source) → Interfacing Equipment (load) | Low Power (28 V) / High Power (800 V) |
 
 Command vs Request: hardwired Analog/Discrete drive → **Command**; bus message
 asking another controller to act → **Request**. A cockpit pushbutton wired to a
@@ -187,10 +208,10 @@ when roles or technologies differ. Relays keep one `Signal Id` across hops.
 | Column | What to enter |
 |---|---|
 | `Bus Id` | Stable instance id (e.g. `NAC_CTRL_1`) |
-| `name` / `Bus description` | Human label and short purpose |
+| `Bus name` / `Bus description` | Human label and short purpose |
 | `Bus Definition` | Exact name of the payload tab for this family (`NAC_CTRL`, …) |
-| `protocol` / `speed` | Transport and bit rate when known |
-| `topology` | `Unidirectional` or `Shared` for digital buses (drives Bus Topology colors). Analog / Discrete / Power are non-digital kinds |
+| `Protocol` / `Speed` | Transport and bit rate when known |
+| `Topology` | `Unidirectional` or `Shared` for digital buses (drives Bus Topology colors). Analog / Discrete / Low Power / High Power are non-digital kinds |
 | `Sender` / `Receiver` | Connected LRU **instances** (naming rule above) |
 | platform flags | As needed |
 
@@ -198,10 +219,10 @@ Several bus instances may share one `Bus Definition` so the payload is authored
 once. On a shared bus, Sender/Receiver list every node; each allocation names
 only its actual producer and intended receivers (usually a subset).
 
-`Message ID`, bit range, encoding and `Refresh rate` on the definition tab
+`Message ID`, bit range, encoding and `Refresh period (ms)` on the definition tab
 are the inputs for bus load / bandwidth checks: each distinct `Message ID` on a
 physical bus instance is one frame type. Where suppliers have not fixed rates,
-`Refresh rate` may carry class defaults (working assumptions — see workbook
+`Refresh period (ms)` may carry class defaults (working assumptions — see workbook
 `README`).
 
 ### 4. Bus-definition tabs — allocations on a family
@@ -215,13 +236,13 @@ one encoded item on that family.
 | `Signal Id` | Exactly one `Signal Id` from `1_Signals` (relays: same id on each hop) |
 | `Data name` | Human-readable name on this bus |
 | `Sender` / `Receiver` | Producer and intended receivers (nodes of every instance of this definition) |
-| `instance_dimension` | Extra token when the bus instance alone is not enough (e.g. `PACK-{n}`, `EM-{n}`) |
+| `Instance dimension` | Extra token when the bus instance alone is not enough (e.g. `PACK-{n}`, `EM-{n}`) |
 | `Message ID` | Transport identity: A825/CAN DOC or arbitration id, or A429 label |
 | `Label` | Human message / frame name when useful |
-| `start bit` / `stop bit` | Field bit range (MSB…LSB inclusive) |
-| `encoding` / `unit` / `scale` / `resolution` / `minimum` / `maximum` | Wire encoding and engineering mapping; `minimum`/`maximum` are the **encoding** range on this bus (often wider than the functional range on `1_Signals`) |
-| `Refresh rate` / `validity` | Refresh period (ms) and how the receiver judges validity |
-| `notes` / platform flags | Current-state notes; applicability flags |
+| `Start bit` / `Stop bit` | Field bit range (MSB…LSB inclusive) |
+| `Encoding` / `Unit` / `Scale` / `Resolution` / `Minimum` / `Maximum` | Wire encoding and engineering mapping; `Minimum`/`Maximum` are the **encoding** range on this bus (often wider than the functional range on `1_Signals`) |
+| `Refresh period (ms)` / `Validity` | Refresh period (ms) and how the receiver judges validity |
+| `Notes` / platform flags | Current-state notes; applicability flags |
 
 ### Cross-cutting rules
 

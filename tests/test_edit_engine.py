@@ -99,7 +99,7 @@ REFUSED = [
 ACCEPTED = [
     (
         "editing a field on an existing allocation",
-        {"upsert": {"ICM_FCS": [{"Allocation Id": AN_ALLOCATION, "notes": "fine"}]}},
+        {"upsert": {"ICM_FCS": [{"Allocation Id": AN_ALLOCATION, "Notes": "fine"}]}},
     ),
     (
         "adding an allocation and letting the id be allocated",
@@ -164,7 +164,7 @@ def test_an_edit_changes_only_what_was_asked(csv_dir: Path) -> None:
     """Fields left out of the document keep their stored value."""
     before = {r["Allocation Id"]: r for r in rows(csv_dir, "ICM_FCS")}
     result = run_edit(
-        {"upsert": {"ICM_FCS": [{"Allocation Id": AN_ALLOCATION, "notes": "only this"}]}},
+        {"upsert": {"ICM_FCS": [{"Allocation Id": AN_ALLOCATION, "Notes": "only this"}]}},
         csv_dir=csv_dir,
     )
     assert result.ok, result.errors
@@ -176,7 +176,7 @@ def test_an_edit_changes_only_what_was_asked(csv_dir: Path) -> None:
         for column, value in after[AN_ALLOCATION].items()
         if before[AN_ALLOCATION][column] != value
     }
-    assert changed == {"notes"}
+    assert changed == {"Notes"}
 
 
 def test_new_allocation_ids_are_unique_across_every_tab(csv_dir: Path) -> None:

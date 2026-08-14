@@ -26,13 +26,17 @@ import streamlit as st
 from visualizer.data.models import (
     ALLOCATION_ID,
     BUS_DEFINITION,
+    BUS_NAME,
+    PROTOCOL,
     SIGNAL_ID,
+    SPEED,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
     TOPOLOGY_ANALOG,
     TOPOLOGY_COLORS,
     TOPOLOGY_DISCRETE,
-    TOPOLOGY_POWER,
+    TOPOLOGY_HIGH_POWER,
+    TOPOLOGY_LOW_POWER,
     TOPOLOGY_SHARED,
     TOPOLOGY_UNIDIRECTIONAL,
     formal_topology_label,
@@ -52,7 +56,9 @@ COLOR_BUS_MONO = TOPOLOGY_COLORS[TOPOLOGY_UNIDIRECTIONAL]
 COLOR_BUS_SHARED = TOPOLOGY_COLORS[TOPOLOGY_SHARED]
 COLOR_BUS_ANALOG = TOPOLOGY_COLORS[TOPOLOGY_ANALOG]
 COLOR_BUS_DISCRETE = TOPOLOGY_COLORS[TOPOLOGY_DISCRETE]
-COLOR_BUS_POWER = TOPOLOGY_COLORS[TOPOLOGY_POWER]
+COLOR_BUS_LOW_POWER = TOPOLOGY_COLORS[TOPOLOGY_LOW_POWER]
+COLOR_BUS_HIGH_POWER = TOPOLOGY_COLORS[TOPOLOGY_HIGH_POWER]
+_POWER_KINDS = {TOPOLOGY_LOW_POWER, TOPOLOGY_HIGH_POWER}
 COLOR_BUS_DEFAULT = "#1f77b4"
 COLOR_FUNCTION_FILL = "rgba(70, 130, 180, 0.10)"
 COLOR_FUNCTION_BORDER = "#4682b4"
@@ -142,14 +148,14 @@ def _bus_meta_lines(node_id: str, family: str, mode: str, buses: pd.DataFrame) -
     # Generic bus node (id == definition): summarize the family.
     if exact.empty and not family_rows.empty:
         lines.append(f"Instances: {len(family_rows)}")
-        name = str(family_rows.iloc[0].get("name") or "").strip()
+        name = str(family_rows.iloc[0].get(BUS_NAME) or "").strip()
         if name:
             lines.append(_esc(name))
         protos = sorted(
-            {str(v).strip() for v in family_rows.get("protocol", []) if str(v).strip()}
+            {str(v).strip() for v in family_rows.get(PROTOCOL, []) if str(v).strip()}
         )
         speeds = sorted(
-            {str(v).strip() for v in family_rows.get("speed", []) if str(v).strip()}
+            {str(v).strip() for v in family_rows.get(SPEED, []) if str(v).strip()}
         )
         proto_speed = " · ".join(
             p for p in (", ".join(_esc(x) for x in protos), ", ".join(_esc(x) for x in speeds))
@@ -162,11 +168,11 @@ def _bus_meta_lines(node_id: str, family: str, mode: str, buses: pd.DataFrame) -
     if exact.empty:
         return lines
     row = exact.iloc[0]
-    name = str(row.get("name") or "").strip()
+    name = str(row.get(BUS_NAME) or "").strip()
     if name:
         lines.append(_esc(name))
-    proto = str(row.get("protocol") or "").strip()
-    speed = str(row.get("speed") or "").strip()
+    proto = str(row.get(PROTOCOL) or "").strip()
+    speed = str(row.get(SPEED) or "").strip()
     if proto or speed:
         lines.append(" · ".join(p for p in (_esc(proto), _esc(speed)) if p))
     sender = str(row.get("Sender") or "").strip()
@@ -461,8 +467,9 @@ def _vis_edges_from_digraph(
                     link_kind = TOPOLOGY_SHARED
             color = topology_color(link_kind)
             label = formal_topology_label(link_kind) or link_kind
-            # Power is undirected on the diagram (nominal flow is stored, not drawn).
-            if link_kind == TOPOLOGY_POWER:
+            # Power links are undirected on the diagram (nominal flow is
+            # stored, not drawn).
+            if link_kind in _POWER_KINDS:
                 arrows: dict = {
                     "to": {"enabled": False},
                     "from": {"enabled": False},
@@ -485,7 +492,7 @@ def _vis_edges_from_digraph(
         else:
             color = topology_color(link_kind)
             label = formal_topology_label(link_kind) or link_kind
-            if link_kind == TOPOLOGY_POWER:
+            if link_kind in _POWER_KINDS:
                 # Power supply: no arrowheads (bidirectional by nature).
                 arrows = {"to": {"enabled": False}, "from": {"enabled": False}}
                 width = 1.5
@@ -825,7 +832,9 @@ def render_draggable_bus_topology(
     <div class="legend">
       <span class="swatch" style="background:{COLOR_LRU}"></span> LRU
       &nbsp;&nbsp;
-      <span class="swatch" style="background:{COLOR_BUS_POWER}"></span> Power
+      <span class="swatch" style="background:{COLOR_BUS_LOW_POWER}"></span> Low Power
+      &nbsp;&nbsp;
+      <span class="swatch" style="background:{COLOR_BUS_HIGH_POWER}"></span> High Power
       &nbsp;&nbsp;
       <span class="swatch" style="background:{COLOR_BUS_ANALOG}"></span> Analog
       &nbsp;&nbsp;

@@ -10,14 +10,23 @@ from visualizer.components.topology_page import render_draggable_bus_topology
 from visualizer.data.loader import IcdBundle
 from visualizer.data.models import (
     BUS_DEFINITION,
+    BUS_NAME,
+    PROTOCOL,
+    TOPOLOGY,
     TOPOLOGY_ANALOG,
     TOPOLOGY_DISCRETE,
-    TOPOLOGY_POWER,
+    TOPOLOGY_HIGH_POWER,
+    TOPOLOGY_LOW_POWER,
     TOPOLOGY_SHARED,
     TOPOLOGY_UNIDIRECTIONAL,
 )
 
-_INTERFACE_KINDS = {TOPOLOGY_ANALOG, TOPOLOGY_DISCRETE, TOPOLOGY_POWER}
+_INTERFACE_KINDS = {
+    TOPOLOGY_ANALOG,
+    TOPOLOGY_DISCRETE,
+    TOPOLOGY_LOW_POWER,
+    TOPOLOGY_HIGH_POWER,
+}
 _DIGITAL_KINDS = {TOPOLOGY_UNIDIRECTIONAL, TOPOLOGY_SHARED}
 _LINK_KINDS = _INTERFACE_KINDS | _DIGITAL_KINDS
 
@@ -98,7 +107,8 @@ def _filter_link_kinds(
     show_shared: bool,
     show_analog: bool,
     show_discrete: bool,
-    show_power: bool,
+    show_low_power: bool,
+    show_high_power: bool,
 ) -> pd.DataFrame:
     """Keep only edges whose link_kind is enabled by the layer toggles."""
     if edges.empty or "link_kind" not in edges.columns:
@@ -112,8 +122,10 @@ def _filter_link_kinds(
         allowed.add(TOPOLOGY_ANALOG)
     if show_discrete:
         allowed.add(TOPOLOGY_DISCRETE)
-    if show_power:
-        allowed.add(TOPOLOGY_POWER)
+    if show_low_power:
+        allowed.add(TOPOLOGY_LOW_POWER)
+    if show_high_power:
+        allowed.add(TOPOLOGY_HIGH_POWER)
     kinds = edges["link_kind"].astype(str)
     # Unknown / empty kinds stay visible only when at least one digital layer is on.
     known = kinds.isin(_LINK_KINDS)
@@ -130,7 +142,7 @@ def _lru_neighbors_one_hop(
 ) -> list[str]:
     """Expand selection with LRUs one hop away on the filtered graph.
 
-    A hop is either a direct LRU↔LRU edge (Analog/Discrete/Power) or an
+    A hop is either a direct hardwired LRU↔LRU edge or an
     LRU–bus–LRU path on a databus.
     """
     selected = {str(x).strip() for x in selected_lrus if str(x).strip()}
@@ -196,7 +208,8 @@ def render(bundle: IcdBundle) -> None:
     if generic:
         st.caption(
             "Generic map: one node per Bus Definition; LRUs are bare acronyms "
-            "(PACK, BMU, EPECS, …). Analog / Discrete / Power are direct colored "
+            "(PACK, BMU, EPECS, …). Analog / Discrete / Low Power / High Power are "
+            "direct colored "
             "LRU↔LRU links (no hub box). Buses stay pinned; drag one bus — "
             "LRUs re-settle."
         )
@@ -214,15 +227,16 @@ def render(bundle: IcdBundle) -> None:
     else:
         st.caption(
             "Full network: exhaustive bus and LRU instances from Sender/Receiver. "
-            "Orange = LRU · link colors: Power red · Analog brown · Discrete orange · "
-            "Digital mono blue · Digital shared purple. Analog/Discrete/Power are "
+            "Orange = LRU · link colors: Low Power light red · High Power dark red · "
+            "Analog brown · Discrete orange · Digital mono blue · "
+            "Digital shared purple. Hardwired links are "
             "direct LRU↔LRU links (databus boxes only). "
             "Buses stay pinned; drag one bus at a time — connected LRUs re-settle."
         )
         nodes = bundle.graph_nodes
         edges = bundle.graph_edges
 
-    c_m, c_s, c_a, c_d, c_p = st.columns(5)
+    c_m, c_s, c_a, c_d, c_lp, c_hp = st.columns(6)
     with c_m:
         show_mono = st.checkbox(
             "Digital mono",
@@ -251,12 +265,25 @@ def render(bundle: IcdBundle) -> None:
             key="topo_show_discrete",
             help="Show direct Discrete links from 1_Signals (Interfacing Equipment ≠ Owner).",
         )
-    with c_p:
-        show_power = st.checkbox(
-            "Power",
+    with c_lp:
+        show_low_power = st.checkbox(
+            "Low Power",
             value=False,
-            key="topo_show_power",
-            help="Show direct Power links from 1_Signals (Interfacing Equipment ≠ Owner).",
+            key="topo_show_low_power",
+            help=(
+                "Show direct Low Power (28 V supply network) links from 1_Signals "
+                "(Interfacing Equipment ≠ Owner)."
+            ),
+        )
+    with c_hp:
+        show_high_power = st.checkbox(
+            "High Power",
+            value=False,
+            key="topo_show_high_power",
+            help=(
+                "Show direct High Power (800 V traction network) links from "
+                "1_Signals (Interfacing Equipment ≠ Owner)."
+            ),
         )
 
     families = _bus_families(bundle.buses)
@@ -280,7 +307,8 @@ def render(bundle: IcdBundle) -> None:
         show_shared=show_shared,
         show_analog=show_analog,
         show_discrete=show_discrete,
-        show_power=show_power,
+        show_low_power=show_low_power,
+        show_high_power=show_high_power,
     )
     # Nodes follow visible edges — toggling layers re-evaluates buses and LRUs.
     plot_nodes = _nodes_touched_by_edges(nodes, plot_edges)
@@ -299,10 +327,11 @@ def render(bundle: IcdBundle) -> None:
     ) if not plot_nodes.empty and "kind" in plot_nodes.columns else []
 
     # Include layer toggles in widget keys so Bus/LRU multiselects reset to the
-    # newly visible set whenever Analog/Discrete/Power/Digital filters change.
+    # newly visible set whenever any layer filter changes.
     layer_key = (
         f"m{int(show_mono)}s{int(show_shared)}"
-        f"a{int(show_analog)}d{int(show_discrete)}p{int(show_power)}"
+        f"a{int(show_analog)}d{int(show_discrete)}"
+        f"lp{int(show_low_power)}hp{int(show_high_power)}"
     )
 
     with st.expander("Filter nodes on diagram", expanded=False):
@@ -336,7 +365,7 @@ def render(bundle: IcdBundle) -> None:
                 key=f"topo_add_linked_lrus_{view}_{family}_{layer_key}",
                 help=(
                     "Add LRUs directly linked to the current selection on the "
-                    "filtered graph: Analog/Discrete/Power edges, or other LRUs "
+                    "filtered graph: hardwired edges, or other LRUs "
                     "on the same visible databus (LRU–bus–LRU)."
                 ),
                 disabled=not selected_lrus or not lru_options,
@@ -391,13 +420,13 @@ def render(bundle: IcdBundle) -> None:
                 .agg(
                     instances=("Bus Id", "count"),
                     protocols=(
-                        "protocol",
+                        PROTOCOL,
                         lambda s: "; ".join(
                             sorted({str(x) for x in s if str(x).strip()})
                         ),
                     ),
                     topologies=(
-                        "topology",
+                        TOPOLOGY,
                         lambda s: "; ".join(sorted({str(x) for x in s if str(x).strip()})),
                     ),
                 )
@@ -417,11 +446,11 @@ def render(bundle: IcdBundle) -> None:
                     c
                     for c in [
                         "Bus Id",
-                        "name",
+                        BUS_NAME,
                         "Bus Definition",
                         "Bus description",
-                        "protocol",
-                        "topology",
+                        PROTOCOL,
+                        TOPOLOGY,
                         "Sender",
                         "Receiver",
                     ]

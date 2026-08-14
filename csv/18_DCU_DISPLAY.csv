@@ -1,1 +1,1 @@
-﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,Instance dimension,Signal Id,Message ID,Label,Start bit,Stop bit,Encoding,Unit,Scale,Resolution,Minimum,Maximum,Refresh period (ms),Validity,Notes,On aircraft ?,On FND ?,On Sim ?

@@ -1,4 +1,4 @@
-﻿Bus Id,name,Bus Definition,Bus description,protocol,speed,topology,Sender,Receiver,On aircraft ?,On FND ?,On Sim ?
+﻿Bus Id,Bus name,Bus Definition,Bus description,Protocol,Speed,Topology,Sender,Receiver,On aircraft ?,On FND ?,On Sim ?
 ICM_1_TX,ICM acquisition bus 1,ICM_FCS,Pilot-control acquisition and FCC exchange,RS485,1Mbit/s,Shared,ICM-1,FCC-1;FCC-2;FCC-3;BPM,TBD,TBD,TBD
 ICM_2_TX,ICM acquisition bus 2,ICM_FCS,Pilot-control acquisition and FCC exchange,RS485,1Mbit/s,Shared,ICM-2,FCC-1;FCC-2;FCC-3;BPM,TBD,TBD,TBD
 ICM_3_TX,ICM acquisition bus 3,ICM_FCS,Pilot-control acquisition and FCC exchange,RS485,1Mbit/s,Shared,ICM-3,FCC-1;FCC-2;FCC-3;BPM,TBD,TBD,TBD

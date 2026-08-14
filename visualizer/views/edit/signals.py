@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pandas as pd
 import streamlit as st
 
 from visualizer.components.filters import apply_text_search
@@ -12,7 +11,6 @@ from visualizer.components.selectors import (
     labeled_acronym_select,
     labeled_multi_acronym,
     labeled_multi_select,
-    labeled_select,
     system_acronym_labels,
     table_select_id,
 )
@@ -22,20 +20,19 @@ from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import render_apply_panel, sync_fields
 
 EDITABLE_FIELDS = [
-    "Physical Id",
+    "Same quantity as",
     "Signal Name",
     "Signal Role",
     "Abbreviation",
     "Interfacing Equipment",
     "Signal Owner",
     "Repeated Per",
-    "Related to",
     "Connection Type",
     "Interface Type",
     "Unit",
     "Functional Minimum",
     "Functional Maximum",
-    "Derivation",
+    "Computed from",
     "Notes",
     "On aircraft ?",
     "On FND ?",
@@ -44,35 +41,13 @@ EDITABLE_FIELDS = [
 _SEP = " — "
 
 
-def _physical_id_labels(
-    signals: pd.DataFrame,
-) -> tuple[list[str], dict[str, str]]:
-    """Unique Physical Id options labeled ``Id — Signal Name``."""
-    labels: list[str] = []
-    label_to_id: dict[str, str] = {}
-    if signals.empty or "Physical Id" not in signals.columns:
-        return labels, label_to_id
-    seen: set[str] = set()
-    for _, row in signals.iterrows():
-        pid = str(row.get("Physical Id") or "").strip()
-        if not pid or pid in seen:
-            continue
-        seen.add(pid)
-        name = str(row.get("Signal Name") or "").strip()
-        label = f"{pid}{_SEP}{name}" if name else pid
-        labels.append(label)
-        label_to_id[label] = pid
-    labels.sort()
-    return labels, label_to_id
-
-
 def render(bundle: IcdBundle) -> None:
     sheet = bundle.signals_sheet
     st.subheader(f"Signals (`{sheet}`)")
     st.caption(
         "Canonical signal catalog. Bus allocations reference these rows via "
-        "`signal_id`. `Physical Id` is optional: use it only when two or more "
-        "signals share the same physical meaning; leave blank otherwise."
+        "`signal_id`. `Same quantity as` is optional: use it only when two or "
+        "more rows observe the same real-world quantity; leave blank otherwise."
     )
     signals = bundle.signals
     q = st.text_input("Search signals", key="edit_sig_q")
@@ -83,7 +58,7 @@ def render(bundle: IcdBundle) -> None:
             SIGNAL_ID,
             "Signal Name",
             "Abbreviation",
-            "Physical Id",
+            "Same quantity as",
             "Interfacing Equipment",
             "Signal Owner",
             "Signal Role",
@@ -103,7 +78,6 @@ def render(bundle: IcdBundle) -> None:
 
     # Repeated Per picks from the same system list, so build the labels once.
     sys_labels, sys_map = system_acronym_labels(bundle.systems)
-    phys_labels, phys_map = _physical_id_labels(signals)
     _, sig_map = id_name_labels(signals, SIGNAL_ID, "Signal Name")
 
     action = st.radio(
@@ -127,7 +101,8 @@ def render(bundle: IcdBundle) -> None:
         "Mode", ["Edit existing", "Add new"], horizontal=True, key="edit_sig_mode"
     )
     original: dict = {}
-    current_related: list[str] = []
+    current_inputs: list[str] = []
+    current_same: list[str] = []
 
     if mode == "Edit existing":
         if not sid:
@@ -145,16 +120,20 @@ def render(bundle: IcdBundle) -> None:
         phys = str(original.get("Interfacing Equipment") or "").strip()
         repeated = split_refs(original.get("Repeated Per", ""))
         known_signal_ids = set(sig_map.values())
-        current_related = [
+        current_inputs = [
             ref
-            for ref in split_refs(original.get("Related to", ""))
+            for ref in split_refs(original.get("Computed from", ""))
             if ref in known_signal_ids and ref != sid
         ]
-        phys_id_val = str(original.get("Physical Id") or "").strip()
-        phys_to_lab = {v: lab for lab, v in phys_map.items()}
-        related_labels = [
-            lab for lab, rid in sig_map.items() if rid in current_related
+        current_same = [
+            ref
+            for ref in split_refs(original.get("Same quantity as", ""))
+            if ref in known_signal_ids and ref != sid
         ]
+        computed_labels = [
+            lab for lab, rid in sig_map.items() if rid in current_inputs
+        ]
+        same_labels = [lab for lab, rid in sig_map.items() if rid in current_same]
         sync_fields(
             "edit_sig",
             sid,
@@ -162,17 +141,16 @@ def render(bundle: IcdBundle) -> None:
                 "edit_sig_name": original.get("Signal Name", ""),
                 "edit_sig_role": original.get("Signal Role", "") or "",
                 "edit_sig_abbr": original.get("Abbreviation", ""),
-                "edit_sig_phys_label": phys_to_lab.get(phys_id_val, ""),
+                "edit_sig_same": same_labels,
                 "edit_sig_owner_label": acr_to_lab.get(owner, ""),
                 "edit_sig_psys_label": acr_to_lab.get(phys, ""),
                 "edit_sig_rep": [acr_to_lab[a] for a in repeated if a in acr_to_lab],
-                "edit_sig_related": related_labels,
+                "edit_sig_computed": computed_labels,
                 "edit_sig_conn": original.get("Connection Type", ""),
                 "edit_sig_iface": original.get("Interface Type", ""),
                 "edit_sig_unit": original.get("Unit", ""),
                 "edit_sig_min": original.get("Functional Minimum", ""),
                 "edit_sig_max": original.get("Functional Maximum", ""),
-                "edit_sig_deriv": original.get("Derivation", ""),
                 "edit_sig_notes": original.get("Notes", ""),
                 "edit_sig_ac": original.get("On aircraft ?", ""),
                 "edit_sig_fnd": original.get("On FND ?", ""),
@@ -188,17 +166,16 @@ def render(bundle: IcdBundle) -> None:
                 "edit_sig_name": "",
                 "edit_sig_role": "",
                 "edit_sig_abbr": "",
-                "edit_sig_phys_label": "",
+                "edit_sig_same": [],
                 "edit_sig_owner_label": "",
                 "edit_sig_psys_label": "",
                 "edit_sig_rep": [],
-                "edit_sig_related": [],
+                "edit_sig_computed": [],
                 "edit_sig_conn": "",
                 "edit_sig_iface": "",
                 "edit_sig_unit": "",
                 "edit_sig_min": "",
                 "edit_sig_max": "",
-                "edit_sig_deriv": "",
                 "edit_sig_notes": "",
                 "edit_sig_ac": "",
                 "edit_sig_fnd": "",
@@ -207,7 +184,7 @@ def render(bundle: IcdBundle) -> None:
         )
 
     name = st.text_input("Signal Name", key="edit_sig_name")
-    role_col, abbr_col, pid_col = st.columns(3)
+    role_col, abbr_col = st.columns(2)
     with role_col:
         role_opts = list(SIGNAL_ROLES)
         current_role = st.session_state.get("edit_sig_role", "")
@@ -220,16 +197,6 @@ def render(bundle: IcdBundle) -> None:
         )
     with abbr_col:
         abbr = st.text_input("Abbreviation", key="edit_sig_abbr")
-    with pid_col:
-        phys_id = labeled_select(
-            "Physical Id (only if shared)",
-            phys_labels,
-            phys_map,
-            key="edit_sig_phys",
-            current=str(original.get("Physical Id") or "")
-            if mode == "Edit existing" and original
-            else "",
-        )
 
     owner_col, psys_col = st.columns(2)
     with owner_col:
@@ -271,14 +238,23 @@ def render(bundle: IcdBundle) -> None:
         if not (mode == "Edit existing" and sid and rid == sid)
     ]
     related_map = {lab: sig_map[lab] for lab in related_options}
-    related_ids = labeled_multi_select(
-        "Related to signals (semicolon list)",
+    computed_ids = labeled_multi_select(
+        "Computed from (signals this value is produced from)",
         related_options,
         related_map,
-        key="edit_sig_related",
-        current=current_related if mode == "Edit existing" else [],
+        key="edit_sig_computed",
+        current=current_inputs if mode == "Edit existing" else [],
     )
-    related = ";".join(related_ids)
+    derivation = ";".join(computed_ids)
+
+    same_ids = labeled_multi_select(
+        "Same quantity as (rows observing this same real-world quantity)",
+        related_options,
+        related_map,
+        key="edit_sig_same",
+        current=current_same if mode == "Edit existing" else [],
+    )
+    same_quantity = ";".join(same_ids)
 
     conn_col, iface_col = st.columns(2)
     with conn_col:
@@ -304,7 +280,6 @@ def render(bundle: IcdBundle) -> None:
         minimum = st.text_input("Functional Minimum", key="edit_sig_min")
     with max_col:
         maximum = st.text_input("Functional Maximum", key="edit_sig_max")
-    derivation = st.text_input("Derivation", key="edit_sig_deriv")
     notes = st.text_area("Notes", key="edit_sig_notes")
     ac_col, fnd_col, sim_col = st.columns(3)
     with ac_col:
@@ -315,20 +290,19 @@ def render(bundle: IcdBundle) -> None:
         on_sim = st.text_input("On Sim ?", key="edit_sig_sim")
 
     edited = {
-        "Physical Id": phys_id,
+        "Same quantity as": same_quantity,
         "Signal Name": name,
         "Signal Role": role,
         "Abbreviation": abbr,
         "Interfacing Equipment": phys_sys,
         "Signal Owner": owner,
         "Repeated Per": ";".join(repeated),
-        "Related to": related,
         "Connection Type": conn,
         "Interface Type": iface,
         "Unit": unit,
         "Functional Minimum": minimum,
         "Functional Maximum": maximum,
-        "Derivation": derivation,
+        "Computed from": derivation,
         "Notes": notes,
         "On aircraft ?": on_ac,
         "On FND ?": on_fnd,

@@ -12,10 +12,13 @@ from icd_instances import SystemTree
 from icd_paths import DEFAULT_CSV_DIR
 from icd_sheets import (
     BUS_DEFINITION,
+    BUS_NAME,
     BUS_ROLES_FROM_OWNER,
+    TOPOLOGY,
     TOPOLOGY_ANALOG,
     TOPOLOGY_DISCRETE,
-    TOPOLOGY_POWER,
+    TOPOLOGY_HIGH_POWER,
+    TOPOLOGY_LOW_POWER,
     TOPOLOGY_SHARED,
     TOPOLOGY_UNIDIRECTIONAL,
     normalize_bus_topology,
@@ -28,6 +31,11 @@ from visualizer.data.models import (
     SENDER,
     SIGNAL_ID,
     SYSTEMS_SHEET,
+)
+
+# Interface Type kinds drawn as direct LRU-to-LRU links, not via a bus node.
+_HARDWIRED_KINDS = frozenset(
+    {TOPOLOGY_ANALOG, TOPOLOGY_DISCRETE, TOPOLOGY_LOW_POWER, TOPOLOGY_HIGH_POWER}
 )
 
 
@@ -104,11 +112,6 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
 
     if not bus_payload.empty and not signals.empty and SIGNAL_ID in signals.columns:
         signal_index = signals.set_index(SIGNAL_ID)
-        phys_map = (
-            signal_index["Physical Id"].to_dict()
-            if "Physical Id" in signal_index.columns
-            else {}
-        )
         owner_map = (
             signal_index["Signal Owner"].to_dict()
             if "Signal Owner" in signal_index.columns
@@ -119,10 +122,6 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
             if "Signal Role" in signal_index.columns
             else {}
         )
-
-        def derive_physical(row: pd.Series) -> str:
-            sid = str(row.get(SIGNAL_ID) or "").strip()
-            return str(phys_map.get(sid, "") or "")
 
         def hop_role(row: pd.Series) -> str:
             sid = str(row.get(SIGNAL_ID) or "").strip()
@@ -152,7 +151,6 @@ def load_icd(mtime_key: str = "", csv_dir: Path | None = None) -> IcdBundle:
             return "other"
 
         bus_payload = bus_payload.copy()
-        bus_payload["derived_physical_id"] = bus_payload.apply(derive_physical, axis=1)
         bus_payload["hop_role"] = bus_payload.apply(hop_role, axis=1)
 
     graph_nodes, graph_edges = _build_graph(buses, bus_payload, signals, systems)
@@ -321,7 +319,10 @@ def _add_interface_links_from_signals(
     instantiate: bool,
     systems: pd.DataFrame | None = None,
 ) -> None:
-    """Add Analog / Discrete / Power links when Interfacing Equipment ≠ Signal Owner."""
+    """Add hardwired links when Interfacing Equipment ≠ Signal Owner.
+
+    Covers Analog, Discrete, Low Power and High Power interface types.
+    """
     if signals.empty:
         return
     for col in ("Interfacing Equipment", "Signal Owner", "Interface Type"):
@@ -383,7 +384,7 @@ def _add_interface_links_from_signals(
 
     for _, row in signals.iterrows():
         iface = normalize_bus_topology(row.get("Interface Type"))
-        if iface not in {TOPOLOGY_ANALOG, TOPOLOGY_DISCRETE, TOPOLOGY_POWER}:
+        if iface not in _HARDWIRED_KINDS:
             continue
         physical = str(row.get("Interfacing Equipment") or "").strip()
         owner = str(row.get("Signal Owner") or "").strip()
@@ -400,6 +401,13 @@ def _add_interface_links_from_signals(
                 existing_lrus, owner, tree=tree
             )
         else:
+            # Generic view: one node per system. A row naming instances
+            # (LVPDU-2 → EMC-4-1) collapses onto its bare acronyms, and
+            # seen_edges then folds the per-instance rows into one edge.
+            physical = _base_acronym(physical)
+            owner = _base_acronym(owner)
+            if physical == owner:
+                continue
             phys_tokens = [physical]
             owner_tokens = [owner]
 
@@ -416,7 +424,8 @@ def _add_interface_links_from_signals(
             left_tokens, right_tokens, left_acr, right_acr
         )
         for writer, receiver in pairs:
-            # Direct LRU↔LRU edge — color carries Analog/Discrete/Power; no hub node.
+            # Direct LRU↔LRU edge — the color carries the interface kind;
+            # no hub node.
             add_node(writer, "lru")
             add_node(receiver, "lru")
             add_edge(
@@ -487,7 +496,8 @@ def _build_generic_graph(
     """One node per Bus Definition; bare (non-instantiated) LRU acronyms.
 
     Sender/Receiver endpoints are collapsed to system acronyms. Analog /
-    Discrete / Power links are direct LRU↔LRU edges between those acronyms.
+    Discrete / Low Power / High Power links are direct LRU↔LRU edges
+    between those acronyms.
     """
     _ = systems
     nodes: dict[str, dict[str, str]] = {}
@@ -543,7 +553,7 @@ def _build_generic_graph(
                 continue
             writers = [_base_acronym(w) for w in _split_ids(row.get(SENDER))]
             receivers = [_base_acronym(r) for r in _split_ids(row.get(RECEIVER))]
-            mode = classify_bus_mode(row.get("topology"), writers, receivers)
+            mode = classify_bus_mode(row.get(TOPOLOGY), writers, receivers)
             add_node(family, "bus", family, bus_mode=mode, family=family)
 
     if not bus_payload.empty:
@@ -599,7 +609,8 @@ def classify_bus_mode(
         TOPOLOGY_SHARED,
         TOPOLOGY_ANALOG,
         TOPOLOGY_DISCRETE,
-        TOPOLOGY_POWER,
+        TOPOLOGY_LOW_POWER,
+        TOPOLOGY_HIGH_POWER,
     }:
         return key
     writer_set = set(writers)
@@ -653,11 +664,11 @@ def _build_graph(
             writers = _split_ids(row.get(SENDER))
             receivers = _split_ids(row.get(RECEIVER))
             family = str(row.get(BUS_DEFINITION) or "").strip()
-            mode = classify_bus_mode(row.get("topology"), writers, receivers)
+            mode = classify_bus_mode(row.get(TOPOLOGY), writers, receivers)
             add_node(
                 bus_id,
                 "bus",
-                str(row.get("name") or bus_id),
+                str(row.get(BUS_NAME) or bus_id),
                 bus_mode=mode,
                 family=family,
             )

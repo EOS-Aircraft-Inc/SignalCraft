@@ -17,9 +17,30 @@ from visualizer.components.selectors import table_select_id
 from visualizer.components.tables import show_dataframe
 from visualizer.data.dataflow import build_dataflow
 from visualizer.data.loader import IcdBundle, payloads_for_signal
-from visualizer.data.models import ALLOCATION_ID, SIGNAL_ID
+from visualizer.data.models import (
+    ALLOCATION_ID,
+    INSTANCE_DIMENSION,
+    SIGNAL_ID,
+)
 
 _SIGNAL_ROLE = "Signal Role"
+
+# Columns shown in the Signals table. Membership only — the order comes from
+# 1_Signals itself, so the table reads like the sheet.
+_TABLE_COLUMNS = frozenset(
+    {
+        SIGNAL_ID,
+        "Signal Name",
+        _SIGNAL_ROLE,
+        "Abbreviation",
+        "Interfacing Equipment",
+        "Signal Owner",
+        "Repeated Per",
+        "Same quantity as",
+        "Computed from",
+        "Interface Type",
+    }
+)
 
 _HOP_ROLE_ORDER = {
     "origin": 0,
@@ -91,7 +112,7 @@ def render(bundle: IcdBundle) -> None:
             SIGNAL_ID,
             "Signal Name",
             "Abbreviation",
-            "Physical Id",
+            "Same quantity as",
             "Interfacing Equipment",
             "Signal Owner",
             "Signal Role",
@@ -99,20 +120,9 @@ def render(bundle: IcdBundle) -> None:
         ],
     )
 
-    table_cols = [
-        c
-        for c in [
-            SIGNAL_ID,
-            "Signal Name",
-            "Signal Role",
-            "Physical Id",
-            "Interfacing Equipment",
-            "Signal Owner",
-            "Repeated Per",
-            "Abbreviation",
-        ]
-        if c in work.columns
-    ]
+    # Ordered by the sheet, not by this list, so the table always reads like
+    # 1_Signals — reordering a column there reorders it here.
+    table_cols = [c for c in work.columns if c in _TABLE_COLUMNS]
 
     st.subheader("Signals")
     st.caption(f"Click a row for details — {len(work)} of {len(bundle.signals)} signals.")
@@ -140,11 +150,11 @@ def render(bundle: IcdBundle) -> None:
     row = srow.iloc[0]
     st.write(row.get("Signal Name", ""))
     st.caption(
-        f"{row.get('Signal Role', '')} · Physical `{row.get('Physical Id', '')}` · "
+        f"{row.get('Signal Role', '')} · "
         f"{row.get('Interfacing Equipment', '')} ↔ {row.get('Signal Owner', '')}"
     )
-    if str(row.get("Related to") or "").strip():
-        st.write(f"Related to: `{row.get('Related to')}`")
+    if str(row.get("Computed from") or "").strip():
+        st.write(f"Computed from: `{row.get('Computed from')}`")
     if str(row.get("Notes") or "").strip():
         st.write(row.get("Notes", ""))
 
@@ -153,8 +163,8 @@ def render(bundle: IcdBundle) -> None:
     relatives = [s for s in flow.signal_ids if s != selected]
     if relatives:
         st.caption(
-            "Dotted legs come from signals merged in via `Related to` / "
-            f"`Physical Id`: {', '.join(relatives)}"
+            f"Dotted legs come from signals declared as the same quantity: "
+            f"{', '.join(relatives)}"
         )
     st.plotly_chart(signal_dataflow_figure(flow), width="stretch")
 
@@ -173,7 +183,7 @@ def render(bundle: IcdBundle) -> None:
                         "Data name",
                         "Sender",
                         "Receiver",
-                        "instance_dimension",
+                        INSTANCE_DIMENSION,
                         "Signal Id",
                         "hop_role",
                     ]

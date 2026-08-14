@@ -1,6 +1,8 @@
 # SignalCraft — maintaining the tool
 
 User needs [`README.md`](README.md) instead — nothing here.
+Model rules, invariants and silent failure modes:
+[`DECISIONS.md`](DECISIONS.md).
 
 ## Where things live
 

@@ -11,7 +11,23 @@ from visualizer.components.selectors import labeled_select
 from visualizer.components.tables import show_dataframe
 from visualizer.data.bus_instances import build_bus_instance_graph
 from visualizer.data.loader import IcdBundle
-from visualizer.data.models import ALLOCATION_ID, BUS_DEFINITION, SIGNAL_ID
+from visualizer.data.models import (
+    ALLOCATION_ID,
+    BUS_DEFINITION,
+    BUS_NAME,
+    ENCODING,
+    INSTANCE_DIMENSION,
+    MESSAGE_ID,
+    NOTES,
+    PROTOCOL,
+    REFRESH_PERIOD_MS,
+    SIGNAL_ID,
+    SPEED,
+    START_BIT,
+    STOP_BIT,
+    TOPOLOGY,
+    UNIT,
+)
 
 
 def _definition_column(buses: pd.DataFrame) -> str:
@@ -34,12 +50,12 @@ def _generic_bus_summary(buses: pd.DataFrame, payload: pd.DataFrame) -> pd.DataF
         agg["instances"] = ("Bus Id", "count")
     else:
         agg["instances"] = (col, "count")
-    if "protocol" in buses.columns:
-        agg["protocols"] = ("protocol", _join_unique)
-    if "topology" in buses.columns:
-        agg["topologies"] = ("topology", _join_unique)
-    if "name" in buses.columns:
-        agg["names"] = ("name", _join_unique)
+    if PROTOCOL in buses.columns:
+        agg["protocols"] = (PROTOCOL, _join_unique)
+    if TOPOLOGY in buses.columns:
+        agg["topologies"] = (TOPOLOGY, _join_unique)
+    if BUS_NAME in buses.columns:
+        agg["names"] = (BUS_NAME, _join_unique)
 
     summary = (
         buses.groupby(col, dropna=False)
@@ -183,11 +199,11 @@ def _render_selection(bundle: IcdBundle, summary: pd.DataFrame, selected: str) -
                 c
                 for c in [
                     "Bus Id",
-                    "name",
+                    BUS_NAME,
                     "Bus description",
-                    "protocol",
-                    "speed",
-                    "topology",
+                    PROTOCOL,
+                    SPEED,
+                    TOPOLOGY,
                     "Sender",
                     "Receiver",
                 ]
@@ -216,16 +232,16 @@ def _render_selection(bundle: IcdBundle, summary: pd.DataFrame, selected: str) -
                     "Signal Role",
                     "Sender",
                     "Receiver",
-                    "instance_dimension",
-                    "Message ID",
+                    INSTANCE_DIMENSION,
+                    MESSAGE_ID,
                     "Label",
-                    "start bit",
-                    "stop bit",
-                    "encoding",
-                    "unit",
-                    "Refresh rate",
+                    START_BIT,
+                    STOP_BIT,
+                    ENCODING,
+                    UNIT,
+                    REFRESH_PERIOD_MS,
                     "hop_role",
-                    "notes",
+                    NOTES,
                 ]
                 if c in enriched.columns
             ]

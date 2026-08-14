@@ -16,10 +16,14 @@ import pandas as pd
 from visualizer.data.models import (
     BUS_DEFINITION,
     BUS_ID,
+    BUS_NAME,
+    PROTOCOL,
     RECEIVER,
     SENDER,
+    SPEED,
     SYSTEM_TEXTUAL_NAME,
     SYSTEM_UNIQUE_ID,
+    TOPOLOGY,
     split_refs,
 )
 
@@ -105,7 +109,7 @@ def build_bus_instance_graph(
     cursor = 0.0
 
     for _, bus in matching.iterrows():
-        bus_id = _clean(bus.get(BUS_ID)) or _clean(bus.get("name")) or target
+        bus_id = _clean(bus.get(BUS_ID)) or _clean(bus.get(BUS_NAME)) or target
         instances.append(bus_id)
         writers = set(split_refs(bus.get(SENDER)))
         receivers = set(split_refs(bus.get(RECEIVER)))
@@ -131,13 +135,13 @@ def build_bus_instance_graph(
                     part
                     for part in [
                         bus_id,
-                        _clean(bus.get("name")),
+                        _clean(bus.get(BUS_NAME)),
                         " · ".join(
                             value
                             for value in [
-                                _clean(bus.get("protocol")),
-                                _clean(bus.get("speed")),
-                                _clean(bus.get("topology")),
+                                _clean(bus.get(PROTOCOL)),
+                                _clean(bus.get(SPEED)),
+                                _clean(bus.get(TOPOLOGY)),
                             ]
                             if value
                         ),

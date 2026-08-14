@@ -1,4 +1,4 @@
-﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
-DBUS-ADC-001,True airspeed,ADC,FCC;DCU,,SIG-069,TBD,TBD,TBD,TBD,BNR,kt,,,,,50,"Sign / status matrix in the word, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ADC-002,Calibrated airspeed,ADC,FCC;DCU,,SIG-115,TBD,TBD,TBD,TBD,BNR,kt,,,,,50,"Sign / status matrix in the word, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ADC-003,Air data environmental conditions,ADC,FCC;DCU,,SIG-127,TBD,TBD,TBD,TBD,TBD,,,,,,50,"Sign / status matrix in the word, plus receiver freshness timeout",Direct ADC-to-FCC path for the air data part of the environmental picture; the weather part reaches the FCC from the DCU on the avionics backbone.,TBD,TBD,TBD
+﻿Allocation Id,Data name,Sender,Receiver,Instance dimension,Signal Id,Message ID,Label,Start bit,Stop bit,Encoding,Unit,Scale,Resolution,Minimum,Maximum,Refresh period (ms),Validity,Notes,On aircraft ?,On FND ?,On Sim ?
+DBUS-ADC-001,True airspeed,ADC,FCC;DCU,,SIG-066,TBD,TBD,TBD,TBD,BNR,kt,,,,,50,"Sign / status matrix in the word, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ADC-002,Calibrated airspeed,ADC,FCC;DCU,,SIG-107,TBD,TBD,TBD,TBD,BNR,kt,,,,,50,"Sign / status matrix in the word, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ADC-003,Air data environmental conditions,ADC,FCC;DCU,,SIG-117,TBD,TBD,TBD,TBD,TBD,,,,,,50,"Sign / status matrix in the word, plus receiver freshness timeout",Direct ADC-to-FCC path for the air data part of the environmental picture; the weather part reaches the FCC from the DCU on the avionics backbone.,TBD,TBD,TBD

@@ -1,24 +1,24 @@
-﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,Instance dimension,Signal Id,Message ID,Label,Start bit,Stop bit,Encoding,Unit,Scale,Resolution,Minimum,Maximum,Refresh period (ms),Validity,Notes,On aircraft ?,On FND ?,On Sim ?
 DBUS-FCS-001,Power Lever RVDT,FCC,FCC,,SIG-007,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
-DBUS-FCS-001-B,Power Lever Potentiometer,FCC,FCC,,SIG-010,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
-DBUS-FCS-001-C,Power Lever Idle Proximity,FCC,FCC,,SIG-011,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
-DBUS-FCS-002,Autothrust command,FCC,FCC,,SIG-135,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
-DBUS-010,Per-nacelle power allocation,FCC,HICU,,SIG-116,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-011,Turbine torque target,FCC,HICU,,SIG-093,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-012,Electric motor torque target,FCC,HICU,EM-{n},SIG-070,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",One target per motor.,TBD,TBD,TBD
-DBUS-014,Propeller speed target,FCC,HICU,,SIG-097,TBD,TBD,TBD,TBD,BNR,rpm,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-FCS-001-B,Power Lever Potentiometer,FCC,FCC,,SIG-008,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
+DBUS-FCS-001-C,Power Lever Idle Proximity,FCC,FCC,,SIG-009,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
+DBUS-FCS-002,Autothrust command,FCC,FCC,,SIG-124,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Shared inter-FCC bus: individual FCC LRUs can transmit and receive,TBD,TBD,TBD
+DBUS-010,Per-nacelle power allocation,FCC,HICU,,SIG-108,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-011,Turbine torque target,FCC,HICU,,SIG-090,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-012,Electric motor torque target,FCC,HICU,EM-{n},SIG-067,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",One target per motor.,TBD,TBD,TBD
+DBUS-014,Propeller speed target,FCC,HICU,,SIG-091,TBD,TBD,TBD,TBD,BNR,rpm,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
 DBUS-066,Power Lever RVDT,FCC,HICU,,SIG-007,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-066-B,Power Lever Potentiometer,FCC,HICU,,SIG-010,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-066-C,Power Lever Idle Proximity,FCC,HICU,,SIG-011,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-067,Power Lever at Idle,FCC,HICU,,SIG-011,TBD,TBD,TBD,TBD,DISCRETE,N/A,N/A,N/A,,,10,"Frame checksum, plus receiver freshness timeout",Discrete signal to validate throttle lever at Idle,TBD,TBD,TBD
-DBUS-068,TOGA activation,FCC,HICU,,SIG-117,TBD,TBD,TBD,TBD,DISCRETE,N/A,N/A,N/A,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-015,Nacelle status and available power,HICU,FCC,,SIG-118,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-066-B,Power Lever Potentiometer,FCC,HICU,,SIG-008,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-066-C,Power Lever Idle Proximity,FCC,HICU,,SIG-009,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-067,Power Lever at Idle,FCC,HICU,,SIG-009,TBD,TBD,TBD,TBD,DISCRETE,N/A,N/A,N/A,,,10,"Frame checksum, plus receiver freshness timeout",Discrete signal to validate throttle lever at Idle,TBD,TBD,TBD
+DBUS-068,TOGA activation,FCC,HICU,,SIG-109,TBD,TBD,TBD,TBD,DISCRETE,N/A,N/A,N/A,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-015,Nacelle status and available power,HICU,FCC,,SIG-110,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
 DBUS-016,Electric motor torque feedback,HICU,FCC,EM-{n},SIG-001,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout","Torque probe wired directly to HICU (frequency/phase); reported to FCC on this bus, DCU taps for display/maintenance.",TBD,TBD,TBD
-DBUS-017,Turbine torque feedback,HICU,FCC,,SIG-022,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout","Torque probe wired directly to HICU (frequency/phase), independent from EPECS; reported to FCC on this bus, DCU taps for display/maintenance.",TBD,TBD,TBD
-DBUS-074,Turbine oil chip maintenance flag,HICU,FCC,,SIG-062,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",Relayed from EPECS (via NAC_CTRL) for avionics/maintenance display.,TBD,TBD,TBD
-DBUS-075,EPECS status / fault word,HICU,FCC,,SIG-064,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",Relayed from EPECS (via NAC_CTRL) for avionics/maintenance reporting.,TBD,TBD,TBD
-DBUS-076,EMC status / fault word,HICU,FCC,,SIG-059,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",Relayed from EMC via NAC_CTRL for avionics and maintenance reporting.,TBD,TBD,TBD
-DBUS-082,Turbine run command,FCC,HICU,,SIG-098,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout","Part of the FCC power-management path, alongside the torque/speed targets.",TBD,TBD,TBD
-DBUS-083,Turbine shutdown command,FCC,HICU,,SIG-100,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout","Part of the FCC power-management path, alongside the torque/speed targets.",TBD,TBD,TBD
-DBUS-295,Weight on wheels,FCC,HICU,,SIG-226,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",FCC-computed WOW; HICU relays to EMC/EPECS on NAC_CTRL.,Yes,TBD,TBD
-DBUS-301,Fuel level on the reserve,HICU,FCC,,SIG-136,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Low-level discrete reported to the FCC; the tank-to-nacelle mapping is still open.,,,
+DBUS-017,Turbine torque feedback,HICU,FCC,,SIG-019,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout","Torque probe wired directly to HICU (frequency/phase), independent from EPECS; reported to FCC on this bus, DCU taps for display/maintenance.",TBD,TBD,TBD
+DBUS-074,Turbine oil chip maintenance flag,HICU,FCC,,SIG-059,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",Relayed from EPECS (via NAC_CTRL) for avionics/maintenance display.,TBD,TBD,TBD
+DBUS-075,EPECS status / fault word,HICU,FCC,,SIG-061,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",Relayed from EPECS (via NAC_CTRL) for avionics/maintenance reporting.,TBD,TBD,TBD
+DBUS-076,EMC status / fault word,HICU,FCC,,SIG-056,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",Relayed from EMC via NAC_CTRL for avionics and maintenance reporting.,TBD,TBD,TBD
+DBUS-082,Turbine run command,FCC,HICU,,SIG-092,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout","Part of the FCC power-management path, alongside the torque/speed targets.",TBD,TBD,TBD
+DBUS-083,Turbine shutdown command,FCC,HICU,,SIG-093,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout","Part of the FCC power-management path, alongside the torque/speed targets.",TBD,TBD,TBD
+DBUS-295,Weight on wheels,FCC,HICU,,SIG-207,TBD,TBD,TBD,TBD,Discrete,,,,,,10,"Frame checksum, plus receiver freshness timeout",FCC-computed WOW; HICU relays to EMC/EPECS on NAC_CTRL.,Yes,TBD,TBD
+DBUS-301,Fuel level on the reserve,HICU,FCC,,SIG-125,TBD,TBD,TBD,TBD,TBD,,,,,,10,"Frame checksum, plus receiver freshness timeout",Low-level discrete reported to the FCC; the tank-to-nacelle mapping is still open.,,,

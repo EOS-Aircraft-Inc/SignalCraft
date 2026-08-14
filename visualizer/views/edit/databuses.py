@@ -16,15 +16,19 @@ from visualizer.data.loader import IcdBundle
 from visualizer.data.models import (
     BUS_DEFINITION,
     BUS_ID,
+    BUS_NAME,
     BUS_TOPOLOGIES,
     DATABUSES_SHEET,
+    PROTOCOL,
+    SPEED,
+    TOPOLOGY,
     split_refs,
 )
 from visualizer.edit_bridge import sparse_upsert
 from visualizer.views.edit.common import render_apply_panel, sync_fields
 
 # Generic topology LRUs: physical equipment that rides Sender/Receiver.
-_GENERIC_TYPES = frozenset({"Component", "Controller"})
+_GENERIC_TYPES = frozenset({"Component"})
 
 
 def _def_col(buses) -> str:
@@ -125,7 +129,7 @@ def render(bundle: IcdBundle) -> None:
                 "edit_bus",
                 bid,
                 {
-                    "edit_bus_name": original.get("name", ""),
+                    "edit_bus_name": original.get(BUS_NAME, ""),
                     "edit_bus_def": original.get(def_col, "")
                     if original.get(def_col) in families
                     else "",
@@ -135,9 +139,9 @@ def render(bundle: IcdBundle) -> None:
                     "edit_bus_rx": [
                         ep_to_lab[t] for t in rx_refs if t in ep_to_lab
                     ],
-                    "edit_bus_proto": original.get("protocol", ""),
-                    "edit_bus_speed": original.get("speed", ""),
-                    "edit_bus_topo": original.get("topology", ""),
+                    "edit_bus_proto": original.get(PROTOCOL, ""),
+                    "edit_bus_speed": original.get(SPEED, ""),
+                    "edit_bus_topo": original.get(TOPOLOGY, ""),
                     "edit_bus_use": original.get("Bus description", ""),
                     "edit_bus_ac": original.get("On aircraft ?", ""),
                     "edit_bus_fnd": original.get("On FND ?", ""),
@@ -164,7 +168,7 @@ def render(bundle: IcdBundle) -> None:
                 },
             )
 
-        name = st.text_input("name", key="edit_bus_name")
+        name = st.text_input(BUS_NAME, key="edit_bus_name")
         def_col_ui, proto_col = st.columns(2)
         with def_col_ui:
             definition = st.selectbox(
@@ -173,29 +177,29 @@ def render(bundle: IcdBundle) -> None:
                 key="edit_bus_def",
             )
         with proto_col:
-            protocol = st.text_input("protocol", key="edit_bus_proto")
+            protocol = st.text_input(PROTOCOL, key="edit_bus_proto")
         if definition == "(new…)":
             definition = st.text_input("New definition tab name", key="edit_bus_def_new")
 
         speed_col, topo_col = st.columns(2)
         with speed_col:
-            speed = st.text_input("speed", key="edit_bus_speed")
+            speed = st.text_input(SPEED, key="edit_bus_speed")
         with topo_col:
             topo_opts = list(BUS_TOPOLOGIES)
             current_topo = (
-                str(original.get("topology") or "").strip()
+                str(original.get(TOPOLOGY) or "").strip()
                 if mode == "Edit existing" and original
                 else str(st.session_state.get("edit_bus_topo") or "")
             )
             if current_topo and current_topo not in topo_opts:
                 topo_opts = [*topo_opts, current_topo]
             topology = st.selectbox(
-                "topology",
+                TOPOLOGY,
                 options=["", *topo_opts],
                 key="edit_bus_topo",
                 help=(
                     "Unidirectional / Shared for digital buses; "
-                    "Analog / Discrete / Power for non-digital links."
+                    "Analog / Discrete / Low Power / High Power for non-digital links."
                 ),
             )
 
@@ -230,13 +234,13 @@ def render(bundle: IcdBundle) -> None:
             on_sim = st.text_input("On Sim ?", key="edit_bus_sim")
 
         edited = {
-            "name": name,
+            BUS_NAME: name,
             def_col: definition,
             "Sender": ";".join(writer_list),
             "Receiver": ";".join(receiver_list),
-            "protocol": protocol,
-            "speed": speed,
-            "topology": topology,
+            PROTOCOL: protocol,
+            SPEED: speed,
+            TOPOLOGY: topology,
             "Bus description": bus_use,
             "On aircraft ?": on_ac,
             "On FND ?": on_fnd,

@@ -18,7 +18,20 @@ from visualizer.data.loader import IcdBundle
 from visualizer.data.models import (
     ALLOCATION_ID,
     BUS_DEFINITION,
+    ENCODING,
+    INSTANCE_DIMENSION,
+    MAXIMUM,
+    MESSAGE_ID,
+    MINIMUM,
+    NOTES,
+    REFRESH_PERIOD_MS,
+    RESOLUTION,
+    SCALE,
     SIGNAL_ID,
+    START_BIT,
+    STOP_BIT,
+    UNIT,
+    VALIDITY,
     split_refs,
 )
 from visualizer.edit_bridge import sparse_upsert
@@ -59,7 +72,7 @@ def render(bundle: IcdBundle) -> None:
             "Data name",
             "Signal Id",
             "Sender",
-            "Message ID",
+            MESSAGE_ID,
             "Label",
         ],
     )
@@ -118,20 +131,20 @@ def render(bundle: IcdBundle) -> None:
                     "edit_pay_sig_label": next(
                         (lab for lab, rid in sig_m.items() if rid == signal_id), ""
                     ),
-                    "edit_pay_dim": original.get("instance_dimension", ""),
-                    "edit_pay_msgid": original.get("Message ID", ""),
+                    "edit_pay_dim": original.get(INSTANCE_DIMENSION, ""),
+                    "edit_pay_msgid": original.get(MESSAGE_ID, ""),
                     "edit_pay_msgname": original.get("Label", ""),
-                    "edit_pay_startbit": original.get("start bit", ""),
-                    "edit_pay_stopbit": original.get("stop bit", ""),
-                    "edit_pay_enc": original.get("encoding", ""),
-                    "edit_pay_unit": original.get("unit", ""),
-                    "edit_pay_scale": original.get("scale", ""),
-                    "edit_pay_res": original.get("resolution", ""),
-                    "edit_pay_min": original.get("minimum", ""),
-                    "edit_pay_max": original.get("maximum", ""),
-                    "edit_pay_period": original.get("Refresh rate", ""),
-                    "edit_pay_validity": original.get("validity", ""),
-                    "edit_pay_notes": original.get("notes", ""),
+                    "edit_pay_startbit": original.get(START_BIT, ""),
+                    "edit_pay_stopbit": original.get(STOP_BIT, ""),
+                    "edit_pay_enc": original.get(ENCODING, ""),
+                    "edit_pay_unit": original.get(UNIT, ""),
+                    "edit_pay_scale": original.get(SCALE, ""),
+                    "edit_pay_res": original.get(RESOLUTION, ""),
+                    "edit_pay_min": original.get(MINIMUM, ""),
+                    "edit_pay_max": original.get(MAXIMUM, ""),
+                    "edit_pay_period": original.get(REFRESH_PERIOD_MS, ""),
+                    "edit_pay_validity": original.get(VALIDITY, ""),
+                    "edit_pay_notes": original.get(NOTES, ""),
                     "edit_pay_ac": original.get("On aircraft ?", ""),
                     "edit_pay_fnd": original.get("On FND ?", ""),
                     "edit_pay_sim": original.get("On Sim ?", ""),
@@ -203,7 +216,7 @@ def render(bundle: IcdBundle) -> None:
         )
 
         dim = st.text_input(
-            "instance_dimension",
+            INSTANCE_DIMENSION,
             key="edit_pay_dim",
             help="Extra token when the bus instance alone is not enough, e.g. PACK-{n}.",
         )
@@ -216,7 +229,7 @@ def render(bundle: IcdBundle) -> None:
         msgid_col, msgname_col = st.columns(2)
         with msgid_col:
             message_id = st.text_input(
-                "Message ID",
+                MESSAGE_ID,
                 key="edit_pay_msgid",
                 help="A825/CAN DOC or arbitration id, or the A429 label.",
             )
@@ -228,45 +241,45 @@ def render(bundle: IcdBundle) -> None:
         startbit_col, stopbit_col = st.columns(2)
         with startbit_col:
             start_bit = st.text_input(
-                "start bit", key="edit_pay_startbit", help="MSB of the field."
+                START_BIT, key="edit_pay_startbit", help="MSB of the field."
             )
         with stopbit_col:
             stop_bit = st.text_input(
-                "stop bit", key="edit_pay_stopbit", help="LSB of the field, inclusive."
+                STOP_BIT, key="edit_pay_stopbit", help="LSB of the field, inclusive."
             )
 
         st.markdown("##### Encoding")
         enc_col, unit_col = st.columns(2)
         with enc_col:
-            encoding = st.text_input("encoding", key="edit_pay_enc")
+            encoding = st.text_input(ENCODING, key="edit_pay_enc")
         with unit_col:
-            unit = st.text_input("unit", key="edit_pay_unit")
+            unit = st.text_input(UNIT, key="edit_pay_unit")
         scale_col, res_col = st.columns(2)
         with scale_col:
-            scale = st.text_input("scale", key="edit_pay_scale")
+            scale = st.text_input(SCALE, key="edit_pay_scale")
         with res_col:
-            resolution = st.text_input("resolution", key="edit_pay_res")
+            resolution = st.text_input(RESOLUTION, key="edit_pay_res")
         min_col, max_col = st.columns(2)
         with min_col:
             minimum = st.text_input(
-                "minimum",
+                MINIMUM,
                 key="edit_pay_min",
                 help="Encoding range on this bus — often wider than the "
                 "functional range on 1_Signals.",
             )
         with max_col:
-            maximum = st.text_input("maximum", key="edit_pay_max")
+            maximum = st.text_input(MAXIMUM, key="edit_pay_max")
         period_col, validity_col = st.columns(2)
         with period_col:
-            period = st.text_input("Refresh rate", key="edit_pay_period")
+            period = st.text_input(REFRESH_PERIOD_MS, key="edit_pay_period")
         with validity_col:
             validity = st.text_input(
-                "validity",
+                VALIDITY,
                 key="edit_pay_validity",
                 help="How the receiver judges the value is usable.",
             )
 
-        notes = st.text_area("notes", key="edit_pay_notes")
+        notes = st.text_area(NOTES, key="edit_pay_notes")
         ac_col, fnd_col, sim_col = st.columns(3)
         with ac_col:
             on_ac = st.text_input("On aircraft ?", key="edit_pay_ac")
@@ -280,20 +293,20 @@ def render(bundle: IcdBundle) -> None:
             "Sender": writer,
             "Receiver": ";".join(receiver_list),
             "Signal Id": signal_id,
-            "instance_dimension": dim,
-            "Message ID": message_id,
+            INSTANCE_DIMENSION: dim,
+            MESSAGE_ID: message_id,
             "Label": message_name,
-            "start bit": start_bit,
-            "stop bit": stop_bit,
-            "encoding": encoding,
-            "unit": unit,
-            "scale": scale,
-            "resolution": resolution,
-            "minimum": minimum,
-            "maximum": maximum,
-            "Refresh rate": period,
-            "validity": validity,
-            "notes": notes,
+            START_BIT: start_bit,
+            STOP_BIT: stop_bit,
+            ENCODING: encoding,
+            UNIT: unit,
+            SCALE: scale,
+            RESOLUTION: resolution,
+            MINIMUM: minimum,
+            MAXIMUM: maximum,
+            REFRESH_PERIOD_MS: period,
+            VALIDITY: validity,
+            NOTES: notes,
             "On aircraft ?": on_ac,
             "On FND ?": on_fnd,
             "On Sim ?": on_sim,

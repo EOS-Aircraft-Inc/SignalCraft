@@ -1,56 +1,56 @@
-﻿UniqueId,Textual Name,Installed In/Part of,Domain,Type,Multiplicity,Instance Token,Description,Notes
-AVIO,Avionics,,,Domain,,,Aircraft avionics domain,
-FCS,Flight Control System,,,Domain,,,Global flight control system,
-PDS,Power Distribution System,,,Domain,,,High-voltage distribution from the storage assemblies to the propulsion loads,
-PEMS,Power and Energy Management System,,,Domain,,,"Power and energy management: mission energy strategy, power allocation to the propulsion effectors and nacelle command distribution",
-PROP,Propulsion System,,,Domain,,,"Propulsion: hybrid propulsion packages, thermal engine, electric motors, combining gearbox and propeller",
-FUEL,Fuel System,,,Domain,,,Fuel storage and delivery to the propulsion packages,Storage is in the three tanks; delivery to each propulsion package is handled by the FCU (one per HPP)
-THERM,Thermal system,,,Domain,,,Thermal management of the propulsion packages (IPTMS) and of the storage assemblies (BTMS),
-ESS,Energy Storage System,,,Domain,,,"Electrical energy storage: four HVDC assemblies, each holding twelve battery packs with their BMU, a master BMS and a charge controller",Function only; the storage hardware is contained in the HVDC assemblies.
-AC,Aircraft,,,Aircraft,1,,Complete aircraft,
-BAY,Avionics bays,AC,,Zone,1,,Avionics bay containing LRU that most need to be in a controlled environment,"Assume only one bay at this stage, separation of different LRU to different bays might be added later"
-CKPT,Cockpit,AC,,Zone,1,,Pilot controls and displays,
-WING,Wing,AC,,Zone,2,WING-{n},"Two wings, mainly defined for BTMS",
-NAC,Nacelle,AC,,Zone,4,NAC-{n},Four nacelle installations,
-NOSE,Aircraft nose,AC,,Zone,1,,,
-FCC,Flight Control Computer,BAY,FCS,Controller,3,FCC-{n},Primary flight control computer,Quantity subject to supplier confirmation. Also hosts the power-management computation (working assumption); stays in the FCS grouping.
-ICM,Interface Control Module,BAY,FCS,Controller,3,ICM-{n},Pilot-control acquisition modules,Acquires the cockpit controls and publishes them on the aircraft backbone
-FMS,Flight Management System,BAY,AVIO,Controller,2,FMS-{n},,
-IRU,Inertial Reference Unit,BAY,AVIO,Component,1,,Inertial reference units providing aircraft attitude and acceleration,Modelled as a single entity; avionics redundancy to be refined.
-ADC,Air Data Computer,BAY,AVIO,Controller,1,,Air Data Computer,Modelled as a single entity; avionics redundancy to be refined.
-WXR,Weather Radar,BAY,AVIO,Controller,1,,Weather radar (environmental sensing),Placeholder for the avionics environmental inputs.
-DCU,Data Concentrator Unit,BAY,AVIO,Component,1,,Placeholder for avionics data collector and distributor,Modelled as a single entity; avionics redundancy to be refined.
-IMA,Integrated Modular Avionics,BAY,AVIO,Controller,1,,Integrated Modular Avionics - host of multiple applications in one server. Use data collected through DCU.,Modelled as a single entity; avionics redundancy to be refined.
-BPM,Backup Power Management,BAY,PEMS,Controller,1,,Independent backup propulsion command controller,
-MMS,Mission Management System,BAY,PEMS,Controller,1,,"Aircraft-level mission and energy management; retrieves the flight mission from FMS and provides energy/hybridization strategy to the FCC power-management function, which retains command authority over the propulsion effectors.",
-FTANK,Fuel Tank,AC,FUEL,Component,3,FTANK_LEFT;FTANK_CENTER;FTANK_RIGHT,One center tank and two wing tanks,"Explicit token list. Parented to the aircraft, not the wing: a per-wing parent would give six tanks and would not accept the center tank."
-BTMS,Battery Thermal Management System,WING,THERM,Controller,1,,Battery thermal management; one per wing,Each BTMS conditions the two HVDC assemblies of its wing.
-HICU,Hybrid Integrated Control Unit,NAC,PEMS,Controller,1,,Nacelle command distributor between aircraft-level functions and local controllers in the nacelle. Act as a data concentrator.,One per nacelle. Hosts part of the control functions otherwise performed by the EPECS.
-IPTMS,Integrated Propulsion Thermal Management System,NAC,THERM,Controller,1,,Propulsion and gearbox thermal management,
-HPP,Hybrid Propulsion Package,NAC,PROP,Component,1,,"One thermal engine, two electric engines, gearbox and controls",
-EPECS,Engine and Propeller Electronic Control System,HPP,PROP,Controller,1,,Local turbine and propeller controller,
-TURB,Thermal Engine,HPP,PROP,Component,1,,One thermal engine per HPP,
-FCU,Fuel Control Unit,HPP,FUEL,Component,1,,Link between the aircraft fuel system and the HPP; meters fuel to the thermal engine,One per HPP. Fuel measurements at the FCU and its metering and shutdown effectors belong here rather than to the aircraft-level FUEL system.
-GBX,Combining Gearbox,HPP,PROP,Component,1,,One combining gearbox per HPP,
-PROPELLER,Propeller,HPP,PROP,Component,1,,One propeller per HPP,
-PCU,Propeller Control Unit,PROPELLER,PROP,Component,1,,Dual-channel propeller pitch control unit,
-OSG,Propeller Overspeed Governor,PROPELLER,PROP,Component,1,,Overspeed governor,
-FEATH_PUMP,Auxiliary Feathering Pump,PROPELLER,PROP,Component,1,,,
-EM,Electric Motor,HPP,PROP,Component,2,EM-{n},Two electric motors per HPP,Motor sectors deferred pending supplier definition
-EMC,Electric Motor Controller,EM,PROP,Controller,1,,One controller/inverter function per electric motor assembly,Installed in EM: the EM-{n} token comes from the motor and is not restated at this level.
-HVDC,High Voltage DC Assembly,NAC,ESS,Component,1,,"One HVDC assembly per nacelle, four in total; each holds twelve battery packs, one master BMS, one charge controller and the HVPDU","One per nacelle rather than four at aircraft level: the nacelle control bus addresses its packs as PACK-1..12 within NAC-{n}, which only closes if the twelve packs are nacelle-local. No token is restated here."
-HVPDU,High-Voltage Power Distribution Unit,HVDC,PDS,Controller,1,,"One HVPDU per HVDC assembly, feeding the two motor controllers of the nacelle","Function is distribution rather than storage, hence PDS. Installed in the engine bay (J1) while the packs sit in the aft nacelle (J4)."
-IMD,Insulation Monitoring Device,HVPDU,PDS,Component,1,,One IMD per HVPDU,Working assumption
-PACK,Battery Pack,HVDC,ESS,Component,12,PACK-{n},Twelve battery packs per HVDC assembly,"Twelve packs per HVDC assembly. Token uses {n}, unpadded, so 10 and above stay multi-digit."
-BMU,Battery Management Unit,PACK,ESS,Controller,1,,Nominal pack monitoring and control,One per pack. Cell-level acquisition is internal to the pack and is not modelled.
-MBMS,Master Battery Management System,HVDC,ESS,Controller,1,,HVDC-level coordination and aircraft interface,Separate LRU from the pack BMUs.
-CHGC,Charge Controller,HVDC,ESS,Controller,1,,Charging protocol and command function,
-F_B_PUMP,Fuel boost pump,HPP,FUEL,Component,1,,Aircraft side fuel boost pump,"Fuel pumps are per tank, but one is dedicated to each nacelle."
-LVPDU,Low Voltage Power Distribution Unit,AC,PDS,Component,3,LVPDU_FWD;LVPDU_CENTER;LVPDU_AFT,,
-DCDC,Step-down DC/DC Converter,HVPDU,PDS,Component,1,,Steps the 800 V HV network down to the 28 V LV network.,Takes its HV input from the HVPDU and supplies the LV network.
-LVBAT,Low voltage battery,LVPDU,PDS,Component,1,,,
-DCDC_UP,Step-up DC/DC Converter,HVPDU,PDS,Component,1,,Steps the 28 V LV network up to the 800 V HV network.,Mirrors the step-down converter; provides a path to energise the HV network from the LV side.
-THROTTLE,Throttle,CKPT,FCS,Component,1,,Power lever assembly; its position is acquired through the redundant power-lever channels.,Single quadrant covering both propulsion packages; per-channel sensing hardware is not modelled separately.
-FLAP_LEVER,Flap Lever,CKPT,FCS,Component,1,,Flap selector lever; its position is acquired by the interface control modules.,
-CONTROL_PANELS,Cockpit Control Panels,CKPT,AVIO,Component,1,,Group of cockpit panels carrying the switches and pushbuttons that have no dedicated component of their own.,Catch-all for cockpit switch and pushbutton positions. A control that gains its own component moves out of this row.
-DISPLAY,Display Unit,CKPT,AVIO,Component,1,,Cockpit display unit; receives the display picture from the data concentrator over the display bus.,Quantity subject to confirmation; modelled as a single entity until the cockpit layout is fixed.
+﻿UniqueId,Textual Name,Installed In/Part of,Domain,Type,Multiplicity,Description,Notes
+AVIO,Avionics,,,Domain,,Aircraft avionics domain,
+FCS,Flight Control System,,,Domain,,Global flight control system,
+PDS,Power Distribution System,,,Domain,,High-voltage distribution from the storage assemblies to the propulsion loads,
+PEMS,Power and Energy Management System,,,Domain,,"Power and energy management: mission energy strategy, power allocation to the propulsion effectors and nacelle command distribution",
+PROP,Propulsion System,,,Domain,,"Propulsion: hybrid propulsion packages, thermal engine, electric motors, combining gearbox and propeller",
+FUEL,Fuel System,,,Domain,,Fuel storage and delivery to the propulsion packages,Storage is in the three tanks; delivery to each propulsion package is handled by the FCU (one per HPP)
+THERM,Thermal system,,,Domain,,Thermal management of the propulsion packages (IPTMS) and of the storage assemblies (BTMS),
+ESS,Energy Storage System,,,Domain,,"Electrical energy storage: four HVDC assemblies, each holding twelve battery packs with their BMU, a master BMS and a charge controller",Function only; the storage hardware is contained in the HVDC assemblies.
+AC,Aircraft,,,Aircraft,1,Complete aircraft,
+BAY,Avionics bays,AC,,Zone,1,Avionics bay containing LRU that most need to be in a controlled environment,"Assume only one bay at this stage, separation of different LRU to different bays might be added later"
+CKPT,Cockpit,AC,,Zone,1,Pilot controls and displays,
+WING,Wing,AC,,Zone,2,"Two wings, mainly defined for BTMS",
+NAC,Nacelle,AC,,Zone,4,Four nacelle installations,
+NOSE,Aircraft nose,AC,,Zone,1,,
+FCC,Flight Control Computer,BAY,FCS,Component,3,Primary flight control computer,Quantity subject to supplier confirmation. Also hosts the power-management computation (working assumption); stays in the FCS grouping.
+ICM,Interface Control Module,BAY,FCS,Component,3,Pilot-control acquisition modules,Acquires the cockpit controls and publishes them on the aircraft backbone
+FMS,Flight Management System,BAY,AVIO,Component,2,,
+IRU,Inertial Reference Unit,BAY,AVIO,Component,1,Inertial reference units providing aircraft attitude and acceleration,Modelled as a single entity; avionics redundancy to be refined.
+ADC,Air Data Computer,BAY,AVIO,Component,1,Air Data Computer,Modelled as a single entity; avionics redundancy to be refined.
+WXR,Weather Radar,BAY,AVIO,Component,1,Weather radar (environmental sensing),Placeholder for the avionics environmental inputs.
+DCU,Data Concentrator Unit,BAY,AVIO,Component,1,Placeholder for avionics data collector and distributor,Modelled as a single entity; avionics redundancy to be refined.
+IMA,Integrated Modular Avionics,BAY,AVIO,Component,1,Integrated Modular Avionics - host of multiple applications in one server. Use data collected through DCU.,Modelled as a single entity; avionics redundancy to be refined.
+BPM,Backup Power Management,BAY,PEMS,Component,1,Independent backup propulsion command controller,
+MMS,Mission Management System,BAY,PEMS,Component,1,"Aircraft-level mission and energy management; retrieves the flight mission from FMS and provides energy/hybridization strategy to the FCC power-management function, which retains command authority over the propulsion effectors.",
+FTANK,Fuel Tank,AC,FUEL,Component,3,"One center tank and two wing tanks; instances in declared order: FTANK-1 left, FTANK-2 center, FTANK-3 right","Explicit token list. Parented to the aircraft, not the wing: a per-wing parent would give six tanks and would not accept the center tank."
+BTMS,Battery Thermal Management System,WING,THERM,Component,1,Battery thermal management; one per wing,Each BTMS conditions the two HVDC assemblies of its wing.
+HICU,Hybrid Integrated Control Unit,NAC,PEMS,Component,1,Nacelle command distributor between aircraft-level functions and local controllers in the nacelle. Act as a data concentrator.,One per nacelle. Hosts part of the control functions otherwise performed by the EPECS.
+IPTMS,Integrated Propulsion Thermal Management System,NAC,THERM,Component,1,Propulsion and gearbox thermal management,
+HPP,Hybrid Propulsion Package,NAC,PROP,Component,1,"One thermal engine, two electric engines, gearbox and controls",
+EPECS,Engine and Propeller Electronic Control System,HPP,PROP,Component,1,Local turbine and propeller controller,
+TURB,Thermal Engine,HPP,PROP,Component,1,One thermal engine per HPP,
+FCU,Fuel Control Unit,HPP,FUEL,Component,1,Link between the aircraft fuel system and the HPP; meters fuel to the thermal engine,One per HPP. Fuel measurements at the FCU and its metering and shutdown effectors belong here rather than to the aircraft-level FUEL system.
+GBX,Combining Gearbox,HPP,PROP,Component,1,One combining gearbox per HPP,
+PROPELLER,Propeller,HPP,PROP,Component,1,One propeller per HPP,
+PCU,Propeller Control Unit,PROPELLER,PROP,Component,1,Dual-channel propeller pitch control unit,
+OSG,Propeller Overspeed Governor,PROPELLER,PROP,Component,1,Overspeed governor,
+FEATH_PUMP,Auxiliary Feathering Pump,PROPELLER,PROP,Component,1,,
+EM,Electric Motor,HPP,PROP,Component,2,Two electric motors per HPP,Motor sectors deferred pending supplier definition
+EMC,Electric Motor Controller,EM,PROP,Component,1,One controller/inverter function per electric motor assembly,Installed in EM: the EM-{n} token comes from the motor and is not restated at this level.
+HVDC,High Voltage DC Assembly,NAC,ESS,Component,1,"One HVDC assembly per nacelle, four in total; each holds twelve battery packs, one master BMS, one charge controller and the HVPDU","One per nacelle rather than four at aircraft level: the nacelle control bus addresses its packs as PACK-1..12 within NAC-{n}, which only closes if the twelve packs are nacelle-local. No token is restated here."
+HVPDU,High-Voltage Power Distribution Unit,HVDC,PDS,Component,1,"One HVPDU per HVDC assembly, feeding the two motor controllers of the nacelle","Function is distribution rather than storage, hence PDS. Installed in the engine bay (J1) while the packs sit in the aft nacelle (J4)."
+IMD,Insulation Monitoring Device,HVPDU,PDS,Component,1,One IMD per HVPDU,Working assumption
+PACK,Battery Pack,HVDC,ESS,Component,12,Twelve battery packs per HVDC assembly,"Twelve packs per HVDC assembly. Token uses {n}, unpadded, so 10 and above stay multi-digit."
+BMU,Battery Management Unit,PACK,ESS,Component,1,Nominal pack monitoring and control,One per pack. Cell-level acquisition is internal to the pack and is not modelled.
+MBMS,Master Battery Management System,HVDC,ESS,Component,1,HVDC-level coordination and aircraft interface,Separate LRU from the pack BMUs.
+CHGC,Charge Controller,HVDC,ESS,Component,1,Charging protocol and command function,
+F_B_PUMP,Fuel boost pump,HPP,FUEL,Component,1,Aircraft side fuel boost pump,"Fuel pumps are per tank, but one is dedicated to each nacelle."
+LVPDU,Low Voltage Power Distribution Unit,AC,PDS,Component,3,,
+DCDC_DN,Step-down DC/DC Converter,HVPDU,PDS,Component,1,Steps the 800 V HV network down to the 28 V LV network.,Takes its HV input from the HVPDU and supplies the LV network.
+LVBAT,Low voltage battery,LVPDU,PDS,Component,1,,
+DCDC_UP,Step-up DC/DC Converter,HVPDU,PDS,Component,1,Steps the 28 V LV network up to the 800 V HV network.,Mirrors the step-down converter; provides a path to energise the HV network from the LV side.
+THROTTLE,Throttle,CKPT,FCS,Component,1,Power lever assembly; its position is acquired through the redundant power-lever channels.,Single quadrant covering both propulsion packages; per-channel sensing hardware is not modelled separately.
+FLAP_LEVER,Flap Lever,CKPT,FCS,Component,1,Flap selector lever; its position is acquired by the interface control modules.,
+CONTROL_PANELS,Cockpit Control Panels,CKPT,AVIO,Component,1,Group of cockpit panels carrying the switches and pushbuttons that have no dedicated component of their own.,Catch-all for cockpit switch and pushbutton positions. A control that gains its own component moves out of this row.
+DISPLAY,Display Unit,CKPT,AVIO,Component,1,Cockpit display unit; receives the display picture from the data concentrator over the display bus.,Quantity subject to confirmation; modelled as a single entity until the cockpit layout is fixed.

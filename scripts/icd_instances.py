@@ -1,14 +1,15 @@
 """Instance helpers derived from the 0_Systems containment tree.
 
 The workbook stores parameter definitions only; instances are never stored. Each
-system row declares how many of itself exist per parent instance
-(`Multiplicity`) and which token it contributes to the instance path
-(`Instance Token`). Everything else follows from walking the tree:
+system row declares only how many of itself exist per parent instance
+(`Multiplicity`). Everything else follows from walking the tree:
 
+- an instance name is the UniqueId plus one ordinal per multiplied level of its
+  containment chain, outermost first (`EMC-1-2`);
 - aircraft totals are the product of multiplicity up the containment chain;
 - the dimensions a parameter is indexed by are the levels of its containment
   chain holding more than one instance per parent;
-- a singleton (multiplicity 1) adds no index and no token.
+- a singleton (multiplicity 1) adds no index.
 
 A parameter row therefore never spells out how many instances exist. It names
 dimensions (`NAC`, `NAC;EM`) and the count is read here, so changing four
@@ -17,7 +18,6 @@ nacelles to six is a single edit in 0_Systems.
 
 from __future__ import annotations
 
-import re
 from collections.abc import Iterable, Mapping
 from itertools import product
 from pathlib import Path
@@ -33,7 +33,6 @@ from icd_sheets import (
 )
 
 ROOT_TOKEN = "AC"
-_COUNTER = re.compile(r"\{(n+)\}")
 
 
 class SystemTree:
@@ -78,30 +77,22 @@ class SystemTree:
         return result
 
     def tokens(self, acronym: str) -> list[str]:
-        """Instance tokens contributed by this level alone."""
-        row = self.rows.get(acronym)
-        if row is None:
-            return []
-        token = (row.get("Instance Token") or "").strip()
-        if not token:
-            return []
-        match = _COUNTER.search(token)
-        if not match:
-            return [part.strip() for part in token.split(";") if part.strip()]
-        width = len(match.group(1))
+        """Instance tokens contributed by this level alone (``EM-1``, ``EM-2``)."""
         count = self.multiplicity(acronym)
-        return [
-            _COUNTER.sub(f"{index:0{width}d}", token) for index in range(1, count + 1)
-        ]
+        if acronym not in self.rows or count <= 1:
+            return []
+        return [f"{acronym}-{index}" for index in range(1, count + 1)]
 
     def instance_tokens(self, acronym: str) -> list[str]:
         """Exhaustive endpoint tokens for ``acronym`` (e.g. ``GBX-1..4``, ``EMC-1-1``).
 
-        Mirrors the Sender/Receiver naming used on ``10_Databuses``:
+        Mirrors the Sender/Receiver naming used on ``10_Databuses``. An instance
+        name is the UniqueId plus one ordinal per multiplied level of its
+        containment chain, outermost first, so ``Multiplicity`` alone determines
+        every name:
 
-        - own Multiplicity > 1 with an Instance Token → expand that pattern, and
-          when ancestors also multiply, prefix ancestor indices
-          (``EMC-1-1`` = nacelle 1, motor 1);
+        - own Multiplicity > 1 → one ordinal of its own, after any ancestor
+          ordinals (``EMC-1-1`` = nacelle 1, motor 1);
         - own Multiplicity == 1 under multiplied ancestors → ``UniqueId-1..N``
           (``HICU-1``, ``GBX-1``, …);
         - no multiplied ancestors → bare ``UniqueId``.
@@ -110,40 +101,20 @@ class SystemTree:
         if not acronym or acronym not in self.rows:
             return [acronym] if acronym else []
 
-        # Ancestor multiplicities > 1, outermost first (excluding self).
-        ancestor_counts: list[int] = []
+        # Multiplied levels of the chain, outermost first, self last.
+        counts: list[int] = []
         for node in reversed(self.chain(acronym)):
-            if node == acronym:
-                break
             mult = self.multiplicity(node)
             if mult > 1:
-                ancestor_counts.append(mult)
+                counts.append(mult)
 
-        own_mult = self.multiplicity(acronym)
-        own_tokens = self.tokens(acronym)
+        if not counts:
+            return [acronym]
+        return [
+            f"{acronym}-" + "-".join(str(i) for i in idxs)
+            for idxs in product(*[range(1, n + 1) for n in counts])
+        ]
 
-        if own_mult > 1 and own_tokens:
-            # Local indices from the Instance Token (EM-1, EM-2, …).
-            local_suffixes = [
-                tok[len(acronym) + 1 :] if tok.startswith(f"{acronym}-") else tok
-                for tok in own_tokens
-            ]
-            if not ancestor_counts:
-                return list(own_tokens)
-            result: list[str] = []
-            for idxs in product(*[range(1, n + 1) for n in ancestor_counts]):
-                prefix = "-".join(str(i) for i in idxs)
-                for suffix in local_suffixes:
-                    result.append(f"{acronym}-{prefix}-{suffix}")
-            return result
-
-        if ancestor_counts:
-            return [
-                f"{acronym}-" + "-".join(str(i) for i in idxs)
-                for idxs in product(*[range(1, n + 1) for n in ancestor_counts])
-            ]
-
-        return [acronym]
 
 def bus_family_name(row: Mapping[str, str]) -> str:
     """Family handle for a ``10_Databuses`` row (``Bus Definition`` preferred)."""

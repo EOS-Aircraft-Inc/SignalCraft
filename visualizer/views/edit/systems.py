@@ -146,7 +146,6 @@ def render(bundle: IcdBundle) -> None:
                 "edit_sys_func_label": func_label,
                 "edit_sys_inst_label": inst_label,
                 "edit_sys_mult": original.get("Multiplicity", ""),
-                "edit_sys_tok": original.get("Instance Token", ""),
                 "edit_sys_desc": original.get("Description", ""),
                 "edit_sys_notes": original.get("Notes", ""),
             },
@@ -163,7 +162,6 @@ def render(bundle: IcdBundle) -> None:
                 "edit_sys_func_label": "",
                 "edit_sys_inst_label": "",
                 "edit_sys_mult": "",
-                "edit_sys_tok": "",
                 "edit_sys_desc": "",
                 "edit_sys_notes": "",
             },
@@ -193,7 +191,6 @@ def render(bundle: IcdBundle) -> None:
 
     if no_instance:
         installed = ""
-        token = ""
         # Keep an existing empty/"1" Multiplicity exactly as it is: rewriting it
         # to "" here would clear the stored value on any unrelated edit (the
         # aircraft row legitimately holds "1"). A leftover value from a previous
@@ -205,8 +202,8 @@ def render(bundle: IcdBundle) -> None:
             else ""
         )
         st.caption(
-            "Type **Aircraft** or **System** (functional): Installed In and "
-            "Instance Token stay empty, and Multiplicity stays empty or `1`."
+            "Type **Aircraft** or **Domain**: Installed In stays empty, and "
+            "Multiplicity stays empty or `1`."
         )
     else:
         installed = labeled_acronym_select(
@@ -218,11 +215,11 @@ def render(bundle: IcdBundle) -> None:
             if mode == "Edit existing" and original
             else "",
         )
-        mult_col, tok_col = st.columns(2)
-        with mult_col:
-            mult = st.text_input("Multiplicity", key="edit_sys_mult")
-        with tok_col:
-            token = st.text_input("Instance Token", key="edit_sys_tok")
+        mult = st.text_input(
+            "Multiplicity",
+            key="edit_sys_mult",
+            help="Count per parent instance; instances are named UniqueId-1..N.",
+        )
 
     preview_id = sid.strip() if mode == "Add new" else sid
     render_containment_schema(
@@ -234,14 +231,13 @@ def render(bundle: IcdBundle) -> None:
             "Type": typ or "",
             "Installed In/Part of": installed,
             "Multiplicity": mult,
-            "Instance Token": token,
         },
     )
 
     desc = st.text_area("Description", key="edit_sys_desc")
     notes = st.text_area("Notes", key="edit_sys_notes")
 
-    mult_err = system_multiplicity_error(typ or "", mult, token)
+    mult_err = system_multiplicity_error(typ or "", mult)
     if mult_err:
         st.error(mult_err)
 
@@ -261,7 +257,6 @@ def render(bundle: IcdBundle) -> None:
         "Installed In/Part of": installed,
         "Domain": functional,
         "Multiplicity": mult,
-        "Instance Token": token,
     }
     if mode == "Add new":
         payload = {k: v for k, v in edited.items() if v != ""}
@@ -269,7 +264,6 @@ def render(bundle: IcdBundle) -> None:
             payload.pop("Installed In/Part of", None)
             payload.pop("Domain", None)
             payload.pop("Multiplicity", None)
-            payload.pop("Instance Token", None)
         if sid.strip():
             payload[SYSTEM_UNIQUE_ID] = sid.strip()
         if sid.strip() and (name or typ) and not mult_err:

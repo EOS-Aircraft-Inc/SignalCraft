@@ -39,24 +39,37 @@ from icd_sheets import (
     ALLOCATION_ID,
     BUS_DEFINITION,
     BUS_ID,
+    BUS_NAME,
+    COMPUTED_FROM,
     CONTROLLED_SHEETS,
     DATA_NAME,
     DATABUSES_SHEET,
     DOC_SHEETS,
     DOMAIN,
+    ENCODING,
     INSTALLED_IN,
+    INSTANCE_DIMENSION,
     INTERFACING_EQUIPMENT,
     LABEL,
+    MAXIMUM,
+    MESSAGE_ID,
+    MINIMUM,
+    NOTES,
     RECEIVER,
-    REFRESH_RATE,
-    RELATED_TO,
+    REFRESH_PERIOD_MS,
     REPEATED_PER,
+    RESOLUTION,
+    SCALE,
     SENDER,
     SIGNAL_ID,
     SIGNAL_OWNER,
     SIGNALS_SHEET,
+    START_BIT,
+    STOP_BIT,
     SYSTEM_UNIQUE_ID,
     SYSTEMS_SHEET,
+    UNIT,
+    VALIDITY,
     system_multiplicity_error,
 )
 
@@ -84,7 +97,7 @@ PAYLOAD_ACRONYM_FIELDS = [SENDER, RECEIVER]
 
 # Columns that may hold cross-sheet identity references.
 ID_REF_FIELDS: dict[str, list[str]] = {
-    SIGNALS_SHEET: [RELATED_TO],
+    SIGNALS_SHEET: [COMPUTED_FROM],
     DATABUSES_SHEET: [BUS_DEFINITION, "definition_tab"],
 }
 
@@ -97,21 +110,21 @@ PAYLOAD_DEFAULT_FIELDS = [
     DATA_NAME,
     SENDER,
     RECEIVER,
-    "instance_dimension",
+    INSTANCE_DIMENSION,
     SIGNAL_ID,
-    "Message ID",
+    MESSAGE_ID,
     LABEL,
-    "start bit",
-    "stop bit",
-    "encoding",
-    "unit",
-    "scale",
-    "resolution",
-    "minimum",
-    "maximum",
-    REFRESH_RATE,
-    "validity",
-    "notes",
+    START_BIT,
+    STOP_BIT,
+    ENCODING,
+    UNIT,
+    SCALE,
+    RESOLUTION,
+    MINIMUM,
+    MAXIMUM,
+    REFRESH_PERIOD_MS,
+    VALIDITY,
+    NOTES,
     "On aircraft ?",
     "On FND ?",
     "On Sim ?",
@@ -437,7 +450,7 @@ class IcdEditor:
             row = systems.get(sid)
             if row is None:
                 continue
-            if "Multiplicity" not in item and "Instance Token" not in item:
+            if "Multiplicity" not in item:
                 continue
             unique_id = str(
                 item.get(SYSTEM_UNIQUE_ID) or row.get(SYSTEM_UNIQUE_ID) or ""
@@ -449,9 +462,6 @@ class IcdEditor:
             if not old_mult.isdigit() or not new_mult.isdigit():
                 continue
             old_n, new_n = int(old_mult), int(new_mult)
-            token = str(
-                item.get("Instance Token") or row.get("Instance Token") or ""
-            ).strip()
             for family, members in families.items():
                 if len(members) != old_n:
                     continue
@@ -467,7 +477,6 @@ class IcdEditor:
                         "old_multiplicity": old_n,
                         "new_multiplicity": new_n,
                         "members": sorted(members),
-                        "token": token,
                     }
                 )
         return impacts
@@ -512,7 +521,7 @@ class IcdEditor:
                         new_val = old_val
                         if col == BUS_ID:
                             new_val = new_id
-                        elif col == "name" and old_val:
+                        elif col == BUS_NAME and old_val:
                             # replace trailing number in name if present
                             new_val = (
                                 re.sub(r"\d+$", str(i), old_val)
@@ -542,6 +551,7 @@ class IcdEditor:
                                 DATABUSES_SHEET,
                                 bus_id,
                                 BUS_ID,
+    BUS_NAME,
                                 bus_id,
                                 "",
                                 action="delete_row",
@@ -581,7 +591,7 @@ class IcdEditor:
                     # Judge the row as it will look after the edit, but only when
                     # the edit touches these fields — a pre-existing problem must
                     # not block an unrelated fix (the integrity check reports it).
-                    if {"Type", "Multiplicity", "Instance Token"} & set(item):
+                    if {"Type", "Multiplicity"} & set(item):
 
                         def merged(column: str, row=existing, patch=item) -> str:
                             source = patch if column in patch else row
@@ -590,7 +600,6 @@ class IcdEditor:
                         message = system_multiplicity_error(
                             merged("Type"),
                             merged("Multiplicity"),
-                            merged("Instance Token"),
                         )
                         if message:
                             errors.append(f"{SYSTEMS_SHEET} {sid or '?'}: {message}")
@@ -608,14 +617,15 @@ class IcdEditor:
                                 errors.append(
                                     f"{sheet}: unknown system '{ref}' in {col}"
                                 )
-                    for ref in split_refs(str(item.get(RELATED_TO) or "")):
-                        if not ref:
-                            continue
-                        if ref not in signal_ids:
-                            errors.append(
-                                f"{sheet}: {RELATED_TO} '{ref}' is not a known "
-                                f"{SIGNAL_ID}"
-                            )
+                    for col in (COMPUTED_FROM,):
+                        for ref in split_refs(str(item.get(col) or "")):
+                            if not ref:
+                                continue
+                            if ref not in signal_ids:
+                                errors.append(
+                                    f"{sheet}: {col} '{ref}' is not a known "
+                                    f"{SIGNAL_ID}"
+                                )
                 for col in (BUS_DEFINITION, "definition_tab"):
                     if col not in item:
                         continue

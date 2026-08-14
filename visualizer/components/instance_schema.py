@@ -38,7 +38,6 @@ def containment_schema_lines(
         "Type",
         INSTALLED_IN,
         "Multiplicity",
-        "Instance Token",
     ):
         if key in overrides:
             base[key] = str(overrides[key] or "")
@@ -50,8 +49,7 @@ def containment_schema_lines(
         name = base.get(SYSTEM_TEXTUAL_NAME) or target
         return [
             f"<b>{target}</b> — {name}",
-            "<i>Domain: not instantiated "
-            "(no Multiplicity / Instance Token).</i>",
+            "<i>Domain: not instantiated (no Multiplicity).</i>",
         ], 0
 
     chain = list(reversed(tree.chain(target)))  # root → leaf

@@ -1,8 +1,9 @@
 """Signal dataflow graph.
 
 One graph per selected signal: the hardwired leg declared on ``1_Signals``
-(Analog / Discrete / Power) plus every bus leg carried by allocations, so a
-sensor-to-consumer path reads end to end instead of as a list of bus rows.
+(Analog / Discrete / Low Power / High Power) plus every bus leg carried by
+allocations, so a sensor-to-consumer path reads end to end instead of as a list
+of bus rows.
 
 Direction comes from ``Signal Role`` (see the workbook ``Column_Help`` sheet):
 Measurement flows Interfacing Equipment to Owner, Command and Power flow Owner
@@ -19,13 +20,14 @@ import pandas as pd
 
 from visualizer.data.models import (
     ALLOCATION_ID,
+    INSTANCE_DIMENSION,
     INTERFACE_TYPE,
     INTERFACING_EQUIPMENT,
     RECEIVER,
-    RELATED_TO,
     REPEATED_PER,
     ROLES_FROM_OWNER,
     ROLES_TOWARD_OWNER,
+    SAME_QUANTITY_AS,
     SENDER,
     SIGNAL_ID,
     SIGNAL_OWNER,
@@ -33,26 +35,26 @@ from visualizer.data.models import (
     SYSTEM_UNIQUE_ID,
     TOPOLOGY_ANALOG,
     TOPOLOGY_DISCRETE,
-    TOPOLOGY_POWER,
+    TOPOLOGY_HIGH_POWER,
+    TOPOLOGY_LOW_POWER,
     TOPOLOGY_UNIDIRECTIONAL,
     split_refs,
 )
 
 SIGNAL_ROLE = "Signal Role"
 CONNECTION_TYPE = "Connection Type"
-PHYSICAL_ID = "Physical Id"
 DEFINITION_TAB = "definition_tab"
-INSTANCE_DIMENSION = "instance_dimension"
 
 DIGITAL = "Digital"
-HARDWIRED = ("Analog", "Discrete", "Power")
+HARDWIRED = ("Analog", "Discrete", "Low Power", "High Power")
 
 # Interface Type -> topology key, so dataflow colors match the Bus Topology page.
 INTERFACE_TOPOLOGY = {
     DIGITAL: TOPOLOGY_UNIDIRECTIONAL,
     "Analog": TOPOLOGY_ANALOG,
     "Discrete": TOPOLOGY_DISCRETE,
-    "Power": TOPOLOGY_POWER,
+    "Low Power": TOPOLOGY_LOW_POWER,
+    "High Power": TOPOLOGY_HIGH_POWER,
 }
 
 
@@ -74,7 +76,9 @@ class Dataflow:
 
     @property
     def empty(self) -> bool:
-        return self.nodes.empty
+        # No edges means nothing to draw, whatever the nodes say: a lone node
+        # carries no flow, and its edge frame has no columns to group on.
+        return self.nodes.empty or self.edges.empty
 
 
 def _clean(value: object) -> str:
@@ -84,30 +88,33 @@ def _clean(value: object) -> str:
 def related_signal_ids(signals: pd.DataFrame, signal_id: str) -> list[str]:
     """The selected signal plus the relatives whose legs belong on its diagram.
 
-    ``Related to`` is followed one step only, in both directions: the full
-    transitive closure chains 54 of this database's 224 signals into a single
-    blob. ``Physical Id`` is a declared equivalence class over one physical
-    quantity, so it is merged whole.
+    Only ``Same quantity as`` merges: it declares that the rows observe one and
+    the same real-world quantity, so their legs describe one interface. Nothing
+    else is followed — a diagram shows what crosses the interface, not how the
+    value came to be.
     """
     sid = _clean(signal_id)
     if not sid or signals.empty or SIGNAL_ID not in signals.columns:
         return [sid] if sid else []
 
     ids = signals[SIGNAL_ID].astype(str).str.strip()
-    row = signals.loc[ids == sid]
     found = {sid}
 
-    if RELATED_TO in signals.columns:
-        if not row.empty:
-            found |= set(split_refs(row.iloc[0].get(RELATED_TO)))
-        declares = signals[RELATED_TO].fillna("").astype(str).apply(lambda v: sid in split_refs(v))
-        found |= set(ids[declares])
-
-    if PHYSICAL_ID in signals.columns and not row.empty:
-        phys = _clean(row.iloc[0].get(PHYSICAL_ID))
-        if phys:
-            same = signals[PHYSICAL_ID].fillna("").astype(str).str.strip() == phys
-            found |= set(ids[same])
+    if SAME_QUANTITY_AS in signals.columns:
+        # The column is authored as a mesh, but walk it as an undirected graph
+        # so a half-declared group still resolves to the whole set.
+        neighbours: dict[str, set[str]] = {}
+        declared = signals[SAME_QUANTITY_AS].fillna("").astype(str)
+        for member, refs in zip(ids, declared, strict=False):
+            for other in split_refs(refs):
+                neighbours.setdefault(member, set()).add(other)
+                neighbours.setdefault(other, set()).add(member)
+        pending = [sid]
+        while pending:
+            for other in neighbours.get(pending.pop(), ()):
+                if other not in found:
+                    found.add(other)
+                    pending.append(other)
 
     return sorted((found & set(ids)) | {sid})
 
@@ -228,6 +235,10 @@ def _add_bus_legs(builder: _Builder, payload: pd.DataFrame, members: list[str]) 
         dimension = _clean(alloc.get(INSTANCE_DIMENSION))
         for writer in split_refs(alloc.get(SENDER)):
             for receiver in split_refs(alloc.get(RECEIVER)):
+                if writer == receiver:
+                    # An allocation that sends to itself draws no leg; creating
+                    # its node would leave an orphan with nothing attached.
+                    continue
                 builder.edge(
                     builder.system(writer),
                     builder.system(receiver),

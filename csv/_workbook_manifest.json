@@ -7,14 +7,14 @@
       "csv_file": "01_README.csv",
       "sheet_state": "visible",
       "max_row": 48,
-      "max_column": 7
+      "max_column": 2
     },
     {
       "order": 2,
       "sheet_name": "Column_Help",
       "csv_file": "02_Column_Help.csv",
       "sheet_state": "visible",
-      "max_row": 63,
+      "max_row": 61,
       "max_column": 4
     },
     {
@@ -23,15 +23,15 @@
       "csv_file": "03_0_Systems.csv",
       "sheet_state": "visible",
       "max_row": 56,
-      "max_column": 9
+      "max_column": 8
     },
     {
       "order": 4,
       "sheet_name": "1_Signals",
       "csv_file": "04_1_Signals.csv",
       "sheet_state": "visible",
-      "max_row": 225,
-      "max_column": 19
+      "max_row": 234,
+      "max_column": 18
     },
     {
       "order": 5,

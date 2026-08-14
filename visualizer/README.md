@@ -16,9 +16,9 @@ Sidebar: **Reload database**, **Export to Excel**, **Import Excel → CSV & relo
 
 | Page | Purpose |
 |---|---|
-| Bus Topology | Full network or Generic (by `Bus Definition`); layer filters for digital / Analog / Discrete / Power; hover a bus for summary + first allocations |
+| Bus Topology | Full network or Generic (by `Bus Definition`); layer filters for digital / Analog / Discrete / Low Power / High Power; hover a bus for summary + first allocations |
 | Bus Explorer | Browse generic bus definitions; physical instances and allocated data for the selected definition |
-| Signal Explorer | Browse `1_Signals`; for the selected signal: dataflow diagram (hardwired Analog / Discrete / Power leg plus bus legs, branches and aggregated allocations) and related allocations via `Signal Id` |
+| Signal Explorer | Browse `1_Signals`; for the selected signal: dataflow diagram (hardwired Analog / Discrete / Low Power / High Power leg plus bus legs, branches and aggregated allocations) and related allocations via `Signal Id` |
 | Edit data | Guided upsert/delete/rewrite (same engine as `icd_edit.py`) — Dry-run then Apply |
 
 Data rules for filling sheets: see the workbook `Column_Help` sheet (also in `csv/`) and the main [`README.md`](../README.md) (“How to fill the database”).

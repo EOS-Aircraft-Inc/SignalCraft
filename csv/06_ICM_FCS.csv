@@ -1,12 +1,12 @@
-﻿Allocation Id,Data name,Sender,Receiver,instance_dimension,Signal Id,Message ID,Label,start bit,stop bit,encoding,unit,scale,resolution,minimum,maximum,Refresh rate,validity,notes,On aircraft ?,On FND ?,On Sim ?
+﻿Allocation Id,Data name,Sender,Receiver,Instance dimension,Signal Id,Message ID,Label,Start bit,Stop bit,Encoding,Unit,Scale,Resolution,Minimum,Maximum,Refresh period (ms),Validity,Notes,On aircraft ?,On FND ?,On Sim ?
 DBUS-ICM-001,Power Lever RVDT,ICM,FCC;BPM,,SIG-007,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-001-B,Power Lever Potentiometer,ICM,FCC;BPM,,SIG-010,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-001-C,Power Lever Idle Proximity,ICM,FCC;BPM,,SIG-011,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-002,Turbine operational mode,ICM,FCC;BPM,,SIG-014,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-003,Turbine override start,ICM,FCC;BPM,,SIG-067,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-004,Electric motor stop,ICM,FCC;BPM,,SIG-066,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-005,Nacelle ON/OFF switch,ICM,FCC;BPM,,SIG-065,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
-DBUS-ICM-006,Flap lever position,ICM,FCC;BPM,,SIG-012,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
-DBUS-ICM-007,Landing gear deploy handle,ICM,FCC;BPM,,SIG-104,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
-DBUS-ICM-008,Landing gear alternate deploy handle,ICM,FCC;BPM,,SIG-105,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
-DBUS-ICM-009,Landing gear steering handle,ICM,FCC;BPM,,SIG-106,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
+DBUS-ICM-001-B,Power Lever Potentiometer,ICM,FCC;BPM,,SIG-008,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ICM-001-C,Power Lever Idle Proximity,ICM,FCC;BPM,,SIG-009,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ICM-002,Turbine operational mode,ICM,FCC;BPM,,SIG-011,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ICM-003,Turbine override start,ICM,FCC;BPM,,SIG-064,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ICM-004,Electric motor stop,ICM,FCC;BPM,,SIG-063,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ICM-005,Nacelle ON/OFF switch,ICM,FCC;BPM,,SIG-062,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,TBD,TBD,TBD
+DBUS-ICM-006,Flap lever position,ICM,FCC;BPM,,SIG-010,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
+DBUS-ICM-007,Landing gear deploy handle,ICM,FCC;BPM,,SIG-096,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
+DBUS-ICM-008,Landing gear alternate deploy handle,ICM,FCC;BPM,,SIG-097,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
+DBUS-ICM-009,Landing gear steering handle,ICM,FCC;BPM,,SIG-098,TBD,TBD,TBD,TBD,TBD,,,,,,20,"Frame checksum, plus receiver freshness timeout",,,,
